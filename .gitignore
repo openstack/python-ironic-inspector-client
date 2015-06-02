@@ -1,0 +1,8 @@
+.*.swp
+.tox
+*.pyc
+build/
+dist/
+*.egg-info/
+.coverage
+*~
