@@ -68,6 +68,8 @@ def introspect(uuid, base_url=None, auth_token=None,
     :param new_ipmi_username: if new_ipmi_password is set, this values sets
                               new IPMI user name. Defaults to one in
                               driver_info.
+    :raises: ClientError on error reported from a server
+    :raises: *requests* library exception on connection problems.
     """
     if not isinstance(uuid, six.string_types):
         raise TypeError(_("Expected string for uuid argument, got %r") % uuid)
@@ -90,7 +92,8 @@ def get_status(uuid, base_url=None, auth_token=None):
     :param base_url: *ironic-inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
     :param auth_token: Keystone authentication token.
-    :raises: *requests* library HTTP errors.
+    :raises: ClientError on error reported from a server
+    :raises: *requests* library exception on connection problems.
     """
     if not isinstance(uuid, six.string_types):
         raise TypeError(_("Expected string for uuid argument, got %r") % uuid)

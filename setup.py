@@ -13,13 +13,9 @@ except EnvironmentError:
     install_requires = []
 
 
-with open('ironic_inspector_client/__init__.py', 'rb') as fp:
-    exec(fp.read())
-
-
 setup(
     name = "python-ironic-inspector-client",
-    version = __version__,
+    version = "1.0.0",
     description = open('README.rst', 'r').readline().strip(),
     author = "Dmitry Tantsur",
     author_email = "dtantsur@redhat.com",
