@@ -46,6 +46,16 @@ Every call accepts additional optional arguments:
 * ``base_url`` **ironic-inspector** API endpoint, defaults to
   ``127.0.0.1:5050``,
 * ``auth_token`` Keystone authentication token.
+* ``api_version`` requested API version; can be a tuple (MAJ, MIN), string
+  "MAJ.MIN" or integer (only major). Right now only (1, 0) is supported, other
+  versions will raise an exception. Defaults to ``DEFAULT_API_VERSION``.
+
+Two constants are exposed by the client:
+
+* ``DEFAULT_API_VERSION`` server API version used by default.
+* ``MAX_API_VERSION`` maximum API version this client was designed to work
+  with. Right now providing bigger value for ``api_version`` argument raises
+  on exception, this limitation may be lifted later.
 
 Refer to HTTP-API.rst_ for information on the **ironic-inspector** HTTP API.
 

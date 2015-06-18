@@ -12,3 +12,4 @@
 # limitations under the License.
 
 from .client import introspect, get_status  # noqa
+from .client import DEFAULT_API_VERSION, MAX_API_VERSION  # noqa

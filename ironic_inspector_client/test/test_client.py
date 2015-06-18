@@ -137,3 +137,26 @@ class TestGetStatus(unittest.TestCase):
         mock_post.return_value.content = b'42'
         self.assertRaisesRegexp(client.ClientError, "42",
                                 client.get_status, self.uuid)
+
+
+class TestCheckVesion(unittest.TestCase):
+    def test_tuple(self):
+        self.assertEqual((1, 0), client._check_api_version((1, 0)))
+
+    def test_int(self):
+        self.assertEqual((1, 0), client._check_api_version(1))
+
+    def test_str(self):
+        self.assertEqual((1, 0), client._check_api_version("1.0"))
+
+    def test_invalid_tuple(self):
+        self.assertRaises(TypeError, client._check_api_version, (1, "x"))
+        self.assertRaises(ValueError, client._check_api_version, (1, 2, 3))
+
+    def test_invalid_str(self):
+        self.assertRaises(ValueError, client._check_api_version, "a.b")
+        self.assertRaises(ValueError, client._check_api_version, "1.2.3")
+        self.assertRaises(ValueError, client._check_api_version, "foo")
+
+    def test_only_1_0_supported(self):
+        self.assertRaises(RuntimeError, client._check_api_version, (1, 1))
