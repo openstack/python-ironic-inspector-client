@@ -73,7 +73,7 @@ class ClientError(requests.HTTPError):
             LOG.debug('Old style error response returned, assuming '
                       'ironic-discoverd')
         except (KeyError, TypeError):
-            LOG.exception('Bad error response from ironic-inspector')
+            LOG.exception('Bad error response from Ironic Inspector')
         super(ClientError, self).__init__(msg, response=response)
 
     @classmethod
@@ -89,15 +89,15 @@ def introspect(uuid, base_url=None, auth_token=None,
     """Start introspection for a node.
 
     :param uuid: node uuid
-    :param base_url: *ironic-inspector* URL in form: http://host:port[/ver],
+    :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
     :param auth_token: Keystone authentication token.
-    :param new_ipmi_password: if set, *ironic-inspector* will update IPMI
+    :param new_ipmi_password: if set, *Ironic Inspector* will update IPMI
                               password to this value.
     :param new_ipmi_username: if new_ipmi_password is set, this values sets
                               new IPMI user name. Defaults to one in
                               driver_info.
-    :param api_version: requested ironic-inspector API version, defaults to
+    :param api_version: requested Ironic Inspector API version, defaults to
                         ``DEFAULT_API_VERSION`` attribute.
     :raises: ClientError on error reported from a server
     :raises: *requests* library exception on connection problems.
@@ -120,12 +120,12 @@ def get_status(uuid, base_url=None, auth_token=None,
                api_version=DEFAULT_API_VERSION):
     """Get introspection status for a node.
 
-    New in ironic-inspector version 1.0.0.
+    New in Ironic Inspector version 1.0.0.
     :param uuid: node uuid.
-    :param base_url: *ironic-inspector* URL in form: http://host:port[/ver],
+    :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
     :param auth_token: Keystone authentication token.
-    :param api_version: requested ironic-inspector API version, defaults to
+    :param api_version: requested Ironic Inspector API version, defaults to
                         ``DEFAULT_API_VERSION`` attribute.
     :raises: ClientError on error reported from a server
     :raises: *requests* library exception on connection problems.

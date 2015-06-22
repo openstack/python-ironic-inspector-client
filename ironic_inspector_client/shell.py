@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""OpenStackClient plugin for ironic-inspector."""
+"""OpenStackClient plugin for Ironic Inspector."""
 
 from __future__ import print_function
 
@@ -50,11 +50,11 @@ class StartCommand(command.Command):
         _add_common_arguments(parser)
         parser.add_argument('--new-ipmi-username',
                             default=None,
-                            help='if set, *ironic-inspector* will update IPMI '
+                            help='if set, *Ironic Inspector* will update IPMI '
                             'user name to this value')
         parser.add_argument('--new-ipmi-password',
                             default=None,
-                            help='if set, *ironic-inspector* will update IPMI '
+                            help='if set, *Ironic Inspector* will update IPMI '
                             'password to this value')
         return parser
 

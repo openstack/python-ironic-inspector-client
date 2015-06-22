@@ -1,7 +1,7 @@
 Ironic Inspector Client
 =======================
 
-This is a client library and tool for ironic-inspector_.
+This is a client library and tool for `Ironic Inspector`_.
 
 Install from PyPI::
 
@@ -15,7 +15,7 @@ Usage
 
 CLI tool is based on OpenStackClient_ with prefix
 ``openstack baremetal introspection``. Accepts optional argument
-``--inspector-url`` with the **ironic-inspector** API endpoint.
+``--inspector-url`` with the **Ironic Inspector** API endpoint.
 
 * **Start introspection on a node**:
 
@@ -28,7 +28,7 @@ CLI tool is based on OpenStackClient_ with prefix
 
   * ``uuid`` - Ironic node UUID;
   * ``new_ipmi_username`` and ``new_ipmi_password`` - if these are set,
-    **ironic-inspector** will switch to manual power on and assigning IPMI
+    **Ironic Inspector** will switch to manual power on and assigning IPMI
     credentials on introspection. See `Setting IPMI Credentials`_ for details.
 
 * **Query introspection status**:
@@ -43,7 +43,7 @@ CLI tool is based on OpenStackClient_ with prefix
 
 Every call accepts additional optional arguments:
 
-* ``base_url`` **ironic-inspector** API endpoint, defaults to
+* ``base_url`` **Ironic Inspector** API endpoint, defaults to
   ``127.0.0.1:5050``,
 * ``auth_token`` Keystone authentication token.
 * ``api_version`` requested API version; can be a tuple (MAJ, MIN), string
@@ -57,11 +57,11 @@ Two constants are exposed by the client:
   with. Right now providing bigger value for ``api_version`` argument raises
   on exception, this limitation may be lifted later.
 
-Refer to HTTP-API.rst_ for information on the **ironic-inspector** HTTP API.
+Refer to HTTP-API.rst_ for information on the **Ironic Inspector** HTTP API.
 
 
 .. _Gerrit Workflow: http://docs.openstack.org/infra/manual/developers.html#development-workflow
-.. _ironic-inspector: https://pypi.python.org/pypi/ironic-inspector
+.. _Ironic Inspector: https://pypi.python.org/pypi/ironic-inspector
 .. _Inspector contributing guide: https://github.com/openstack/ironic-inspector/blob/master/CONTRIBUTING.rst
 .. _OpenStackClient: http://docs.openstack.org/developer/python-openstackclient/
 .. _Setting IPMI Credentials: https://github.com/openstack/ironic-inspector#setting-ipmi-credentials
