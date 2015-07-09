@@ -1,2 +1,1 @@
-#FIXME: use released version of inspector
-git+git://git.openstack.org/openstack/ironic-inspector#egg=ironic-inspector
+ironic-inspector
