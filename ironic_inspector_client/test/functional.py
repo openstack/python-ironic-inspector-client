@@ -54,6 +54,20 @@ class TestPythonAPI(functional.Base):
         self.assertEqual('pwd', res['ipmi_password'])
         self.assertTrue(res['ipmi_setup_credentials'])
 
+    def test_api_versions(self):
+        minv, maxv = client.server_api_versions()
+        self.assertEqual((1, 0), minv)
+        self.assertGreaterEqual(maxv, (1, 0))
+        self.assertLess(maxv, (2, 0))
+
+        self.assertRaises(client.VersionNotSupported,
+                          client.introspect, self.uuid, api_version=(1, 999))
+        self.assertRaises(client.VersionNotSupported,
+                          client.get_status, self.uuid, api_version=(1, 999))
+        # Error 404
+        self.assertRaises(client.ClientError,
+                          client.get_status, self.uuid, api_version=(1, 0))
+
 
 if __name__ == '__main__':
     with functional.mocked_server():

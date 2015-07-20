@@ -27,16 +27,19 @@ from ironic_inspector_client import client
 LOG = logging.getLogger('ironic_inspector.shell')
 API_NAME = 'baremetal-introspection'
 API_VERSION_OPTION = 'inspector_api_version'
-DEFAULT_VERSION = '1'
+DEFAULT_API_VERSION = '1'
 API_VERSIONS = {
     "1": "ironic_inspector.shell",
 }
+
+for mversion in range(client.MAX_API_VERSION[1] + 1):
+    API_VERSIONS["1.%d" % mversion] = API_VERSIONS["1"]
 
 
 def build_option_parser(parser):
     parser.add_argument('--inspector-api-version',
                         default=utils.env('INSPECTOR_VERSION',
-                                          default=DEFAULT_VERSION),
+                                          default=DEFAULT_API_VERSION),
                         help='inspector API version, only 1 is supported now '
                         '(env: INSPECTOR_VERSION).')
     return parser
@@ -60,10 +63,12 @@ class StartCommand(command.Command):
 
     def take_action(self, parsed_args):
         auth_token = self.app.client_manager.auth_ref.auth_token
+        api_version = self.app.client_manager._api_version[API_NAME]
         client.introspect(parsed_args.uuid, base_url=parsed_args.inspector_url,
                           auth_token=auth_token,
                           new_ipmi_username=parsed_args.new_ipmi_username,
-                          new_ipmi_password=parsed_args.new_ipmi_password)
+                          new_ipmi_password=parsed_args.new_ipmi_password,
+                          api_version=api_version)
         if parsed_args.new_ipmi_password:
             print('Setting IPMI credentials requested, please power on '
                   'the machine manually')
@@ -79,9 +84,12 @@ class StatusCommand(show.ShowOne):
 
     def take_action(self, parsed_args):
         auth_token = self.app.client_manager.auth_ref.auth_token
-        status = client.get_status(parsed_args.uuid,
-                                   base_url=parsed_args.inspector_url,
-                                   auth_token=auth_token)
+        api_version = self.app.client_manager._api_version[API_NAME]
+        status = client.get_status(
+            parsed_args.uuid,
+            base_url=parsed_args.inspector_url,
+            auth_token=auth_token,
+            api_version=api_version)
         return zip(*sorted(status.items()))
 
 

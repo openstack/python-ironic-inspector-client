@@ -20,20 +20,27 @@ from oslo_utils import uuidutils
 from ironic_inspector_client import client
 
 
-@mock.patch.object(client.requests, 'post', autospec=True,
-                   **{'return_value.status_code': 200})
-class TestIntrospect(unittest.TestCase):
+class BaseTest(unittest.TestCase):
     def setUp(self):
-        super(TestIntrospect, self).setUp()
+        super(BaseTest, self).setUp()
         self.uuid = uuidutils.generate_uuid()
         self.my_ip = 'http://' + netutils.get_my_ipv4() + ':5050/v1'
+        self.token = "token"
+        self.headers = {'X-OpenStack-Ironic-Inspector-API-Version': '1.0',
+                        'X-Auth-Token': self.token}
 
+
+@mock.patch.object(client, 'server_api_versions',
+                   lambda *args, **kwargs: ((1, 0), (1, 99)))
+@mock.patch.object(client.requests, 'post', autospec=True,
+                   **{'return_value.status_code': 200})
+class TestIntrospect(BaseTest):
     def test(self, mock_post):
         client.introspect(self.uuid, base_url="http://host:port",
-                          auth_token="token")
+                          auth_token=self.token)
         mock_post.assert_called_once_with(
             "http://host:port/v1/introspection/%s" % self.uuid,
-            headers={'X-Auth-Token': 'token'},
+            headers=self.headers,
             params={'new_ipmi_username': None, 'new_ipmi_password': None}
         )
 
@@ -44,38 +51,39 @@ class TestIntrospect(unittest.TestCase):
 
     def test_full_url(self, mock_post):
         client.introspect(self.uuid, base_url="http://host:port/v1/",
-                          auth_token="token")
+                          auth_token=self.token)
         mock_post.assert_called_once_with(
             "http://host:port/v1/introspection/%s" % self.uuid,
-            headers={'X-Auth-Token': 'token'},
+            headers=self.headers,
             params={'new_ipmi_username': None, 'new_ipmi_password': None}
         )
 
     def test_default_url(self, mock_post):
-        client.introspect(self.uuid, auth_token="token")
+        client.introspect(self.uuid, auth_token=self.token)
         mock_post.assert_called_once_with(
             "%(my_ip)s/introspection/%(uuid)s" %
             {'my_ip': self.my_ip, 'uuid': self.uuid},
-            headers={'X-Auth-Token': 'token'},
+            headers=self.headers,
             params={'new_ipmi_username': None, 'new_ipmi_password': None}
         )
 
     def test_set_ipmi_credentials(self, mock_post):
         client.introspect(self.uuid, base_url="http://host:port",
-                          auth_token="token", new_ipmi_password='p',
+                          auth_token=self.token, new_ipmi_password='p',
                           new_ipmi_username='u')
         mock_post.assert_called_once_with(
             "http://host:port/v1/introspection/%s" % self.uuid,
-            headers={'X-Auth-Token': 'token'},
+            headers=self.headers,
             params={'new_ipmi_username': 'u', 'new_ipmi_password': 'p'}
         )
 
     def test_none_ok(self, mock_post):
         client.introspect(self.uuid)
+        del self.headers['X-Auth-Token']
         mock_post.assert_called_once_with(
             "%(my_ip)s/introspection/%(uuid)s" %
             {'my_ip': self.my_ip, 'uuid': self.uuid},
-            headers={},
+            headers=self.headers,
             params={'new_ipmi_username': None, 'new_ipmi_password': None}
         )
 
@@ -98,23 +106,20 @@ class TestIntrospect(unittest.TestCase):
                                 client.introspect, self.uuid)
 
 
+@mock.patch.object(client, 'server_api_versions',
+                   lambda *args, **kwargs: ((1, 0), (1, 99)))
 @mock.patch.object(client.requests, 'get', autospec=True,
                    **{'return_value.status_code': 200})
-class TestGetStatus(unittest.TestCase):
-    def setUp(self):
-        super(TestGetStatus, self).setUp()
-        self.uuid = uuidutils.generate_uuid()
-        self.my_ip = 'http://' + netutils.get_my_ipv4() + ':5050/v1'
-
+class TestGetStatus(BaseTest):
     def test(self, mock_get):
         mock_get.return_value.json.return_value = 'json'
 
-        client.get_status(self.uuid, auth_token='token')
+        client.get_status(self.uuid, auth_token=self.token)
 
         mock_get.assert_called_once_with(
             "%(my_ip)s/introspection/%(uuid)s" %
             {'my_ip': self.my_ip, 'uuid': self.uuid},
-            headers={'X-Auth-Token': 'token'}
+            headers=self.headers
         )
 
     def test_invalid_input(self, _):
@@ -139,9 +144,14 @@ class TestGetStatus(unittest.TestCase):
                                 client.get_status, self.uuid)
 
 
+@mock.patch.object(client, 'server_api_versions',
+                   lambda *args, **kwargs: ((1, 0), (1, 99)))
 class TestCheckVesion(unittest.TestCase):
     def test_tuple(self):
         self.assertEqual((1, 0), client._check_api_version((1, 0)))
+
+    def test_small_tuple(self):
+        self.assertEqual((1, 0), client._check_api_version((1,)))
 
     def test_int(self):
         self.assertEqual((1, 0), client._check_api_version(1))
@@ -158,5 +168,49 @@ class TestCheckVesion(unittest.TestCase):
         self.assertRaises(ValueError, client._check_api_version, "1.2.3")
         self.assertRaises(ValueError, client._check_api_version, "foo")
 
-    def test_only_1_0_supported(self):
-        self.assertRaises(RuntimeError, client._check_api_version, (1, 1))
+    def test_unsupported(self):
+        self.assertRaises(client.VersionNotSupported,
+                          client._check_api_version, (99, 42))
+
+
+@mock.patch.object(client.requests, 'get', autospec=True,
+                   **{'return_value.status_code': 200})
+class TestServerApiVersions(BaseTest):
+    def test_no_headers(self, mock_get):
+        mock_get.return_value.headers = {}
+
+        minv, maxv = client.server_api_versions()
+
+        self.assertEqual((1, 0), minv)
+        self.assertEqual((1, 0), maxv)
+        mock_get.assert_called_once_with(self.my_ip)
+
+    def test_with_headers(self, mock_get):
+        mock_get.return_value.headers = {
+            'X-OpenStack-Ironic-Inspector-API-Minimum-Version': '1.1',
+            'X-OpenStack-Ironic-Inspector-API-Maximum-Version': '1.42',
+        }
+
+        minv, maxv = client.server_api_versions()
+
+        self.assertEqual((1, 1), minv)
+        self.assertEqual((1, 42), maxv)
+        mock_get.assert_called_once_with(self.my_ip)
+
+    def test_with_404(self, mock_get):
+        mock_get.return_value.status_code = 404
+        mock_get.return_value.headers = {}
+
+        minv, maxv = client.server_api_versions()
+
+        self.assertEqual((1, 0), minv)
+        self.assertEqual((1, 0), maxv)
+        mock_get.assert_called_once_with(self.my_ip)
+
+    def test_with_other_error(self, mock_get):
+        mock_get.return_value.status_code = 500
+        mock_get.return_value.headers = {}
+
+        self.assertRaises(client.ClientError, client.server_api_versions)
+
+        mock_get.assert_called_once_with(self.my_ip)

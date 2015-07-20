@@ -47,17 +47,38 @@ Every call accepts additional optional arguments:
   ``127.0.0.1:5050``,
 * ``auth_token`` Keystone authentication token.
 * ``api_version`` requested API version; can be a tuple (MAJ, MIN), string
-  "MAJ.MIN" or integer (only major). Right now only (1, 0) is supported, other
-  versions will raise an exception. Defaults to ``DEFAULT_API_VERSION``.
+  "MAJ.MIN" or integer (only major). Defaults to ``DEFAULT_API_VERSION``.
+
+Refer to HTTP-API.rst_ for information on the **Ironic Inspector** HTTP API.
+
+API Versioning
+~~~~~~~~~~~~~~
+
+Starting with version 2.1.0 **Ironic Inspector** supports optional API
+versioning. Version is a tuple (X, Y), where X is always 1 for now.
+
+The server has maximum and minimum supported versions. If no version is
+requested, the server assumes (1, 0).
+
+* There is a helper function to figure out the current server API versions
+  range:
+
+  ``ironic_inspector_client.server_api_versions()``
+
+  Returns a tuple (minimum version, maximum version).
+  Supports optional argument:
+
+  * ``base_url`` **Ironic Inspector** API endpoint, defaults to
+    ``127.0.0.1:5050``,
 
 Two constants are exposed by the client:
 
-* ``DEFAULT_API_VERSION`` server API version used by default.
-* ``MAX_API_VERSION`` maximum API version this client was designed to work
-  with. Right now providing bigger value for ``api_version`` argument raises
-  on exception, this limitation may be lifted later.
+* ``DEFAULT_API_VERSION`` server API version used by default, always (1, 0)
+  for now.
 
-Refer to HTTP-API.rst_ for information on the **Ironic Inspector** HTTP API.
+* ``MAX_API_VERSION`` maximum API version this client was designed to work
+  with. This does not mean that other versions won't work at all - the server
+  might still support them.
 
 
 .. _Gerrit Workflow: http://docs.openstack.org/infra/manual/developers.html#development-workflow
