@@ -11,12 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import types
 import unittest
 
 import mock
 from oslo_utils import netutils
 from oslo_utils import uuidutils
 
+import ironic_inspector_client
 from ironic_inspector_client import client
 
 
@@ -214,3 +216,19 @@ class TestServerApiVersions(BaseTest):
         self.assertRaises(client.ClientError, client.server_api_versions)
 
         mock_get.assert_called_once_with(self.my_ip)
+
+
+class TestExposedAPI(unittest.TestCase):
+    def test_only_client_all_exposed(self):
+        exposed = {x for x in dir(ironic_inspector_client)
+                   if not x.startswith('__') and
+                   not isinstance(getattr(ironic_inspector_client, x),
+                                  types.ModuleType)}
+        self.assertEqual(set(client.__all__), exposed)
+
+    def test_client_exposes_everything(self):
+        actual = {x for x in dir(client)
+                  if not x.startswith('_') and x != 'LOG' and
+                  not isinstance(getattr(client, x),
+                                 types.ModuleType)}
+        self.assertEqual(actual, set(client.__all__))

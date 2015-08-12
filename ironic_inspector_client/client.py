@@ -181,3 +181,8 @@ def server_api_versions(base_url=None):
         ClientError.raise_if_needed(res)
     return (_parse_version(res.headers.get(_MIN_VERSION_HEADER, '1.0')),
             _parse_version(res.headers.get(_MAX_VERSION_HEADER, '1.0')))
+
+
+__all__ = ['DEFAULT_API_VERSION', 'MAX_API_VERSION', 'ClientError',
+           'VersionNotSupported', 'introspect', 'get_status',
+           'server_api_versions']
