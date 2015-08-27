@@ -3,9 +3,10 @@ Ironic Inspector Client
 
 This is a client library and tool for `Ironic Inspector`_.
 
-Install from PyPI::
-
-    pip install python-ironic-inspector-client
+* Free software: Apache license
+* Source: http://git.openstack.org/cgit/openstack/python-ironic-inspector-client
+* Bugs: http://bugs.launchpad.net/python-ironic-inspector-client
+* Downloads: https://pypi.python.org/pypi/python-ironic-inspector-client
 
 Please follow usual OpenStack `Gerrit Workflow`_ to submit a patch, see
 `Inspector contributing guide`_ for more detail.
