@@ -1,2 +1,1 @@
-# TODO(dtantsur): change to just "ironic-inspector" once 2.1.0 is released
 git+git://git.openstack.org/openstack/ironic-inspector#egg=ironic-inspector
