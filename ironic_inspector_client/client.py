@@ -18,7 +18,7 @@ from ironic_inspector_client import v1
 
 
 DEFAULT_API_VERSION = (1, 0)
-MAX_API_VERSION = (1, 0)
+MAX_API_VERSION = (1, 2)
 
 
 # Reimport for backward compatibility

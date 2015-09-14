@@ -108,3 +108,78 @@ class TestGetStatus(BaseTest):
 
     def test_invalid_input(self, _):
         self.assertRaises(TypeError, self.get_client().get_status, 42)
+
+
+@mock.patch.object(http.BaseClient, 'request')
+class TestRules(BaseTest):
+    def get_rules(self, **kwargs):
+        return self.get_client(**kwargs).rules
+
+    def test_create(self, mock_req):
+        self.get_rules().create([{'cond': 'cond'}], [{'act': 'act'}])
+
+        mock_req.assert_called_once_with(
+            'post', '/rules', json={'conditions': [{'cond': 'cond'}],
+                                    'actions': [{'act': 'act'}],
+                                    'uuid': None,
+                                    'description': None})
+
+    def test_create_all_fields(self, mock_req):
+        self.get_rules().create([{'cond': 'cond'}], [{'act': 'act'}],
+                                uuid='u', description='d')
+
+        mock_req.assert_called_once_with(
+            'post', '/rules', json={'conditions': [{'cond': 'cond'}],
+                                    'actions': [{'act': 'act'}],
+                                    'uuid': 'u',
+                                    'description': 'd'})
+
+    def test_create_invalid_input(self, mock_req):
+        self.assertRaises(TypeError, self.get_rules().create,
+                          {}, [{'act': 'act'}])
+        self.assertRaises(TypeError, self.get_rules().create,
+                          [{'cond': 'cond'}], {})
+        self.assertRaises(TypeError, self.get_rules().create,
+                          [{'cond': 'cond'}], [{'act': 'act'}],
+                          uuid=42)
+        self.assertFalse(mock_req.called)
+
+    def test_from_json(self, mock_req):
+        self.get_rules().from_json({'foo': 'bar'})
+
+        mock_req.assert_called_once_with(
+            'post', '/rules', json={'foo': 'bar'})
+
+    def test_get_all(self, mock_req):
+        mock_req.return_value.json.return_value = {'rules': ['rules']}
+
+        res = self.get_rules().get_all()
+        self.assertEqual(['rules'], res)
+
+        mock_req.assert_called_once_with('get', '/rules')
+
+    def test_get(self, mock_req):
+        mock_req.return_value.json.return_value = {'answer': 42}
+
+        res = self.get_rules().get('uuid1')
+        self.assertEqual({'answer': 42}, res)
+
+        mock_req.assert_called_once_with('get', '/rules/uuid1')
+
+    def test_get_invalid_input(self, mock_req):
+        self.assertRaises(TypeError, self.get_rules().get, 42)
+        self.assertFalse(mock_req.called)
+
+    def test_delete(self, mock_req):
+        self.get_rules().delete('uuid1')
+
+        mock_req.assert_called_once_with('delete', '/rules/uuid1')
+
+    def test_delete_invalid_input(self, mock_req):
+        self.assertRaises(TypeError, self.get_rules().delete, 42)
+        self.assertFalse(mock_req.called)
+
+    def test_delete_all(self, mock_req):
+        self.get_rules().delete_all()
+
+        mock_req.assert_called_once_with('delete', '/rules')

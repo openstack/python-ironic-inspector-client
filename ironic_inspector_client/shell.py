@@ -15,9 +15,11 @@
 
 from __future__ import print_function
 
+import json
 import logging
 
 from cliff import command
+from cliff import lister
 from cliff import show
 from openstackclient.common import utils
 
@@ -94,3 +96,56 @@ class StatusCommand(show.ShowOne):
         client = self.app.client_manager.baremetal_introspection
         status = client.get_status(parsed_args.uuid)
         return zip(*sorted(status.items()))
+
+
+class RuleImportCommand(command.Command):
+    """Import one or several introspection rules from a json file."""
+
+    def get_parser(self, prog_name):
+        parser = super(RuleImportCommand, self).get_parser(prog_name)
+        parser.add_argument('file', help='JSON file to import, may contain '
+                            'one or several rules')
+        return parser
+
+    def take_action(self, parsed_args):
+        with open(parsed_args.file, 'r') as fp:
+            rules = json.load(fp)
+            if not isinstance(rules, list):
+                rules = [rules]
+        client = self.app.client_manager.baremetal_introspection
+        for rule in rules:
+            client.rules.from_json(rule)
+
+
+class RuleListCommand(lister.Lister):
+    """List all introspection rules."""
+
+    COLUMNS = ("UUID", "Description")
+
+    def take_action(self, parsed_args):
+        client = self.app.client_manager.baremetal_introspection
+        rules = client.rules.get_all()
+        rules = [tuple(rule.get(col.lower()) for col in self.COLUMNS)
+                 for rule in rules]
+        return self.COLUMNS, rules
+
+
+class RuleDeleteCommand(command.Command):
+    """Delete an introspection rule."""
+
+    def get_parser(self, prog_name):
+        parser = super(RuleDeleteCommand, self).get_parser(prog_name)
+        parser.add_argument('uuid', help='rule UUID')
+        return parser
+
+    def take_action(self, parsed_args):
+        client = self.app.client_manager.baremetal_introspection
+        client.rules.delete(parsed_args.uuid)
+
+
+class RulePurgeCommand(command.Command):
+    """Drop all introspection rules."""
+
+    def take_action(self, parsed_args):
+        client = self.app.client_manager.baremetal_introspection
+        client.rules.delete_all()

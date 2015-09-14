@@ -86,6 +86,52 @@ class TestV1PythonAPI(functional.Base):
         self.assertTrue(client.ClientV1(auth_token='some token')
                         .server_api_versions())
 
+    def test_rules_api(self):
+        res = self.client.rules.get_all()
+        self.assertEqual([], res)
+
+        rule = {'conditions': [],
+                'actions': [{'action': 'fail', 'message': 'boom'}],
+                'description': 'Cool actions',
+                'uuid': self.uuid}
+        res = self.client.rules.from_json(rule)
+        self.assertEqual(self.uuid, res['uuid'])
+        rule['links'] = res['links']
+        self.assertEqual(rule, res)
+
+        res = self.client.rules.get(self.uuid)
+        self.assertEqual(rule, res)
+
+        res = self.client.rules.get_all()
+        self.assertEqual(rule['links'], res[0].pop('links'))
+        self.assertEqual([{'uuid': self.uuid,
+                           'description': 'Cool actions'}],
+                         res)
+
+        self.client.rules.delete(self.uuid)
+        res = self.client.rules.get_all()
+        self.assertEqual([], res)
+
+        for _ in range(3):
+            res = self.client.rules.create(conditions=rule['conditions'],
+                                           actions=rule['actions'],
+                                           description=rule['description'])
+            self.assertTrue(res['uuid'])
+            for key in ('conditions', 'actions', 'description'):
+                self.assertEqual(rule[key], res[key])
+
+        res = self.client.rules.get_all()
+        self.assertEqual(3, len(res))
+
+        self.client.rules.delete_all()
+        res = self.client.rules.get_all()
+        self.assertEqual([], res)
+
+        self.assertRaises(client.ClientError, self.client.rules.get,
+                          self.uuid)
+        self.assertRaises(client.ClientError, self.client.rules.delete,
+                          self.uuid)
+
 
 class TestSimplePythonAPI(functional.Base):
     def test_introspect_get_status(self):

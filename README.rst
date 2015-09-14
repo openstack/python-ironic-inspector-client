@@ -96,6 +96,78 @@ CLI::
 
     $ openstack baremetal introspection status UUID
 
+Introspection Rules API
+~~~~~~~~~~~~~~~~~~~~~~~
+
+All functions related to introspection rules are grouped under ``rules``
+attribute of the ``ClientV1`` object.
+
+Creating a rule
+^^^^^^^^^^^^^^^
+
+``client.rules.create(conditions, actions[, uuid][, description])``
+
+* ``conditions`` and ``actions`` are lists of dictionaries with rule
+  conditions and actions accordingly. Please refer to the `introspection rules
+  documentation`_ for details on.
+
+* ``uuid`` rule UUID, will be generated, if missing.
+
+* ``description`` optional rule description.
+
+This call is not directly represented in CLI, use ``import`` below.
+
+``client.rules.from_json(rule_json)``
+
+* ``rule_json`` dictionary with a rule representation.
+
+CLI::
+
+    $ openstack baremetal introspection rule import <JSON FILE>
+
+Listing all rules
+^^^^^^^^^^^^^^^^^
+
+``client.rules.list()``
+
+Returns list of short rule representations, containing only description, UUID
+and links.
+
+CLI::
+
+    $ openstack baremetal introspection rule list
+
+Getting rule details
+^^^^^^^^^^^^^^^^^^^^
+
+``client.rules.get(uuid)``
+
+* ``uuid`` rule UUID.
+
+Returns a full rule representation as a dictionary.
+
+This call is currently not represented in CLI.
+
+Deleting all rules
+^^^^^^^^^^^^^^^^^^
+
+``client.rules.delete_all()``
+
+CLI::
+
+    $ openstack baremetal introspection rule purge
+
+Deleting a rule
+^^^^^^^^^^^^^^^
+
+``client.rules.delete(uuid)``
+
+* ``uuid`` rule UUID.
+
+CLI::
+
+    $ openstack baremetal introspection rule delete <UUID>
+
 Shortcut Functions
 ~~~~~~~~~~~~~~~~~~
 
@@ -124,3 +196,4 @@ Here ``base_url`` argument is the same as ``inspector_url`` argument to
 .. _OpenStackClient: http://docs.openstack.org/developer/python-openstackclient/
 .. _Setting IPMI Credentials: https://github.com/openstack/ironic-inspector#setting-ipmi-credentials
 .. _HTTP-API.rst: https://github.com/openstack/ironic-inspector/blob/master/HTTP-API.rst
+.. _introspection rules documentation: https://github.com/openstack/ironic-inspector#introspection-rules

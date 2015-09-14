@@ -34,6 +34,7 @@ class ClientV1(http.BaseClient):
         """
         kwargs.setdefault('api_version', DEFAULT_API_VERSION)
         super(ClientV1, self).__init__(**kwargs)
+        self.rules = _RulesAPI(self.request)
 
     def introspect(self, uuid, new_ipmi_password=None, new_ipmi_username=None):
         """Start introspection for a node.
@@ -72,3 +73,74 @@ class ClientV1(http.BaseClient):
                 _("Expected string for uuid argument, got %r") % uuid)
 
         return self.request('get', '/introspection/%s' % uuid).json()
+
+
+class _RulesAPI(object):
+    """Introspection rules API."""
+
+    def __init__(self, requester):
+        self._request = requester
+
+    def create(self, conditions, actions, uuid=None, description=None):
+        """Create a new introspection rule.
+
+        :conditions: list of rule conditions
+        :actions: list of rule actions
+        :uuid: rule UUID, will be generated if not specified
+        :description: optional rule description
+        :returns: rule representation
+        """
+        if uuid is not None and not isinstance(uuid, six.string_types):
+            raise TypeError(
+                _("Expected string for uuid argument, got %r") % uuid)
+        for name, arg in [('conditions', conditions), ('actions', actions)]:
+            if not isinstance(arg, list) or not all(isinstance(x, dict)
+                                                    for x in arg):
+                raise TypeError(_("Expected list of dicts for %(arg)s "
+                                  "argument, got %(real)r"),
+                                {'arg': name, 'real': arg})
+
+        body = {'uuid': uuid, 'conditions': conditions, 'actions': actions,
+                'description': description}
+        return self.from_json(body)
+
+    def from_json(self, json_rule):
+        """Import an introspection rule from JSON data.
+
+        :param json_rule: rule information as a dict
+        :returns: rule representation
+        """
+        return self._request('post', '/rules', json=json_rule).json()
+
+    def get_all(self):
+        """List all introspection rules.
+
+        :returns: list of short rule representations (uuid, description
+                  and links)
+        """
+        return self._request('get', '/rules').json()['rules']
+
+    def get(self, uuid):
+        """Get detailed information about an introspection rule.
+
+        :param uuid: rule UUID
+        :returns: rule representation
+        """
+        if not isinstance(uuid, six.string_types):
+            raise TypeError(
+                _("Expected string for uuid argument, got %r") % uuid)
+        return self._request('get', '/rules/%s' % uuid).json()
+
+    def delete(self, uuid):
+        """Delete an introspection rule.
+
+        :param uuid: rule UUID
+        """
+        if not isinstance(uuid, six.string_types):
+            raise TypeError(
+                _("Expected string for uuid argument, got %r") % uuid)
+        self._request('delete', '/rules/%s' % uuid)
+
+    def delete_all(self):
+        """Delete all introspection rules."""
+        self._request('delete', '/rules')
