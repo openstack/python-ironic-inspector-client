@@ -12,3 +12,4 @@
 # limitations under the License.
 
 from .client import *  # noqa
+from .v1 import ClientV1  # noqa

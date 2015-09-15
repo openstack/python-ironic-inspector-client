@@ -11,46 +11,25 @@ This is a client library and tool for `Ironic Inspector`_.
 Please follow usual OpenStack `Gerrit Workflow`_ to submit a patch, see
 `Inspector contributing guide`_ for more detail.
 
-Usage
------
+Python API
+----------
 
-CLI tool is based on OpenStackClient_ with prefix
-``openstack baremetal introspection``. Accepts optional argument
-``--inspector-url`` with the **Ironic Inspector** API endpoint.
+To use Python API first create a ``ClientV1`` object::
 
-* **Start introspection on a node**:
+    import ironic_inspector_client
 
-  ``ironic_inspector_client.introspect(uuid, new_ipmi_username=None,
-  new_ipmi_password=None)``
+    url = 'http://HOST:5050'
+    client = ironic_inspector_client.ClientV1(auth_token=token, inspector_url=url)
 
-  ::
+This code creates a client with API version *1.0* and an authentication token.
+If ``inspector_url`` is missing, local host is assumed for now. Service
+catalog will be used in the future.
 
-    $ openstack baremetal introspection start UUID [--new-ipmi-password=PWD [--new-ipmi-username=USER]]
+Optional ``api_version`` argument is a minimum API version that a server must
+support. It can be a tuple (MAJ, MIN), string "MAJ.MIN" or integer
+(only major, minimum supported minor version is assumed).
 
-  * ``uuid`` - Ironic node UUID;
-  * ``new_ipmi_username`` and ``new_ipmi_password`` - if these are set,
-    **Ironic Inspector** will switch to manual power on and assigning IPMI
-    credentials on introspection. See `Setting IPMI Credentials`_ for details.
-
-* **Query introspection status**:
-
-  ``ironic_inspector_client.get_status(uuid)``
-
-  ::
-
-    $ openstack baremetal introspection status UUID
-
-  * ``uuid`` - Ironic node UUID.
-
-Every call accepts additional optional arguments:
-
-* ``base_url`` **Ironic Inspector** API endpoint, defaults to
-  ``127.0.0.1:5050``,
-* ``auth_token`` Keystone authentication token.
-* ``api_version`` requested API version; can be a tuple (MAJ, MIN), string
-  "MAJ.MIN" or integer (only major). Defaults to ``DEFAULT_API_VERSION``.
-
-Refer to HTTP-API.rst_ for information on the **Ironic Inspector** HTTP API.
+See `Usage`_ for the list of available calls.
 
 API Versioning
 ~~~~~~~~~~~~~~
@@ -61,18 +40,7 @@ versioning. Version is a tuple (X, Y), where X is always 1 for now.
 The server has maximum and minimum supported versions. If no version is
 requested, the server assumes (1, 0).
 
-* There is a helper function to figure out the current server API versions
-  range:
-
-  ``ironic_inspector_client.server_api_versions()``
-
-  Returns a tuple (minimum version, maximum version).
-  Supports optional argument:
-
-  * ``base_url`` **Ironic Inspector** API endpoint, defaults to
-    ``127.0.0.1:5050``,
-
-Two constants are exposed by the client:
+Two constants are exposed for convenience:
 
 * ``DEFAULT_API_VERSION`` server API version used by default, always (1, 0)
   for now.
@@ -80,6 +48,74 @@ Two constants are exposed by the client:
 * ``MAX_API_VERSION`` maximum API version this client was designed to work
   with. This does not mean that other versions won't work at all - the server
   might still support them.
+
+Usage
+-----
+
+CLI tool is based on OpenStackClient_ with prefix
+``openstack baremetal introspection``. Accepts optional argument
+``--inspector-url`` with the **Ironic Inspector** API endpoint.
+
+Refer to HTTP-API.rst_ for information on the **Ironic Inspector** HTTP API.
+
+Detect server API versions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``client.server_api_versions()``
+
+Returns a tuple (minimum version, maximum version). See `API Versioning`_ for
+details.
+
+Start introspection on a node
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``client.introspect(uuid, new_ipmi_username=None, new_ipmi_password=None)``
+
+* ``uuid`` - Ironic node UUID;
+* ``new_ipmi_username`` and ``new_ipmi_password`` - if these are set,
+  **Ironic Inspector** will switch to manual power on and assigning IPMI
+  credentials on introspection. See `Setting IPMI Credentials`_ for details.
+
+CLI::
+
+    $ openstack baremetal introspection start UUID [--new-ipmi-password=PWD [--new-ipmi-username=USER]]
+
+Query introspection status
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``client.get_status(uuid)``
+
+* ``uuid`` - Ironic node UUID.
+
+Returns a dict with keys:
+
+* ``finished`` - whether introspection has finished for this node;
+* ``error`` - last error, ``None`` if introspection ended without an error.
+
+CLI::
+
+    $ openstack baremetal introspection status UUID
+
+Shortcut Functions
+~~~~~~~~~~~~~~~~~~
+
+The following functions are available for simplified access to the most common
+functionality:
+
+* Starting introspection::
+
+    ironic_inspector_client.introspect(uuid[, new_ipmi_password[, new_ipmi_username]][, auth_token][, base_url][, api_version])
+
+* Getting introspection status::
+
+    ironic_inspector_client.get_status(uuid[, auth_token][, base_url][, api_version])
+
+* Getting API versions supported by a server::
+
+    ironic_inspector_client.server_api_versions([base_url])
+
+Here ``base_url`` argument is the same as ``inspector_url`` argument to
+``ClientV1`` constructor.
 
 
 .. _Gerrit Workflow: http://docs.openstack.org/infra/manual/developers.html#development-workflow

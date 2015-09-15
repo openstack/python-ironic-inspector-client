@@ -21,19 +21,26 @@ from cliff import command
 from cliff import show
 from openstackclient.common import utils
 
-from ironic_inspector_client import client
+import ironic_inspector_client
 
 
 LOG = logging.getLogger('ironic_inspector.shell')
-API_NAME = 'baremetal-introspection'
+API_NAME = 'baremetal_introspection'
 API_VERSION_OPTION = 'inspector_api_version'
 DEFAULT_API_VERSION = '1'
 API_VERSIONS = {
     "1": "ironic_inspector.shell",
 }
 
-for mversion in range(client.MAX_API_VERSION[1] + 1):
+for mversion in range(ironic_inspector_client.MAX_API_VERSION[1] + 1):
     API_VERSIONS["1.%d" % mversion] = API_VERSIONS["1"]
+
+
+def make_client(instance):
+    return ironic_inspector_client.ClientV1(
+        inspector_url=instance.get_configuration().get('inspector_url'),
+        auth_token=instance.auth_ref.auth_token,
+        api_version=instance._api_version[API_NAME])
 
 
 def build_option_parser(parser):
@@ -42,6 +49,10 @@ def build_option_parser(parser):
                                           default=DEFAULT_API_VERSION),
                         help='inspector API version, only 1 is supported now '
                         '(env: INSPECTOR_VERSION).')
+    parser.add_argument('--inspector-url',
+                        default=utils.env('INSPECTOR_URL', default=None),
+                        help='inspector URL, defaults to localhost '
+                        '(env: INSPECTOR_URL).')
     return parser
 
 
@@ -50,7 +61,7 @@ class StartCommand(command.Command):
 
     def get_parser(self, prog_name):
         parser = super(StartCommand, self).get_parser(prog_name)
-        _add_common_arguments(parser)
+        parser.add_argument('uuid', help='baremetal node UUID')
         parser.add_argument('--new-ipmi-username',
                             default=None,
                             help='if set, *Ironic Inspector* will update IPMI '
@@ -62,13 +73,10 @@ class StartCommand(command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        auth_token = self.app.client_manager.auth_ref.auth_token
-        api_version = self.app.client_manager._api_version[API_NAME]
-        client.introspect(parsed_args.uuid, base_url=parsed_args.inspector_url,
-                          auth_token=auth_token,
+        client = self.app.client_manager.baremetal_introspection
+        client.introspect(parsed_args.uuid,
                           new_ipmi_username=parsed_args.new_ipmi_username,
-                          new_ipmi_password=parsed_args.new_ipmi_password,
-                          api_version=api_version)
+                          new_ipmi_password=parsed_args.new_ipmi_password)
         if parsed_args.new_ipmi_password:
             print('Setting IPMI credentials requested, please power on '
                   'the machine manually')
@@ -79,26 +87,10 @@ class StatusCommand(show.ShowOne):
 
     def get_parser(self, prog_name):
         parser = super(StatusCommand, self).get_parser(prog_name)
-        _add_common_arguments(parser)
+        parser.add_argument('uuid', help='baremetal node UUID')
         return parser
 
     def take_action(self, parsed_args):
-        auth_token = self.app.client_manager.auth_ref.auth_token
-        api_version = self.app.client_manager._api_version[API_NAME]
-        status = client.get_status(
-            parsed_args.uuid,
-            base_url=parsed_args.inspector_url,
-            auth_token=auth_token,
-            api_version=api_version)
+        client = self.app.client_manager.baremetal_introspection
+        status = client.get_status(parsed_args.uuid)
         return zip(*sorted(status.items()))
-
-
-def _add_common_arguments(parser):
-    """Add commonly used arguments to a parser."""
-    parser.add_argument('uuid', help='baremetal node UUID')
-    # FIXME(dtantsur): this should be in build_option_parser, but then it won't
-    # be available in commands
-    parser.add_argument('--inspector-url',
-                        default=utils.env('INSPECTOR_URL', default=None),
-                        help='inspector URL, defaults to localhost '
-                        '(env: INSPECTOR_URL).')

@@ -11,98 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import logging
+"""Shorthand client functions using V1 API."""
 
-from oslo_utils import netutils
-import requests
-import six
-
-from ironic_inspector_client.common.i18n import _
-
-
-_DEFAULT_URL = 'http://' + netutils.get_my_ipv4() + ':5050/v1'
-_ERROR_ENCODING = 'utf-8'
-LOG = logging.getLogger('ironic_inspector_client')
+from ironic_inspector_client.common import http
+from ironic_inspector_client import v1
 
 
 DEFAULT_API_VERSION = (1, 0)
 MAX_API_VERSION = (1, 0)
-_MIN_VERSION_HEADER = 'X-OpenStack-Ironic-Inspector-API-Minimum-Version'
-_MAX_VERSION_HEADER = 'X-OpenStack-Ironic-Inspector-API-Maximum-Version'
-_VERSION_HEADER = 'X-OpenStack-Ironic-Inspector-API-Version'
 
 
-def _prepare(base_url, auth_token, api_version=None):
-    base_url = (base_url or _DEFAULT_URL).rstrip('/')
-    if not base_url.endswith('v1'):
-        base_url += '/v1'
-    headers = {'X-Auth-Token': auth_token} if auth_token else {}
-    if api_version:
-        api_version = _check_api_version(api_version, base_url)
-        headers[_VERSION_HEADER] = '%d.%d' % api_version
-    return base_url, headers
-
-
-def _parse_version(api_version):
-    try:
-        return tuple(int(x) for x in api_version.split('.'))
-    except (ValueError, TypeError):
-        raise ValueError(_("Malformed API version: expect tuple, string "
-                           "in form of X.Y or integer"))
-
-
-def _check_api_version(api_version, base_url=None):
-    if isinstance(api_version, int):
-        api_version = (api_version, 0)
-    if isinstance(api_version, six.string_types):
-        api_version = _parse_version(api_version)
-    api_version = tuple(api_version)
-    if not all(isinstance(x, int) for x in api_version):
-        raise TypeError(_("All API version components should be integers"))
-    if len(api_version) == 1:
-        api_version += (0,)
-    elif len(api_version) > 2:
-        raise ValueError(_("API version should be of length 1 or 2"))
-
-    minv, maxv = server_api_versions(base_url=base_url)
-    if api_version < minv or api_version > maxv:
-        raise VersionNotSupported(api_version, (minv, maxv))
-
-    return api_version
-
-
-class ClientError(requests.HTTPError):
-    """Error returned from a server."""
-    def __init__(self, response):
-        # inspector returns error message in body
-        msg = response.content.decode(_ERROR_ENCODING)
-        try:
-            msg = json.loads(msg)['error']['message']
-        except ValueError:
-            LOG.debug('Old style error response returned, assuming '
-                      'ironic-discoverd')
-        except (KeyError, TypeError):
-            LOG.exception('Bad error response from Ironic Inspector')
-        super(ClientError, self).__init__(msg, response=response)
-
-    @classmethod
-    def raise_if_needed(cls, response):
-        """Raise exception if response contains error."""
-        if response.status_code >= 400:
-            raise cls(response)
-
-
-class VersionNotSupported(Exception):
-    """Denotes that requested API versions is not supported by the server."""
-    def __init__(self, expected, supported):
-        msg = (_('Version %(expected)s is not supported by the server, '
-                 'supported range is %(supported)s') %
-               {'expected': expected,
-                'supported': ' to '.join(str(x) for x in supported)})
-        self.expected_version = expected
-        self.supported_versions = supported
-        super(Exception, self).__init__(msg)
+# Reimport for backward compatibility
+ClientError = http.ClientError
+VersionNotSupported = http.VersionNotSupported
 
 
 def introspect(uuid, base_url=None, auth_token=None,
@@ -125,18 +46,10 @@ def introspect(uuid, base_url=None, auth_token=None,
     :raises: VersionNotSupported if requested api_version is not supported
     :raises: *requests* library exception on connection problems.
     """
-    if not isinstance(uuid, six.string_types):
-        raise TypeError(_("Expected string for uuid argument, got %r") % uuid)
-    if new_ipmi_username and not new_ipmi_password:
-        raise ValueError(_("Setting IPMI user name requires a new password"))
-
-    base_url, headers = _prepare(base_url, auth_token, api_version=api_version)
-
-    params = {'new_ipmi_username': new_ipmi_username,
-              'new_ipmi_password': new_ipmi_password}
-    res = requests.post("%s/introspection/%s" % (base_url, uuid),
-                        headers=headers, params=params)
-    ClientError.raise_if_needed(res)
+    c = v1.ClientV1(api_version=api_version, auth_token=auth_token,
+                    inspector_url=base_url)
+    return c.introspect(uuid, new_ipmi_username=new_ipmi_username,
+                        new_ipmi_password=new_ipmi_password)
 
 
 def get_status(uuid, base_url=None, auth_token=None,
@@ -154,15 +67,9 @@ def get_status(uuid, base_url=None, auth_token=None,
     :raises: VersionNotSupported if requested api_version is not supported
     :raises: *requests* library exception on connection problems.
     """
-    if not isinstance(uuid, six.string_types):
-        raise TypeError(_("Expected string for uuid argument, got %r") % uuid)
-
-    base_url, headers = _prepare(base_url, auth_token, api_version=api_version)
-
-    res = requests.get("%s/introspection/%s" % (base_url, uuid),
-                       headers=headers)
-    ClientError.raise_if_needed(res)
-    return res.json()
+    c = v1.ClientV1(api_version=api_version, auth_token=auth_token,
+                    inspector_url=base_url)
+    return c.get_status(uuid)
 
 
 def server_api_versions(base_url=None):
@@ -175,13 +82,8 @@ def server_api_versions(base_url=None):
     :raises: *requests* library exception on connection problems.
     :raises: ValueError if returned version cannot be parsed
     """
-    base_url, _headers = _prepare(base_url, auth_token=None)
-    res = requests.get(base_url)
-    # HTTP Not Found is a valid response for older (2.0.0) servers
-    if res.status_code >= 400 and res.status_code != 404:
-        ClientError.raise_if_needed(res)
-    return (_parse_version(res.headers.get(_MIN_VERSION_HEADER, '1.0')),
-            _parse_version(res.headers.get(_MAX_VERSION_HEADER, '1.0')))
+    c = http.BaseClient(1, inspector_url=base_url)
+    return c.server_api_versions()
 
 
 __all__ = ['DEFAULT_API_VERSION', 'MAX_API_VERSION', 'ClientError',

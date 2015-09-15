@@ -18,10 +18,76 @@ import unittest
 
 from ironic_inspector.test import functional
 
-from ironic_inspector_client import client
+import ironic_inspector_client as client
 
 
-class TestPythonAPI(functional.Base):
+class TestV1PythonAPI(functional.Base):
+    def setUp(self):
+        super(TestV1PythonAPI, self).setUp()
+        self.client = client.ClientV1()
+
+    def test_introspect_get_status(self):
+        self.client.introspect(self.uuid)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
+                                                              'reboot')
+
+        status = self.client.get_status(self.uuid)
+        self.assertEqual({'finished': False, 'error': None}, status)
+
+        res = self.call_continue(self.data)
+        self.assertEqual({'uuid': self.uuid}, res)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+
+        self.cli.node.update.assert_any_call(self.uuid, self.patch)
+        self.cli.port.create.assert_called_once_with(
+            node_uuid=self.uuid, address='11:22:33:44:55:66')
+
+        status = self.client.get_status(self.uuid)
+        self.assertEqual({'finished': True, 'error': None}, status)
+
+    def test_setup_ipmi(self):
+        self.node.maintenance = True
+        self.client.introspect(self.uuid, new_ipmi_username='admin',
+                               new_ipmi_password='pwd')
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+        self.assertFalse(self.cli.node.set_power_state.called)
+
+        res = self.call_continue(self.data)
+        self.assertEqual('admin', res['ipmi_username'])
+        self.assertEqual('pwd', res['ipmi_password'])
+        self.assertTrue(res['ipmi_setup_credentials'])
+
+    def test_api_versions(self):
+        minv, maxv = self.client.server_api_versions()
+        self.assertEqual((1, 0), minv)
+        self.assertGreaterEqual(maxv, (1, 0))
+        self.assertLess(maxv, (2, 0))
+
+    def test_client_init(self):
+        self.assertRaises(client.VersionNotSupported,
+                          client.ClientV1, api_version=(1, 999))
+        self.assertRaises(client.VersionNotSupported,
+                          client.ClientV1, api_version=2)
+
+        self.assertTrue(client.ClientV1(api_version=1).server_api_versions())
+        self.assertTrue(client.ClientV1(api_version='1.0')
+                        .server_api_versions())
+        self.assertTrue(client.ClientV1(api_version=(1, 0))
+                        .server_api_versions())
+
+        self.assertTrue(
+            client.ClientV1(inspector_url='http://127.0.0.1:5050')
+            .server_api_versions())
+        self.assertTrue(
+            client.ClientV1(inspector_url='http://127.0.0.1:5050/v1')
+            .server_api_versions())
+
+        self.assertTrue(client.ClientV1(auth_token='some token')
+                        .server_api_versions())
+
+
+class TestSimplePythonAPI(functional.Base):
     def test_introspect_get_status(self):
         client.introspect(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
@@ -41,18 +107,6 @@ class TestPythonAPI(functional.Base):
 
         status = client.get_status(self.uuid)
         self.assertEqual({'finished': True, 'error': None}, status)
-
-    def test_setup_ipmi(self):
-        self.node.maintenance = True
-        client.introspect(self.uuid, new_ipmi_username='admin',
-                          new_ipmi_password='pwd')
-        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.assertFalse(self.cli.node.set_power_state.called)
-
-        res = self.call_continue(self.data)
-        self.assertEqual('admin', res['ipmi_username'])
-        self.assertEqual('pwd', res['ipmi_password'])
-        self.assertTrue(res['ipmi_setup_credentials'])
 
     def test_api_versions(self):
         minv, maxv = client.server_api_versions()
