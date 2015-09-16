@@ -39,7 +39,7 @@ class TestV1PythonAPI(functional.Base):
         self.assertEqual({'uuid': self.uuid}, res)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
-        self.cli.node.update.assert_any_call(self.uuid, self.patch)
+        self.assertCalledWithPatch(self.patch, self.cli.node.update)
         self.cli.port.create.assert_called_once_with(
             node_uuid=self.uuid, address='11:22:33:44:55:66')
 
@@ -101,7 +101,7 @@ class TestSimplePythonAPI(functional.Base):
         self.assertEqual({'uuid': self.uuid}, res)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
-        self.cli.node.update.assert_any_call(self.uuid, self.patch)
+        self.assertCalledWithPatch(self.patch, self.cli.node.update)
         self.cli.port.create.assert_called_once_with(
             node_uuid=self.uuid, address='11:22:33:44:55:66')
 
