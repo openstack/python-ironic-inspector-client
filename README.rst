@@ -96,6 +96,20 @@ CLI::
 
     $ openstack baremetal introspection status UUID
 
+Retrieving introspection data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``client.get_data(uuid[, raw])``
+
+* ``uuid`` - Ironic node UUID;
+* ``raw`` - whether to return raw data or parsed JSON data (the default).
+
+This call is not exposed in CLI yet.
+
+.. note::
+    This feature requires Swift support to be enabled in **Ironic Inspector**
+    by setting ``[processing]store_data`` configuration option to ``swift``.
+
 Introspection Rules API
 ~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -74,6 +74,27 @@ class ClientV1(http.BaseClient):
 
         return self.request('get', '/introspection/%s' % uuid).json()
 
+    def get_data(self, uuid, raw=False):
+        """Get introspection data from the last introspection of a node.
+
+        :param uuid: node UUID.
+        :param raw: whether to return raw binary data or parsed JSON data
+        :returns: bytes or a dict depending on the 'raw' argument
+        :raises: ClientError on error reported from a server
+        :raises: VersionNotSupported if requested api_version is not supported
+        :raises: *requests* library exception on connection problems.
+        :raises: TypeError if uuid is not a string
+        """
+        if not isinstance(uuid, six.string_types):
+            raise TypeError(
+                _("Expected string for uuid argument, got %r") % uuid)
+
+        resp = self.request('get', '/introspection/%s/data' % uuid)
+        if raw:
+            return resp.content
+        else:
+            return resp.json()
+
 
 class _RulesAPI(object):
     """Introspection rules API."""

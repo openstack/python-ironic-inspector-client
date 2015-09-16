@@ -111,6 +111,29 @@ class TestGetStatus(BaseTest):
 
 
 @mock.patch.object(http.BaseClient, 'request')
+class TestGetData(BaseTest):
+    def test_json(self, mock_req):
+        mock_req.return_value.json.return_value = 'json'
+
+        self.assertEqual('json', self.get_client().get_data(self.uuid))
+
+        mock_req.assert_called_once_with(
+            'get', '/introspection/%s/data' % self.uuid)
+
+    def test_raw(self, mock_req):
+        mock_req.return_value.content = b'json'
+
+        self.assertEqual(b'json', self.get_client().get_data(self.uuid,
+                                                             raw=True))
+
+        mock_req.assert_called_once_with(
+            'get', '/introspection/%s/data' % self.uuid)
+
+    def test_invalid_input(self, _):
+        self.assertRaises(TypeError, self.get_client().get_data, 42)
+
+
+@mock.patch.object(http.BaseClient, 'request')
 class TestRules(BaseTest):
     def get_rules(self, **kwargs):
         return self.get_client(**kwargs).rules
