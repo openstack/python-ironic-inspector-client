@@ -74,6 +74,26 @@ class TestRules(BaseTest):
         self.assertEqual([('1', 'd1'), ('2', 'd2')], values)
         self.api.get_all.assert_called_once_with()
 
+    def test_show(self):
+        self.api.get.return_value = {
+            'uuid': 'uuid1',
+            'links': [],
+            'description': 'd',
+            'conditions': [{}],
+            'actions': [{}]
+        }
+        arglist = ['uuid1']
+        verifylist = [('uuid', 'uuid1')]
+
+        cmd = shell.RuleShowCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cols, values = cmd.take_action(parsed_args)
+
+        self.assertEqual(('actions', 'conditions', 'description', 'uuid'),
+                         cols)
+        self.assertEqual(([{}], [{}], 'd', 'uuid1'), values)
+        self.api.get.assert_called_once_with('uuid1')
+
     def test_delete(self):
         arglist = ['uuid1']
         verifylist = [('uuid', 'uuid1')]

@@ -130,6 +130,21 @@ class RuleListCommand(lister.Lister):
         return self.COLUMNS, rules
 
 
+class RuleShowCommand(show.ShowOne):
+    """Show an introspection rule."""
+
+    def get_parser(self, prog_name):
+        parser = super(RuleShowCommand, self).get_parser(prog_name)
+        parser.add_argument('uuid', help='rule UUID')
+        return parser
+
+    def take_action(self, parsed_args):
+        client = self.app.client_manager.baremetal_introspection
+        rule = client.rules.get(parsed_args.uuid)
+        del rule['links']
+        return self.dict2columns(rule)
+
+
 class RuleDeleteCommand(command.Command):
     """Delete an introspection rule."""
 
