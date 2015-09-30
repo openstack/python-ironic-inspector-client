@@ -1,1 +1,1 @@
-git+git://git.openstack.org/openstack/ironic-inspector#egg=ironic-inspector
+git+git://git.openstack.org/openstack/ironic-inspector@stable/liberty#egg=ironic-inspector
