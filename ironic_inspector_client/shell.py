@@ -63,7 +63,7 @@ class StartCommand(command.Command):
 
     def get_parser(self, prog_name):
         parser = super(StartCommand, self).get_parser(prog_name)
-        parser.add_argument('uuid', help='baremetal node UUID')
+        parser.add_argument('uuid', help='baremetal node UUID(s)', nargs='+')
         parser.add_argument('--new-ipmi-username',
                             default=None,
                             help='if set, *Ironic Inspector* will update IPMI '
@@ -76,9 +76,10 @@ class StartCommand(command.Command):
 
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
-        client.introspect(parsed_args.uuid,
-                          new_ipmi_username=parsed_args.new_ipmi_username,
-                          new_ipmi_password=parsed_args.new_ipmi_password)
+        for uuid in parsed_args.uuid:
+            client.introspect(uuid,
+                              new_ipmi_username=parsed_args.new_ipmi_username,
+                              new_ipmi_password=parsed_args.new_ipmi_password)
         if parsed_args.new_ipmi_password:
             print('Setting IPMI credentials requested, please power on '
                   'the machine manually')
