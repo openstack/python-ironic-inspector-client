@@ -56,7 +56,8 @@ CLI tool is based on OpenStackClient_ with prefix
 ``openstack baremetal introspection``. Accepts optional argument
 ``--inspector-url`` with the **Ironic Inspector** API endpoint.
 
-Refer to HTTP-API.rst_ for information on the **Ironic Inspector** HTTP API.
+Refer to the `HTTP API reference`_ for information on the
+**Ironic Inspector** HTTP API.
 
 Detect server API versions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -208,8 +209,8 @@ Here ``base_url`` argument is the same as ``inspector_url`` argument to
 
 .. _Gerrit Workflow: http://docs.openstack.org/infra/manual/developers.html#development-workflow
 .. _Ironic Inspector: https://pypi.python.org/pypi/ironic-inspector
-.. _Inspector contributing guide: https://github.com/openstack/ironic-inspector/blob/master/CONTRIBUTING.rst
+.. _Inspector contributing guide: http://docs.openstack.org/developer/ironic-inspector/contributing.html
 .. _OpenStackClient: http://docs.openstack.org/developer/python-openstackclient/
-.. _Setting IPMI Credentials: https://github.com/openstack/ironic-inspector#setting-ipmi-credentials
-.. _HTTP-API.rst: https://github.com/openstack/ironic-inspector/blob/master/HTTP-API.rst
-.. _introspection rules documentation: https://github.com/openstack/ironic-inspector#introspection-rules
+.. _Setting IPMI Credentials: http://docs.openstack.org/developer/ironic-inspector/usage.html#setting-ipmi-credentials
+.. _HTTP API reference: http://docs.openstack.org/developer/ironic-inspector/http-api.html
+.. _introspection rules documentation: http://docs.openstack.org/developer/ironic-inspector/usage.html#introspection-rules
