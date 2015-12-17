@@ -1,5 +1,0 @@
-include LICENSE
-include requirements.txt
-include test-requirements.txt
-include tox.ini
-include *.rst
