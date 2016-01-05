@@ -47,7 +47,7 @@ class TestV1PythonAPI(functional.Base):
         self.assertEqual({'finished': True, 'error': None}, status)
 
     def test_setup_ipmi(self):
-        self.node.maintenance = True
+        self.node.provision_state = 'enroll'
         self.client.introspect(self.uuid, new_ipmi_username='admin',
                                new_ipmi_password='pwd')
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
