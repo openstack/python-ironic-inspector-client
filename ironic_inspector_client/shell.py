@@ -17,6 +17,7 @@ from __future__ import print_function
 
 import json
 import logging
+import sys
 
 from cliff import command
 from cliff import lister
@@ -165,3 +166,25 @@ class RulePurgeCommand(command.Command):
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
         client.rules.delete_all()
+
+
+class DataSaveCommand(command.Command):
+    """Save or display raw introspection data."""
+
+    def get_parser(self, prog_name):
+        parser = super(DataSaveCommand, self).get_parser(prog_name)
+        parser.add_argument("--file", metavar="<filename>",
+                            help="downloaded introspection data filename "
+                            "(default: stdout)")
+        parser.add_argument('uuid', help='baremetal node UUID')
+        return parser
+
+    def take_action(self, parsed_args):
+        client = self.app.client_manager.baremetal_introspection
+        data = client.get_data(parsed_args.uuid,
+                               raw=bool(parsed_args.file))
+        if parsed_args.file:
+            with open(parsed_args.file, 'wb') as fp:
+                fp.write(data)
+        else:
+            json.dump(data, sys.stdout)
