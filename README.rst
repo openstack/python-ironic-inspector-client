@@ -107,7 +107,11 @@ Retrieving introspection data
 * ``uuid`` - Ironic node UUID;
 * ``raw`` - whether to return raw data or parsed JSON data (the default).
 
-This call is not exposed in CLI yet.
+CLI::
+
+    $ openstack baremetal introspection data save [--file=file_name] UUID
+
+If file name is not provided, the data is dumped to stdout.
 
 .. note::
     This feature requires Swift support to be enabled in **Ironic Inspector**

@@ -11,8 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
 import mock
 from openstackclient.tests import utils
+import six
 import tempfile
 
 from ironic_inspector_client import shell
@@ -183,3 +186,35 @@ class TestRules(BaseTest):
         cmd.take_action(parsed_args)
 
         self.rules_api.delete_all.assert_called_once_with()
+
+
+class TestDataSave(BaseTest):
+    def test_stdout(self):
+        self.client.get_data.return_value = {'answer': 42}
+        buf = six.StringIO()
+
+        arglist = ['uuid1']
+        verifylist = [('uuid', 'uuid1')]
+
+        cmd = shell.DataSaveCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        with mock.patch.object(sys, 'stdout', buf):
+            cmd.take_action(parsed_args)
+        self.assertEqual('{"answer": 42}', buf.getvalue())
+        self.client.get_data.assert_called_once_with('uuid1', raw=False)
+
+    def test_file(self):
+        self.client.get_data.return_value = b'{"answer": 42}'
+
+        with tempfile.NamedTemporaryFile() as fp:
+            arglist = ['--file', fp.name, 'uuid1']
+            verifylist = [('uuid', 'uuid1'), ('file', fp.name)]
+
+            cmd = shell.DataSaveCommand(self.app, None)
+            parsed_args = self.check_parser(cmd, arglist, verifylist)
+            cmd.take_action(parsed_args)
+
+            content = fp.read()
+
+        self.assertEqual(b'{"answer": 42}', content)
+        self.client.get_data.assert_called_once_with('uuid1', raw=True)

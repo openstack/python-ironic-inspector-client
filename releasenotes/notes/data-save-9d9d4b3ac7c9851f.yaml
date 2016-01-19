@@ -1,0 +1,4 @@
+---
+features:
+  - Added "introspection data save" command to retrieve stored introspection
+    data for the node.
