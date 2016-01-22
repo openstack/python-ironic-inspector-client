@@ -79,9 +79,12 @@ Start introspection on a node
 
 CLI::
 
-    $ openstack baremetal introspection start [--new-ipmi-password=PWD [--new-ipmi-username=USER]] UUID [UUID ...]
+    $ openstack baremetal introspection start [--wait] [--new-ipmi-password=PWD [--new-ipmi-username=USER]] UUID [UUID ...]
 
 Note that the CLI call accepts several UUID's and will stop on the first error.
+
+With ``--wait`` flag it waits until introspection ends for all given nodes,
+then displays the results as a table.
 
 Query introspection status
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

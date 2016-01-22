@@ -1,0 +1,3 @@
+---
+features:
+  - Introspection command got --wait flag to wait for introspection finish.

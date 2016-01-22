@@ -38,8 +38,9 @@ class TestIntrospect(BaseTest):
 
         cmd = shell.StartCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
-        cmd.take_action(parsed_args)
+        result = cmd.take_action(parsed_args)
 
+        self.assertEqual((shell.StartCommand.COLUMNS, []), result)
         self.client.introspect.assert_called_once_with('uuid1',
                                                        new_ipmi_password=None,
                                                        new_ipmi_username=None)
@@ -102,6 +103,27 @@ class TestIntrospect(BaseTest):
                            new_ipmi_username='root')
                  for uuid in uuids]
         self.assertEqual(calls, self.client.introspect.call_args_list)
+
+    def test_wait(self):
+        nodes = ['uuid1', 'uuid2', 'uuid3']
+        arglist = ['--wait'] + nodes
+        verifylist = [('uuid', nodes), ('wait', True)]
+        self.client.wait_for_finish.return_value = {
+            'uuid1': {'finished': True, 'error': None},
+            'uuid2': {'finished': True, 'error': 'boom'},
+            'uuid3': {'finished': True, 'error': None},
+        }
+
+        cmd = shell.StartCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        _c, values = cmd.take_action(parsed_args)
+
+        calls = [mock.call(uuid, new_ipmi_password=None,
+                           new_ipmi_username=None)
+                 for uuid in nodes]
+        self.assertEqual(calls, self.client.introspect.call_args_list)
+        self.assertEqual([('uuid1', None), ('uuid2', 'boom'), ('uuid3', None)],
+                         sorted(values))
 
 
 class TestRules(BaseTest):
