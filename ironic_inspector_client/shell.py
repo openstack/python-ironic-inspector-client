@@ -42,7 +42,7 @@ for mversion in range(ironic_inspector_client.MAX_API_VERSION[1] + 1):
 def make_client(instance):
     return ironic_inspector_client.ClientV1(
         inspector_url=instance.get_configuration().get('inspector_url'),
-        auth_token=instance.auth_ref.auth_token,
+        session=instance.session,
         api_version=instance._api_version[API_NAME])
 
 

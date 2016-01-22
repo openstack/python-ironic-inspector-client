@@ -13,6 +13,7 @@
 
 import unittest
 
+from keystoneclient import session
 import mock
 from oslo_utils import netutils
 from oslo_utils import uuidutils
@@ -27,7 +28,7 @@ FAKE_HEADERS = {
 }
 
 
-@mock.patch.object(http.requests, 'get',
+@mock.patch.object(session.Session, 'get',
                    return_value=mock.Mock(headers=FAKE_HEADERS,
                                           status_code=200))
 class TestInit(unittest.TestCase):
@@ -40,7 +41,8 @@ class TestInit(unittest.TestCase):
 
     def test_ok(self, mock_get):
         self.get_client()
-        mock_get.assert_called_once_with(self.my_ip)
+        mock_get.assert_called_once_with(self.my_ip, authenticated=False,
+                                         raise_exc=False)
 
     def test_explicit_version(self, mock_get):
         self.get_client(api_version=(1, 2))
@@ -57,7 +59,9 @@ class TestInit(unittest.TestCase):
 
     def test_explicit_url(self, mock_get):
         self.get_client(inspector_url='http://host:port')
-        mock_get.assert_called_once_with('http://host:port')
+        mock_get.assert_called_once_with('http://host:port',
+                                         authenticated=False,
+                                         raise_exc=False)
 
 
 class BaseTest(unittest.TestCase):

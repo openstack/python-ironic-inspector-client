@@ -1,0 +1,7 @@
+---
+features:
+  - Python API now supports Keystone sessions instead of only authentication
+    token.
+deprecations:
+  - Passing auth_token directly to the client object constructor is deprecated,
+    please pass session instead.
