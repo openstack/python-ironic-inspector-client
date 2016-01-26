@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fixed MAX_API_VERSION incorrectly set to (1, 0) while API 1.2 is actually
+    fully supported.
