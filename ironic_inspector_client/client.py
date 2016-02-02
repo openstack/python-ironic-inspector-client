@@ -28,13 +28,13 @@ VersionNotSupported = http.VersionNotSupported
 
 def introspect(uuid, base_url=None, auth_token=None,
                new_ipmi_password=None, new_ipmi_username=None,
-               api_version=DEFAULT_API_VERSION):
+               api_version=DEFAULT_API_VERSION, session=None):
     """Start introspection for a node.
 
     :param uuid: node uuid
     :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
-    :param auth_token: Keystone authentication token.
+    :param auth_token: deprecated, use session instead.
     :param new_ipmi_password: if set, *Ironic Inspector* will update IPMI
                               password to this value.
     :param new_ipmi_username: if new_ipmi_password is set, this values sets
@@ -42,47 +42,50 @@ def introspect(uuid, base_url=None, auth_token=None,
                               driver_info.
     :param api_version: requested Ironic Inspector API version, defaults to
                         ``DEFAULT_API_VERSION`` attribute.
+    :param session: keystone session.
     :raises: ClientError on error reported from a server
     :raises: VersionNotSupported if requested api_version is not supported
     :raises: *requests* library exception on connection problems.
     """
     c = v1.ClientV1(api_version=api_version, auth_token=auth_token,
-                    inspector_url=base_url)
+                    inspector_url=base_url, session=session)
     return c.introspect(uuid, new_ipmi_username=new_ipmi_username,
                         new_ipmi_password=new_ipmi_password)
 
 
 def get_status(uuid, base_url=None, auth_token=None,
-               api_version=DEFAULT_API_VERSION):
+               api_version=DEFAULT_API_VERSION, session=None):
     """Get introspection status for a node.
 
     New in Ironic Inspector version 1.0.0.
     :param uuid: node uuid.
     :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
-    :param auth_token: Keystone authentication token.
+    :param auth_token: deprecated, use session instead.
     :param api_version: requested Ironic Inspector API version, defaults to
                         ``DEFAULT_API_VERSION`` attribute.
+    :param session: keystone session.
     :raises: ClientError on error reported from a server
     :raises: VersionNotSupported if requested api_version is not supported
     :raises: *requests* library exception on connection problems.
     """
     c = v1.ClientV1(api_version=api_version, auth_token=auth_token,
-                    inspector_url=base_url)
+                    inspector_url=base_url, session=session)
     return c.get_status(uuid)
 
 
-def server_api_versions(base_url=None):
+def server_api_versions(base_url=None, session=None):
     """Get minimum and maximum supported API versions from a server.
 
     :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
+    :param session: keystone session (authentication is not required).
     :return: tuple (minimum version, maximum version) each version is returned
              as a tuple (X, Y)
     :raises: *requests* library exception on connection problems.
     :raises: ValueError if returned version cannot be parsed
     """
-    c = http.BaseClient(1, inspector_url=base_url)
+    c = http.BaseClient(1, inspector_url=base_url, session=session)
     return c.server_api_versions()
 
 

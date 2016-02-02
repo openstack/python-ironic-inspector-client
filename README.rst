@@ -19,9 +19,10 @@ To use Python API first create a ``ClientV1`` object::
     import ironic_inspector_client
 
     url = 'http://HOST:5050'
-    client = ironic_inspector_client.ClientV1(auth_token=token, inspector_url=url)
+    client = ironic_inspector_client.ClientV1(session=keystone_session,
+                                              inspector_url=url)
 
-This code creates a client with API version *1.0* and an authentication token.
+This code creates a client with API version *1.0* and a given Keystone session.
 If ``inspector_url`` is missing, local host is assumed for now. Service
 catalog will be used in the future.
 
@@ -197,18 +198,19 @@ functionality:
 
 * Starting introspection::
 
-    ironic_inspector_client.introspect(uuid[, new_ipmi_password[, new_ipmi_username]][, auth_token][, base_url][, api_version])
+    ironic_inspector_client.introspect(uuid[, new_ipmi_password[, new_ipmi_username]][, base_url][, api_version][, session])
 
 * Getting introspection status::
 
-    ironic_inspector_client.get_status(uuid[, auth_token][, base_url][, api_version])
+    ironic_inspector_client.get_status(uuid[, base_url][, api_version[, session]])
 
 * Getting API versions supported by a server::
 
-    ironic_inspector_client.server_api_versions([base_url])
+    ironic_inspector_client.server_api_versions([base_url][, session])
 
 Here ``base_url`` argument is the same as ``inspector_url`` argument to
-``ClientV1`` constructor.
+``ClientV1`` constructor. The first 2 functions also accept deprecated
+``auth_token`` argument, which should not be used.
 
 
 .. _Gerrit Workflow: http://docs.openstack.org/infra/manual/developers.html#development-workflow

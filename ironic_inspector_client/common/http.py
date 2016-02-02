@@ -16,11 +16,13 @@
 import json
 import logging
 
+from keystoneclient.auth import token_endpoint
+from keystoneclient import session as ks_session
 from oslo_utils import netutils
 import requests
 import six
 
-from ironic_inspector_client.common.i18n import _
+from ironic_inspector_client.common.i18n import _, _LW
 
 
 _DEFAULT_URL = 'http://' + netutils.get_my_ipv4() + ':5050'
@@ -81,7 +83,8 @@ class VersionNotSupported(Exception):
 class BaseClient(object):
     """Base class for clients, provides common HTTP code."""
 
-    def __init__(self, api_version, inspector_url=None, auth_token=None):
+    def __init__(self, api_version, inspector_url=None, auth_token=None,
+                 session=None):
         """Create a client.
 
         :param api_version: minimum API version that must be supported by
@@ -89,11 +92,25 @@ class BaseClient(object):
         :param inspector_url: *Ironic Inspector* URL in form:
             http://host:port[/ver],
             defaults to ``http://<current host>:5050/v<MAJOR>``.
-        :param auth_token: authentication token
+        :param auth_token: authentication token (deprecated, use session)
+        :param session: existing keystone session
         """
         self._base_url = (inspector_url or _DEFAULT_URL).rstrip('/')
-
         self._auth_token = auth_token
+
+        if session is None:
+            if auth_token:
+                LOG.warning(_LW('Passing auth_token to client objects '
+                                'is deprecated, please pass session instead'))
+                auth = token_endpoint.Token(endpoint=self._base_url,
+                                            token=auth_token)
+            else:
+                auth = None
+
+            self._session = ks_session.Session(auth)
+        else:
+            self._session = session
+
         self._api_version = self._check_api_version(api_version)
         self._version_str = '%d.%d' % self._api_version
         ver_postfix = '/v%d' % self._api_version[0]
@@ -101,11 +118,9 @@ class BaseClient(object):
         if not self._base_url.endswith(ver_postfix):
             self._base_url += ver_postfix
 
-    def _make_headers(self, **kwargs):
-        kwargs[_VERSION_HEADER] = self._version_str
-        if self._auth_token:
-            kwargs[_AUTH_TOKEN_HEADER] = self._auth_token
-        return kwargs
+    def _add_headers(self, headers):
+        headers[_VERSION_HEADER] = self._version_str
+        return headers
 
     def _check_api_version(self, api_version):
         if isinstance(api_version, int):
@@ -133,13 +148,14 @@ class BaseClient(object):
         :param endpoint: relative endpoint
         :param kwargs: arguments to pass to 'requests' library
         """
-        headers = self._make_headers()
+        headers = self._add_headers(kwargs.pop('headers', {}))
         url = self._base_url + '/' + url.lstrip('/')
         LOG.debug('Requesting %(method)s %(url)s (API version %(ver)s) '
                   'with %(args)s',
                   {'method': method.upper(), 'url': url,
                    'ver': self._version_str, 'args': kwargs})
-        res = getattr(requests, method)(url, headers=headers, **kwargs)
+        res = self._session.request(url, method, headers=headers,
+                                    raise_exc=False, **kwargs)
         LOG.debug('Got response for %(method)s %(url)s with status code '
                   '%(code)s', {'url': url, 'method': method.upper(),
                                'code': res.status_code})
@@ -154,7 +170,8 @@ class BaseClient(object):
         :raises: *requests* library exception on connection problems.
         :raises: ValueError if returned version cannot be parsed
         """
-        res = requests.get(self._base_url)
+        res = self._session.get(self._base_url, authenticated=False,
+                                raise_exc=False)
         # HTTP Not Found is a valid response for older (2.0.0) servers
         if res.status_code >= 400 and res.status_code != 404:
             ClientError.raise_if_needed(res)

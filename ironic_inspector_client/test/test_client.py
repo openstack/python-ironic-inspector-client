@@ -14,6 +14,7 @@
 import types
 import unittest
 
+from keystoneclient import session as ks_session
 import mock
 from oslo_utils import uuidutils
 
@@ -26,14 +27,26 @@ from ironic_inspector_client import v1
 class BaseTest(unittest.TestCase):
     uuid = uuidutils.generate_uuid()
     token = "token"
+    session = mock.Mock(spec=ks_session.Session)
 
 
 @mock.patch.object(v1, 'ClientV1', autospec=True)
 class TestIntrospect(BaseTest):
     def test(self, mock_v1):
         client.introspect(self.uuid, base_url="http://host:port",
+                          session=self.session)
+        mock_v1.assert_called_once_with(auth_token=None,
+                                        session=self.session,
+                                        inspector_url="http://host:port",
+                                        api_version=client.DEFAULT_API_VERSION)
+        mock_v1.return_value.introspect.assert_called_once_with(
+            self.uuid, new_ipmi_username=None, new_ipmi_password=None)
+
+    def test_token(self, mock_v1):
+        client.introspect(self.uuid, base_url="http://host:port",
                           auth_token=self.token)
         mock_v1.assert_called_once_with(auth_token=self.token,
+                                        session=None,
                                         inspector_url="http://host:port",
                                         api_version=client.DEFAULT_API_VERSION)
         mock_v1.return_value.introspect.assert_called_once_with(
@@ -41,8 +54,9 @@ class TestIntrospect(BaseTest):
 
     def test_full_url(self, mock_v1):
         client.introspect(self.uuid, base_url="http://host:port/v1/",
-                          auth_token=self.token)
-        mock_v1.assert_called_once_with(auth_token=self.token,
+                          session=self.session)
+        mock_v1.assert_called_once_with(auth_token=None,
+                                        session=self.session,
                                         inspector_url="http://host:port/v1/",
                                         api_version=client.DEFAULT_API_VERSION)
         mock_v1.return_value.introspect.assert_called_once_with(
@@ -50,9 +64,10 @@ class TestIntrospect(BaseTest):
 
     def test_set_ipmi_credentials(self, mock_v1):
         client.introspect(self.uuid, base_url="http://host:port",
-                          auth_token=self.token, new_ipmi_password='p',
+                          session=self.session, new_ipmi_password='p',
                           new_ipmi_username='u')
-        mock_v1.assert_called_once_with(auth_token=self.token,
+        mock_v1.assert_called_once_with(auth_token=None,
+                                        session=self.session,
                                         inspector_url="http://host:port",
                                         api_version=client.DEFAULT_API_VERSION)
         mock_v1.return_value.introspect.assert_called_once_with(
@@ -65,9 +80,10 @@ class TestGetStatus(BaseTest):
         mock_v1.return_value.get_status.return_value = 'json'
 
         self.assertEqual('json',
-                         client.get_status(self.uuid, auth_token=self.token))
+                         client.get_status(self.uuid, session=self.session))
 
-        mock_v1.assert_called_once_with(auth_token=self.token,
+        mock_v1.assert_called_once_with(auth_token=None,
+                                        session=self.session,
                                         inspector_url=None,
                                         api_version=client.DEFAULT_API_VERSION)
         mock_v1.return_value.get_status.assert_called_once_with(self.uuid)
@@ -79,6 +95,14 @@ class TestServerApiVersions(BaseTest):
         mock_cli.return_value.server_api_versions.return_value = (1, 0), (1, 1)
 
         minv, maxv = client.server_api_versions()
+
+        self.assertEqual((1, 0), minv)
+        self.assertEqual((1, 1), maxv)
+
+    def test_with_session(self, mock_cli):
+        mock_cli.return_value.server_api_versions.return_value = (1, 0), (1, 1)
+
+        minv, maxv = client.server_api_versions(session=self.session)
 
         self.assertEqual((1, 0), minv)
         self.assertEqual((1, 1), maxv)
