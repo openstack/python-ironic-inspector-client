@@ -59,8 +59,10 @@ def build_option_parser(parser):
     return parser
 
 
-class StartCommand(command.Command):
+class StartCommand(lister.Lister):
     """Start the introspection."""
+
+    COLUMNS = ('UUID', 'Error')
 
     def get_parser(self, prog_name):
         parser = super(StartCommand, self).get_parser(prog_name)
@@ -73,6 +75,10 @@ class StartCommand(command.Command):
                             default=None,
                             help='if set, *Ironic Inspector* will update IPMI '
                             'password to this value')
+        parser.add_argument('--wait',
+                            action='store_true',
+                            help='wait for introspection to finish; the result'
+                            ' will be displayed in the end')
         return parser
 
     def take_action(self, parsed_args):
@@ -83,7 +89,17 @@ class StartCommand(command.Command):
                               new_ipmi_password=parsed_args.new_ipmi_password)
         if parsed_args.new_ipmi_password:
             print('Setting IPMI credentials requested, please power on '
-                  'the machine manually')
+                  'the machine manually', file=sys.stderr)
+
+        if parsed_args.wait:
+            print('Waiting for introspection to finish...', file=sys.stderr)
+            result = client.wait_for_finish(parsed_args.uuid)
+            result = [(uuid, s.get('error'))
+                      for uuid, s in result.items()]
+        else:
+            result = []
+
+        return self.COLUMNS, result
 
 
 class StatusCommand(show.ShowOne):

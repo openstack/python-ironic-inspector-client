@@ -13,6 +13,9 @@
 
 """Client for V1 API."""
 
+import logging
+import time
+
 import six
 
 from ironic_inspector_client.common import http
@@ -21,6 +24,17 @@ from ironic_inspector_client.common.i18n import _
 
 DEFAULT_API_VERSION = (1, 0)
 MAX_API_VERSION = (1, 0)
+
+# using huge timeout by default, as precise timeout should be set in
+# ironic-inspector settings
+DEFAULT_RETRY_INTERVAL = 10
+DEFAULT_MAX_RETRIES = 3600
+
+LOG = logging.getLogger(__name__)
+
+
+class WaitTimeoutError(Exception):
+    """Timeout while waiting for nodes to finish introspection."""
 
 
 class ClientV1(http.BaseClient):
@@ -67,12 +81,57 @@ class ClientV1(http.BaseClient):
         :raises: ClientError on error reported from a server
         :raises: VersionNotSupported if requested api_version is not supported
         :raises: *requests* library exception on connection problems.
+        :return: dictionary with keys "finished" (True/False) and "error"
+                 (error string or None).
         """
         if not isinstance(uuid, six.string_types):
             raise TypeError(
                 _("Expected string for uuid argument, got %r") % uuid)
 
         return self.request('get', '/introspection/%s' % uuid).json()
+
+    def wait_for_finish(self, uuids, retry_interval=DEFAULT_RETRY_INTERVAL,
+                        max_retries=DEFAULT_MAX_RETRIES,
+                        sleep_function=time.sleep):
+        """Wait for introspection finishing for given nodes.
+
+        :param uuids: collection of node uuid's.
+        :param retry_interval: sleep interval between retries.
+        :param max_retries: maximum number of retries.
+        :param sleep_function: function used for sleeping between retries.
+        :raises: WaitTimeoutError on timeout
+        :raises: ClientError on error reported from a server
+        :raises: VersionNotSupported if requested api_version is not supported
+        :raises: *requests* library exception on connection problems.
+        :return: dictionary UUID -> status (the same as in get_status).
+        """
+        result = {}
+
+        # Number of attempts = number of retries + first attempt
+        for attempt in range(max_retries + 1):
+            new_active_uuids = []
+            for uuid in uuids:
+                status = self.get_status(uuid)
+                if status.get('finished'):
+                    result[uuid] = status
+                else:
+                    new_active_uuids.append(uuid)
+
+            if new_active_uuids:
+                if attempt != max_retries:
+                    uuids = new_active_uuids
+                    LOG.debug('Still waiting for introspection results for '
+                              '%(count)d nodes, attempt %(attempt)d of '
+                              '%(total)d',
+                              {'count': len(new_active_uuids),
+                               'attempt': attempt + 1,
+                               'total': max_retries + 1})
+                    sleep_function(retry_interval)
+            else:
+                return result
+
+        raise WaitTimeoutError(_("Timeout while waiting for introspection "
+                                 "of nodes %s") % new_active_uuids)
 
     def get_data(self, uuid, raw=False):
         """Get introspection data from the last introspection of a node.
