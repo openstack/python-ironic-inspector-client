@@ -14,6 +14,7 @@
 import json
 import unittest
 
+from keystoneclient import exceptions
 from keystoneclient import session
 import mock
 
@@ -107,6 +108,7 @@ class TestRequest(unittest.TestCase):
         super(TestRequest, self).setUp()
         self.headers = {http._VERSION_HEADER: '1.0'}
         self.session = mock.Mock(spec=session.Session)
+        self.session.get_endpoint.return_value = self.base_url
         self.req = self.session.request
         self.req.return_value.status_code = 200
 
@@ -129,6 +131,31 @@ class TestRequest(unittest.TestCase):
         self.assertIs(self.req.return_value, res)
         self.req.assert_called_once_with(self.base_url + '/foo/bar', 'get',
                                          raise_exc=False, headers=self.headers)
+        self.session.get_endpoint.assert_called_once_with(
+            service_type='baremetal-introspection',
+            interface=None, region_name=None)
+
+    def test_ok_no_endpoint(self):
+        self.session.get_endpoint.return_value = None
+        res = self.get_client().request('get', '/foo/bar')
+
+        self.assertIs(self.req.return_value, res)
+        self.req.assert_called_once_with(self.base_url + '/foo/bar', 'get',
+                                         raise_exc=False, headers=self.headers)
+        self.session.get_endpoint.assert_called_once_with(
+            service_type='baremetal-introspection',
+            interface=None, region_name=None)
+
+    def test_ok_endpoint_not_found(self):
+        self.session.get_endpoint.side_effect = exceptions.EndpointNotFound()
+        res = self.get_client().request('get', '/foo/bar')
+
+        self.assertIs(self.req.return_value, res)
+        self.req.assert_called_once_with(self.base_url + '/foo/bar', 'get',
+                                         raise_exc=False, headers=self.headers)
+        self.session.get_endpoint.assert_called_once_with(
+            service_type='baremetal-introspection',
+            interface=None, region_name=None)
 
     @mock.patch.object(session.Session, 'request', autospec=True,
                        **{'return_value.status_code': 200})

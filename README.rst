@@ -17,14 +17,16 @@ Python API
 To use Python API first create a ``ClientV1`` object::
 
     import ironic_inspector_client
-
-    url = 'http://HOST:5050'
-    client = ironic_inspector_client.ClientV1(session=keystone_session,
-                                              inspector_url=url)
+    client = ironic_inspector_client.ClientV1(session=keystone_session)
 
 This code creates a client with API version *1.0* and a given Keystone session.
-If ``inspector_url`` is missing, local host is assumed for now. Service
-catalog will be used in the future.
+The service URL is fetched from the service catalog in this case. Optional
+arguments ``service_type``, ``interface`` and ``region_name`` can be provided
+to modify how the URL is looked up.
+
+If the catalog lookup fails, the local host with port 5050 is tried. However,
+this behaviour is deprecated and should not be relied on.
+Also an explicit ``inspector_url`` can be passed to bypass service catalog.
 
 Optional ``api_version`` argument is a minimum API version that a server must
 support. It can be a tuple (MAJ, MIN), string "MAJ.MIN" or integer
@@ -201,19 +203,20 @@ functionality:
 
 * Starting introspection::
 
-    ironic_inspector_client.introspect(uuid[, new_ipmi_password[, new_ipmi_username]][, base_url][, api_version][, session])
+    ironic_inspector_client.introspect(uuid[, new_ipmi_password[, new_ipmi_username]][, base_url][, api_version] **)
 
 * Getting introspection status::
 
-    ironic_inspector_client.get_status(uuid[, base_url][, api_version[, session]])
+    ironic_inspector_client.get_status(uuid[, base_url][, api_version] **)
 
 * Getting API versions supported by a server::
 
-    ironic_inspector_client.server_api_versions([base_url][, session])
+    ironic_inspector_client.server_api_versions([base_url] **)
 
-Here ``base_url`` argument is the same as ``inspector_url`` argument to
-``ClientV1`` constructor. The first 2 functions also accept deprecated
-``auth_token`` argument, which should not be used.
+Here ``base_url`` argument is the same as ``inspector_url`` argument
+to the ``ClientV1`` constructor. Keyword arguments are passed to the client
+constructor intact. The first 2 functions also accept deprecated ``auth_token``
+argument, which should not be used.
 
 
 .. _Gerrit Workflow: http://docs.openstack.org/infra/manual/developers.html#development-workflow

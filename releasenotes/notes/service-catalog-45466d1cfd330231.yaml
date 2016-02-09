@@ -1,0 +1,6 @@
+---
+features:
+  - Inspector service URL can now be fetched from the service catalog.
+deprecations:
+  - Using default service URL of locahost:5050 is deprecated now. Either use
+    the service catalog or provide an explicit URL.
