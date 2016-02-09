@@ -126,6 +126,21 @@ class TestIntrospect(BaseTest):
                          sorted(values))
 
 
+class TestGetStatus(BaseTest):
+    def test_get_status(self):
+        arglist = ['uuid1']
+        verifylist = [('uuid', 'uuid1')]
+        self.client.get_status.return_value = {'finished': True,
+                                               'error': 'boom'}
+
+        cmd = shell.StatusCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        result = cmd.take_action(parsed_args)
+
+        self.assertEqual([('error', 'finished'), ('boom', True)], list(result))
+        self.client.get_status.assert_called_once_with('uuid1')
+
+
 class TestRules(BaseTest):
     def test_import_single(self):
         f = tempfile.NamedTemporaryFile()
