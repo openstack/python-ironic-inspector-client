@@ -1,0 +1,4 @@
+---
+features:
+  - Introduced command "openstack baremetal introspection abort <UUID>"
+    to abort running introspection for a node.

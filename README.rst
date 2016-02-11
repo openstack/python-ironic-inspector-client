@@ -121,6 +121,17 @@ If file name is not provided, the data is dumped to stdout.
     This feature requires Swift support to be enabled in **Ironic Inspector**
     by setting ``[processing]store_data`` configuration option to ``swift``.
 
+Aborting introspection
+~~~~~~~~~~~~~~~~~~~~~~
+
+``client.abort(uuid)``
+
+* ``uuid`` - Ironic node UUID.
+
+CLI::
+
+  $ openstack baremetal introspection abort UUID
+
 Introspection Rules API
 ~~~~~~~~~~~~~~~~~~~~~~~
 

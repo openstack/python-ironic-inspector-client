@@ -264,3 +264,14 @@ class TestRules(BaseTest):
         self.get_rules().delete_all()
 
         mock_req.assert_called_once_with('delete', '/rules')
+
+
+@mock.patch.object(http.BaseClient, 'request')
+class TestAbort(BaseTest):
+    def test(self, mock_req):
+        self.get_client().abort(self.uuid)
+        mock_req.assert_called_once_with('post',
+                                         '/introspection/%s/abort' % self.uuid)
+
+    def test_invalid_input(self, _):
+        self.assertRaises(TypeError, self.get_client().abort, 42)

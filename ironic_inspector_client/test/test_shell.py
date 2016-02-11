@@ -125,6 +125,21 @@ class TestIntrospect(BaseTest):
         self.assertEqual([('uuid1', None), ('uuid2', 'boom'), ('uuid3', None)],
                          sorted(values))
 
+    def test_abort(self):
+        node = 'uuid1'
+        arglist = [node]
+        verifylist = [('uuid', node)]
+        response_mock = mock.Mock(status_code=202, content=b'')
+        self.client.abort.return_value = response_mock
+
+        cmd = shell.AbortCommand(self.app, None)
+
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        result = cmd.take_action(parsed_args)
+
+        self.client.abort.assert_called_once_with(node)
+        self.assertIs(None, result)
+
 
 class TestRules(BaseTest):
     def test_import_single(self):

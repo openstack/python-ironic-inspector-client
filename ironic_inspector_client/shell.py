@@ -116,6 +116,19 @@ class StatusCommand(show.ShowOne):
         return zip(*sorted(status.items()))
 
 
+class AbortCommand(command.Command):
+    """Abort running introspection for node."""
+
+    def get_parser(self, prog_name):
+        parser = super(AbortCommand, self).get_parser(prog_name)
+        parser.add_argument('uuid', help='baremetal node UUID')
+        return parser
+
+    def take_action(self, parsed_args):
+        client = self.app.client_manager.baremetal_introspection
+        client.abort(parsed_args.uuid)
+
+
 class RuleImportCommand(command.Command):
     """Import one or several introspection rules from a json file."""
 

@@ -154,6 +154,21 @@ class ClientV1(http.BaseClient):
         else:
             return resp.json()
 
+    def abort(self, uuid):
+        """Abort running introspection for a node.
+
+        :param uuid: node UUID.
+        :raises: ClientError on error reported from a server.
+        :raises: VersionNotSupported if requested api_version is not supported.
+        :raises: *requests* library exception on connection problems.
+        :raises: TypeError if uuid is not a string.
+        """
+        if not isinstance(uuid, six.string_types):
+            raise TypeError(_("Expected string for uuid argument, got"
+                              " %r") % uuid)
+
+        return self.request('post', '/introspection/%s/abort' % uuid)
+
 
 class _RulesAPI(object):
     """Introspection rules API."""

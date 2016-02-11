@@ -14,6 +14,7 @@
 import eventlet
 eventlet.monkey_patch()
 
+import requests
 import unittest
 
 from ironic_inspector.test import functional
@@ -45,6 +46,32 @@ class TestV1PythonAPI(functional.Base):
 
         status = self.client.get_status(self.uuid)
         self.assertEqual({'finished': True, 'error': None}, status)
+
+    def test_abort_introspection(self):
+        # assert abort doesn't work before introspect request
+        self.assertRaises(client.ClientError, self.client.abort,
+                          self.uuid)
+
+        self.client.introspect(self.uuid)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
+                                                              'reboot')
+
+        status = self.client.get_status(self.uuid)
+        self.assertEqual({'finished': False, 'error': None}, status)
+
+        res = self.client.abort(self.uuid)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+
+        self.assertEqual(202, res.status_code)
+        self.assertEqual('', res.text)
+
+        status = self.client.get_status(self.uuid)
+        self.assertEqual({'finished': True, 'error': 'Canceled by '
+                          'operator'}, status)
+
+        # assert continue doesn't work after abort
+        self.assertRaises(requests.HTTPError, self.call_continue, self.data)
 
     def test_setup_ipmi(self):
         self.node.provision_state = 'enroll'
