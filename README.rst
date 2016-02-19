@@ -84,6 +84,12 @@ CLI::
 
 Note that the CLI call accepts several UUID's and will stop on the first error.
 
+.. note::
+    This CLI call doesn't rely on Ironic, and the introspected node will be left in
+    ``MANAGEABLE`` state. This means that the Ironic node is not protected from other
+    operations being performed by Ironic, which could cause inconsistency in the
+    node's state, and lead to operational errors.
+
 With ``--wait`` flag it waits until introspection ends for all given nodes,
 then displays the results as a table.
 
