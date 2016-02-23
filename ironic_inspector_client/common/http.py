@@ -17,6 +17,7 @@ import json
 import logging
 
 from keystoneclient.auth import token_endpoint
+from keystoneclient import exceptions as ks_exc
 from keystoneclient import session as ks_session
 from oslo_utils import netutils
 import requests
@@ -84,18 +85,24 @@ class BaseClient(object):
     """Base class for clients, provides common HTTP code."""
 
     def __init__(self, api_version, inspector_url=None, auth_token=None,
-                 session=None):
+                 session=None, service_type='baremetal-introspection',
+                 interface=None, region_name=None):
         """Create a client.
 
         :param api_version: minimum API version that must be supported by
                             the server
         :param inspector_url: *Ironic Inspector* URL in form:
-            http://host:port[/ver],
+            http://host:port[/ver]. When session is provided, defaults to
+            service URL from the catalog. As a last resort
             defaults to ``http://<current host>:5050/v<MAJOR>``.
         :param auth_token: authentication token (deprecated, use session)
         :param session: existing keystone session
+        :param service_type: service type to use when looking up the URL
+        :param interface: interface type (public, internal, etc) to use when
+            looking up the URL
+        :param region_name: region name to use when looking up the URL
         """
-        self._base_url = (inspector_url or _DEFAULT_URL).rstrip('/')
+        self._base_url = inspector_url or _DEFAULT_URL
         self._auth_token = auth_token
 
         if session is None:
@@ -110,7 +117,18 @@ class BaseClient(object):
             self._session = ks_session.Session(auth)
         else:
             self._session = session
+            if not inspector_url:
+                try:
+                    self._base_url = session.get_endpoint(
+                        service_type=service_type,
+                        interface=interface,
+                        region_name=region_name) or _DEFAULT_URL
+                except ks_exc.EndpointNotFound:
+                    LOG.warning(_LW('Endpoint for service %s was not found, '
+                                    'falling back to local host on port 5050'),
+                                service_type)
 
+        self._base_url = self._base_url.rstrip('/')
         self._api_version = self._check_api_version(api_version)
         self._version_str = '%d.%d' % self._api_version
         ver_postfix = '/v%d' % self._api_version[0]

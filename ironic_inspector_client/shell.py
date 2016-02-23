@@ -43,7 +43,9 @@ def make_client(instance):
     return ironic_inspector_client.ClientV1(
         inspector_url=instance.get_configuration().get('inspector_url'),
         session=instance.session,
-        api_version=instance._api_version[API_NAME])
+        api_version=instance._api_version[API_NAME],
+        interface=instance._interface,
+        region_name=instance._region_name)
 
 
 def build_option_parser(parser):
