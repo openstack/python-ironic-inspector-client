@@ -23,7 +23,7 @@ from ironic_inspector_client.common.i18n import _
 
 
 DEFAULT_API_VERSION = (1, 0)
-MAX_API_VERSION = (1, 3)
+MAX_API_VERSION = (1, 4)
 
 # using huge timeout by default, as precise timeout should be set in
 # ironic-inspector settings
@@ -73,6 +73,23 @@ class ClientV1(http.BaseClient):
         params = {'new_ipmi_username': new_ipmi_username,
                   'new_ipmi_password': new_ipmi_password}
         self.request('post', '/introspection/%s' % uuid, params=params)
+
+    def reprocess(self, uuid):
+        """Reprocess stored introspection data.
+
+        :param uuid: node UUID.
+        :raises: ClientError on error reported from the server.
+        :raises: VersionNotSupported if requested api_version is not supported.
+        :raises: *requests* library exception on connection problems.
+        :raises: TypeError if uuid is not a string.
+        """
+        if not isinstance(uuid, six.string_types):
+            raise TypeError(_("Expected string for uuid argument, got"
+                              " %r instead") % uuid)
+
+        return self.request('post',
+                            '/introspection/%s/data/unprocessed' %
+                            uuid)
 
     def get_status(self, uuid):
         """Get introspection status for a node.

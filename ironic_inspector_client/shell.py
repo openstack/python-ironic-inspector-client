@@ -104,6 +104,19 @@ class StartCommand(lister.Lister):
         return self.COLUMNS, result
 
 
+class ReprocessCommand(command.Command):
+    """Reprocess stored introspection data"""
+
+    def get_parser(self, prog_name):
+        parser = super(ReprocessCommand, self).get_parser(prog_name)
+        parser.add_argument('uuid', help='baremetal node UUID')
+        return parser
+
+    def take_action(self, parsed_args):
+        client = self.app.client_manager.baremetal_introspection
+        client.reprocess(parsed_args.uuid)
+
+
 class StatusCommand(show.ShowOne):
     """Get introspection status."""
 

@@ -1,0 +1,4 @@
+---
+features:
+  - Introduced command "openstack baremetal introspection reprocess <UUID>"
+    to reprocess stored introspection data

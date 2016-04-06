@@ -140,6 +140,21 @@ CLI::
 
   $ openstack baremetal introspection abort UUID
 
+Reprocess stored introspection data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``client.reprocess(uuid)``
+
+* ``uuid`` - Ironic node UUID.
+
+CLI::
+
+    $ openstack baremetal introspection reprocess UUID
+
+.. note::
+   This feature requires Swift store to be enabled for **Ironic Inspector**
+   by setting ``[processing]store_data`` configuration option to ``swift``.
+
 Introspection Rules API
 ~~~~~~~~~~~~~~~~~~~~~~~
 

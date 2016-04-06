@@ -102,6 +102,20 @@ class TestIntrospect(BaseTest):
 
 
 @mock.patch.object(http.BaseClient, 'request')
+class TestReprocess(BaseTest):
+    def test(self, mock_req):
+        self.get_client().reprocess(self.uuid)
+        mock_req.assert_called_once_with(
+            'post',
+            '/introspection/%s/data/unprocessed' % self.uuid
+        )
+
+    def test_invalid_input(self, mock_req):
+        self.assertRaises(TypeError, self.get_client().reprocess, 42)
+        self.assertFalse(mock_req.called)
+
+
+@mock.patch.object(http.BaseClient, 'request')
 class TestGetStatus(BaseTest):
     def test(self, mock_req):
         mock_req.return_value.json.return_value = 'json'

@@ -104,6 +104,21 @@ class TestIntrospect(BaseTest):
                  for uuid in uuids]
         self.assertEqual(calls, self.client.introspect.call_args_list)
 
+    def test_reprocess(self):
+        node = 'uuid1'
+        arglist = [node]
+        verifylist = [('uuid', node)]
+        response_mock = mock.Mock(status_code=202, content=b'')
+        self.client.reprocess.return_value = response_mock
+
+        cmd = shell.ReprocessCommand(self.app, None)
+
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        result = cmd.take_action(parsed_args)
+
+        self.client.reprocess.assert_called_once_with(node)
+        self.assertIs(None, result)
+
     def test_wait(self):
         nodes = ['uuid1', 'uuid2', 'uuid3']
         arglist = ['--wait'] + nodes

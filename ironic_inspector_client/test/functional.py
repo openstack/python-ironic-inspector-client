@@ -14,9 +14,12 @@
 import eventlet
 eventlet.monkey_patch()
 
+import json
+import mock
 import requests
 import unittest
 
+from ironic_inspector.common import swift
 from ironic_inspector.test import functional
 
 import ironic_inspector_client as client
@@ -26,6 +29,7 @@ class TestV1PythonAPI(functional.Base):
     def setUp(self):
         super(TestV1PythonAPI, self).setUp()
         self.client = client.ClientV1()
+        functional.cfg.CONF.set_override('store_data', '', 'processing')
 
     def test_introspect_get_status(self):
         self.client.introspect(self.uuid)
@@ -46,6 +50,53 @@ class TestV1PythonAPI(functional.Base):
 
         status = self.client.get_status(self.uuid)
         self.assertEqual({'finished': True, 'error': None}, status)
+
+    @mock.patch.object(swift, 'store_introspection_data', autospec=True)
+    @mock.patch.object(swift, 'get_introspection_data', autospec=True)
+    def test_reprocess_stored_introspection_data(self, get_mock,
+                                                 store_mock):
+        functional.cfg.CONF.set_override('store_data', 'swift', 'processing')
+        port_create_call = mock.call(node_uuid=self.uuid,
+                                     address='11:22:33:44:55:66')
+        get_mock.return_value = json.dumps(self.data)
+
+        # assert reprocessing doesn't work before introspection
+        self.assertRaises(client.ClientError, self.client.reprocess,
+                          self.uuid)
+
+        self.client.introspect(self.uuid)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
+                                                              'reboot')
+        status = self.client.get_status(self.uuid)
+        self.assertEqual({'finished': False, 'error': None},
+                         status)
+
+        res = self.call_continue(self.data)
+        self.assertEqual({'uuid': self.uuid}, res)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+
+        status = self.client.get_status(self.uuid)
+        self.assertEqual({'finished': True, 'error': None},
+                         status)
+        self.cli.port.create.assert_has_calls([port_create_call],
+                                              any_order=True)
+        self.assertFalse(get_mock.called)
+        self.assertTrue(store_mock.called)
+
+        res = self.client.reprocess(self.uuid)
+        self.assertEqual(202, res.status_code)
+        self.assertEqual('', res.text)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+        self.assertEqual({'finished': True, 'error': None},
+                         status)
+
+        self.cli.port.create.assert_has_calls([port_create_call,
+                                               port_create_call],
+                                              any_order=True)
+        self.assertTrue(get_mock.called)
+        # incoming, processing, reapplying data
+        self.assertEqual(3, store_mock.call_count)
 
     def test_abort_introspection(self):
         # assert abort doesn't work before introspect request
