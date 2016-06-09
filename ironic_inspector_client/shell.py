@@ -144,8 +144,10 @@ class AbortCommand(command.Command):
         client.abort(parsed_args.uuid)
 
 
-class RuleImportCommand(command.Command):
+class RuleImportCommand(lister.Lister):
     """Import one or several introspection rules from a json file."""
+
+    COLUMNS = ("UUID", "Description")
 
     def get_parser(self, prog_name):
         parser = super(RuleImportCommand, self).get_parser(prog_name)
@@ -159,8 +161,12 @@ class RuleImportCommand(command.Command):
             if not isinstance(rules, list):
                 rules = [rules]
         client = self.app.client_manager.baremetal_introspection
+        result = []
         for rule in rules:
-            client.rules.from_json(rule)
+            result.append(client.rules.from_json(rule))
+        result = [tuple(rule.get(col.lower()) for col in self.COLUMNS)
+                  for rule in result]
+        return self.COLUMNS, result
 
 
 class RuleListCommand(lister.Lister):
