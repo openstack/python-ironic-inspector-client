@@ -23,7 +23,7 @@ from ironic_inspector_client.common.i18n import _
 
 
 DEFAULT_API_VERSION = (1, 0)
-MAX_API_VERSION = (1, 4)
+MAX_API_VERSION = (1, 6)
 
 # using huge timeout by default, as precise timeout should be set in
 # ironic-inspector settings

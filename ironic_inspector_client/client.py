@@ -17,8 +17,8 @@ from ironic_inspector_client.common import http
 from ironic_inspector_client import v1
 
 
-DEFAULT_API_VERSION = (1, 0)
-MAX_API_VERSION = (1, 5)
+DEFAULT_API_VERSION = v1.DEFAULT_API_VERSION
+MAX_API_VERSION = v1.MAX_API_VERSION
 
 
 # Reimport for backward compatibility
