@@ -16,9 +16,9 @@
 import json
 import logging
 
-from keystoneclient.auth import token_endpoint
-from keystoneclient import exceptions as ks_exc
-from keystoneclient import session as ks_session
+from keystoneauth1 import exceptions as ks_exc
+from keystoneauth1 import session as ks_session
+from keystoneauth1 import token_endpoint
 from oslo_utils import netutils
 import requests
 import six

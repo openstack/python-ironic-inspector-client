@@ -14,7 +14,7 @@
 import types
 import unittest
 
-from keystoneclient import session as ks_session
+from keystoneauth1 import session as ks_session
 import mock
 from oslo_utils import uuidutils
 

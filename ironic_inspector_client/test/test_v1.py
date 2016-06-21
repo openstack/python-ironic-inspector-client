@@ -13,7 +13,7 @@
 
 import unittest
 
-from keystoneclient import session
+from keystoneauth1 import session
 import mock
 from oslo_utils import netutils
 from oslo_utils import uuidutils
