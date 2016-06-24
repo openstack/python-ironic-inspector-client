@@ -14,7 +14,7 @@
 import sys
 
 import mock
-from openstackclient.tests import utils
+from osc_lib.tests import utils
 import six
 import tempfile
 
