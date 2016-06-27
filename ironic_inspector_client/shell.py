@@ -22,7 +22,7 @@ import sys
 from cliff import command
 from cliff import lister
 from cliff import show
-from openstackclient.common import utils
+from osc_lib import utils
 
 import ironic_inspector_client
 
