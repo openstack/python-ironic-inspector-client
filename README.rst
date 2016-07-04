@@ -41,7 +41,7 @@ Starting with version 2.1.0 **Ironic Inspector** supports optional API
 versioning. Version is a tuple (X, Y), where X is always 1 for now.
 
 The server has maximum and minimum supported versions. If no version is
-requested, the server assumes (1, 0).
+requested, the server assumes the maximum it's supported.
 
 Two constants are exposed for convenience:
 
