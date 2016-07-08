@@ -84,10 +84,17 @@ class TestIntrospect(BaseTest):
     def test(self, mock_req):
         self.get_client().introspect(self.uuid)
         mock_req.assert_called_once_with(
-            'post', '/introspection/%s' % self.uuid)
+            'post', '/introspection/%s' % self.uuid,
+            params={})
 
     def test_invalid_input(self, mock_req):
         self.assertRaises(TypeError, self.get_client().introspect, 42)
+
+    def test_manage_boot(self, mock_req):
+        self.get_client().introspect(self.uuid, manage_boot=False)
+        mock_req.assert_called_once_with(
+            'post', '/introspection/%s' % self.uuid,
+            params={'manage_boot': '0'})
 
 
 @mock.patch.object(http.BaseClient, 'request')

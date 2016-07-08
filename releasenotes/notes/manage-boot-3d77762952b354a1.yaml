@@ -1,0 +1,4 @@
+---
+features:
+  - Adds Python library support for passing ``manage_boot``
+    to the introspection API.

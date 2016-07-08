@@ -26,7 +26,7 @@ from ironic_inspector_client.common.i18n import _
 DEFAULT_API_VERSION = (1, 0)
 """Server API version used by default."""
 
-MAX_API_VERSION = (1, 8)
+MAX_API_VERSION = (1, 13)
 """Maximum API version this client was designed to work with.
 
 This does not mean that other versions won't work at all - the server might
@@ -88,10 +88,13 @@ class ClientV1(http.BaseClient):
         super(ClientV1, self).__init__(**kwargs)
         self.rules = RulesAPI(self.request)
 
-    def introspect(self, uuid):
+    def introspect(self, uuid, manage_boot=None):
         """Start introspection for a node.
 
         :param uuid: node UUID or name
+        :param manage_boot: whether to manage boot during introspection of
+            this node. If it is None (the default), then this argument is not
+            passed to API and the server default is used instead.
         :raises: :py:class:`ironic_inspector_client.ClientError` on error
             reported from a server
         :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
@@ -102,7 +105,11 @@ class ClientV1(http.BaseClient):
             raise TypeError(
                 _("Expected string for uuid argument, got %r") % uuid)
 
-        self.request('post', '/introspection/%s' % uuid)
+        params = {}
+        if manage_boot is not None:
+            params['manage_boot'] = str(int(manage_boot))
+
+        self.request('post', '/introspection/%s' % uuid, params=params)
 
     def reprocess(self, uuid):
         """Reprocess stored introspection data.
