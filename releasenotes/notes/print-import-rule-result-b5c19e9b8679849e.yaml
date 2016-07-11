@@ -1,0 +1,4 @@
+---
+upgrade:
+  - command `openstack baremetal introspection rule import` prints
+    created rules to stdout.

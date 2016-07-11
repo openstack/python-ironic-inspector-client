@@ -181,10 +181,15 @@ class TestRules(BaseTest):
         arglist = [f.name]
         verifylist = [('file', f.name)]
 
+        self.rules_api.from_json.return_value = {
+            'uuid': '1', 'description': 'd', 'links': []}
+
         cmd = shell.RuleImportCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
-        cmd.take_action(parsed_args)
+        cols, values = cmd.take_action(parsed_args)
 
+        self.assertEqual(('UUID', 'Description'), cols)
+        self.assertEqual([('1', 'd')], values)
         self.rules_api.from_json.assert_called_once_with({'foo': 'bar'})
 
     def test_import_multiple(self):
@@ -196,10 +201,17 @@ class TestRules(BaseTest):
         arglist = [f.name]
         verifylist = [('file', f.name)]
 
+        self.rules_api.from_json.side_effect = iter([
+            {'uuid': '1', 'description': 'd1', 'links': []},
+            {'uuid': '2', 'description': 'd2', 'links': []}
+        ])
+
         cmd = shell.RuleImportCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
-        cmd.take_action(parsed_args)
+        cols, values = cmd.take_action(parsed_args)
 
+        self.assertEqual(('UUID', 'Description'), cols)
+        self.assertEqual([('1', 'd1'), ('2', 'd2')], values)
         self.rules_api.from_json.assert_any_call({'foo': 'bar'})
         self.rules_api.from_json.assert_any_call({'answer': 42})
 
