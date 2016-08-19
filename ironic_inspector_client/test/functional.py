@@ -16,7 +16,6 @@ eventlet.monkey_patch()
 
 import json
 import mock
-import requests
 import unittest
 
 from ironic_inspector.common import swift
@@ -122,7 +121,7 @@ class TestV1PythonAPI(functional.Base):
                           'operator'}, status)
 
         # assert continue doesn't work after abort
-        self.assertRaises(requests.HTTPError, self.call_continue, self.data)
+        self.call_continue(self.data, expect_error=400)
 
     def test_setup_ipmi(self):
         self.node.provision_state = 'enroll'
