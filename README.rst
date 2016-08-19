@@ -227,29 +227,6 @@ CLI::
 
     $ openstack baremetal introspection rule delete <UUID>
 
-Shortcut Functions
-~~~~~~~~~~~~~~~~~~
-
-The following functions are available for simplified access to the most common
-functionality:
-
-* Starting introspection::
-
-    ironic_inspector_client.introspect(uuid[, new_ipmi_password[, new_ipmi_username]][, base_url][, api_version] **)
-
-* Getting introspection status::
-
-    ironic_inspector_client.get_status(uuid[, base_url][, api_version] **)
-
-* Getting API versions supported by a server::
-
-    ironic_inspector_client.server_api_versions([base_url] **)
-
-Here ``base_url`` argument is the same as ``inspector_url`` argument
-to the ``ClientV1`` constructor. Keyword arguments are passed to the client
-constructor intact. The first 2 functions also accept deprecated ``auth_token``
-argument, which should not be used.
-
 Using names instead of UUID
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

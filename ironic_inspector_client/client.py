@@ -13,9 +13,14 @@
 
 """Shorthand client functions using V1 API."""
 
+import logging
+
 from ironic_inspector_client.common import http
+from ironic_inspector_client.common.i18n import _LW
 from ironic_inspector_client import v1
 
+
+LOG = logging.getLogger(__name__)
 
 DEFAULT_API_VERSION = v1.DEFAULT_API_VERSION
 MAX_API_VERSION = v1.MAX_API_VERSION
@@ -30,6 +35,8 @@ def introspect(uuid, base_url=None, auth_token=None,
                new_ipmi_password=None, new_ipmi_username=None,
                api_version=DEFAULT_API_VERSION, session=None, **kwargs):
     """Start introspection for a node.
+
+    This function is deprecated. Please use ClientV1.introspect.
 
     :param uuid: node uuid
     :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
@@ -48,6 +55,8 @@ def introspect(uuid, base_url=None, auth_token=None,
     :raises: VersionNotSupported if requested api_version is not supported
     :raises: *requests* library exception on connection problems.
     """
+    LOG.warning(_LW('The "introspect" function is deprecated, please use '
+                    'ClientV1.introspect method instead'))
     c = v1.ClientV1(api_version=api_version, auth_token=auth_token,
                     inspector_url=base_url, session=session, **kwargs)
     return c.introspect(uuid, new_ipmi_username=new_ipmi_username,
@@ -57,6 +66,8 @@ def introspect(uuid, base_url=None, auth_token=None,
 def get_status(uuid, base_url=None, auth_token=None,
                api_version=DEFAULT_API_VERSION, session=None, **kwargs):
     """Get introspection status for a node.
+
+    This function is deprecated. Please use ClientV1.get_status.
 
     New in Ironic Inspector version 1.0.0.
     :param uuid: node uuid.
@@ -71,6 +82,8 @@ def get_status(uuid, base_url=None, auth_token=None,
     :raises: VersionNotSupported if requested api_version is not supported
     :raises: *requests* library exception on connection problems.
     """
+    LOG.warning(_LW('The "get_status" function is deprecated, please use '
+                    'ClientV1.get_status method instead'))
     c = v1.ClientV1(api_version=api_version, auth_token=auth_token,
                     inspector_url=base_url, session=session, **kwargs)
     return c.get_status(uuid)
@@ -78,6 +91,8 @@ def get_status(uuid, base_url=None, auth_token=None,
 
 def server_api_versions(base_url=None, session=None, **kwargs):
     """Get minimum and maximum supported API versions from a server.
+
+    This function is deprecated. Please use ClientV1.server_api_versions.
 
     :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
@@ -88,6 +103,8 @@ def server_api_versions(base_url=None, session=None, **kwargs):
     :raises: *requests* library exception on connection problems.
     :raises: ValueError if returned version cannot be parsed
     """
+    LOG.warning(_LW('The "server_api_versions" function is deprecated, '
+                    'please use ClientV1.server_api_versions method instead'))
     c = http.BaseClient(1, inspector_url=base_url, session=session, **kwargs)
     return c.server_api_versions()
 

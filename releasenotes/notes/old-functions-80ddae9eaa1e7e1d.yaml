@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    The following functions are deprecated in favor of ``ClientV1`` methods:
+
+    * ``ironic_inspector_client.introspect``
+    * ``ironic_inspector_client.get_status``
+    * ``ironic_inspector_client.server_api_versions``
