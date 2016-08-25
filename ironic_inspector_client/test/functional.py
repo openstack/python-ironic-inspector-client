@@ -248,4 +248,4 @@ class TestSimplePythonAPI(functional.Base):
 
 if __name__ == '__main__':
     with functional.mocked_server():
-        unittest.main()
+        unittest.main(verbosity=2)
