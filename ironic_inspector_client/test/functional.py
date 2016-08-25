@@ -50,6 +50,31 @@ class TestV1PythonAPI(functional.Base):
         status = self.client.get_status(self.uuid)
         self.assertEqual({'finished': True, 'error': None}, status)
 
+    def test_wait_for_finish(self):
+        shared = [0]  # mutable structure to hold number of retries
+
+        def fake_waiter(delay):
+            shared[0] += 1
+            if shared[0] == 2:
+                # On the second wait simulate data arriving
+                res = self.call_continue(self.data)
+                self.assertEqual({'uuid': self.uuid}, res)
+            elif shared[0] > 2:
+                # Just wait afterwards
+                eventlet.greenthread.sleep(delay)
+
+        self.client.introspect(self.uuid)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+
+        status = self.client.get_status(self.uuid)
+        self.assertEqual({'finished': False, 'error': None}, status)
+
+        self.client.wait_for_finish([self.uuid], sleep_function=fake_waiter,
+                                    retry_interval=functional.DEFAULT_SLEEP)
+
+        status = self.client.get_status(self.uuid)
+        self.assertEqual({'finished': True, 'error': None}, status)
+
     @mock.patch.object(swift, 'store_introspection_data', autospec=True)
     @mock.patch.object(swift, 'get_introspection_data', autospec=True)
     def test_reprocess_stored_introspection_data(self, get_mock,
