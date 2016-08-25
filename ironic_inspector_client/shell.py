@@ -19,9 +19,7 @@ import json
 import logging
 import sys
 
-from cliff import command
-from cliff import lister
-from cliff import show
+from osc_lib.command import command
 from osc_lib import utils
 
 import ironic_inspector_client
@@ -61,7 +59,7 @@ def build_option_parser(parser):
     return parser
 
 
-class StartCommand(lister.Lister):
+class StartCommand(command.Lister):
     """Start the introspection."""
 
     COLUMNS = ('UUID', 'Error')
@@ -117,7 +115,7 @@ class ReprocessCommand(command.Command):
         client.reprocess(parsed_args.uuid)
 
 
-class StatusCommand(show.ShowOne):
+class StatusCommand(command.ShowOne):
     """Get introspection status."""
 
     def get_parser(self, prog_name):
@@ -144,7 +142,7 @@ class AbortCommand(command.Command):
         client.abort(parsed_args.uuid)
 
 
-class RuleImportCommand(lister.Lister):
+class RuleImportCommand(command.Lister):
     """Import one or several introspection rules from a json file."""
 
     COLUMNS = ("UUID", "Description")
@@ -169,7 +167,7 @@ class RuleImportCommand(lister.Lister):
         return self.COLUMNS, result
 
 
-class RuleListCommand(lister.Lister):
+class RuleListCommand(command.Lister):
     """List all introspection rules."""
 
     COLUMNS = ("UUID", "Description")
@@ -182,7 +180,7 @@ class RuleListCommand(lister.Lister):
         return self.COLUMNS, rules
 
 
-class RuleShowCommand(show.ShowOne):
+class RuleShowCommand(command.ShowOne):
     """Show an introspection rule."""
 
     def get_parser(self, prog_name):
