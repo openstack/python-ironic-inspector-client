@@ -117,7 +117,7 @@ class TestIntrospect(BaseTest):
         result = cmd.take_action(parsed_args)
 
         self.client.reprocess.assert_called_once_with(node)
-        self.assertIs(None, result)
+        self.assertIsNone(result)
 
     def test_wait(self):
         nodes = ['uuid1', 'uuid2', 'uuid3']
@@ -153,7 +153,7 @@ class TestIntrospect(BaseTest):
         result = cmd.take_action(parsed_args)
 
         self.client.abort.assert_called_once_with(node)
-        self.assertIs(None, result)
+        self.assertIsNone(result)
 
 
 class TestGetStatus(BaseTest):
