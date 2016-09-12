@@ -70,6 +70,7 @@ def get_status(uuid, base_url=None, auth_token=None,
     This function is deprecated. Please use ClientV1.get_status.
 
     New in Ironic Inspector version 1.0.0.
+
     :param uuid: node uuid.
     :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
