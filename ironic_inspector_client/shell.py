@@ -16,7 +16,6 @@
 from __future__ import print_function
 
 import json
-import logging
 import sys
 
 from osc_lib.command import command
@@ -25,7 +24,6 @@ from osc_lib import utils
 import ironic_inspector_client
 
 
-LOG = logging.getLogger('ironic_inspector.shell')
 API_NAME = 'baremetal_introspection'
 API_VERSION_OPTION = 'inspector_api_version'
 DEFAULT_API_VERSION = '1'
