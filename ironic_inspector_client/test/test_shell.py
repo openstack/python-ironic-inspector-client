@@ -26,7 +26,7 @@ class BaseTest(utils.TestCommand):
     def setUp(self):
         super(BaseTest, self).setUp()
         self.client = mock.Mock(spec=v1.ClientV1)
-        self.rules_api = mock.Mock(spec=v1._RulesAPI)
+        self.rules_api = mock.Mock(spec=v1.RulesAPI)
         self.client.rules = self.rules_api
         self.app.client_manager.baremetal_introspection = self.client
 

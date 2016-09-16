@@ -11,7 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Shorthand client functions using V1 API."""
+"""Shorthand client functions using V1 API.
+
+All these functions are deprecated, and
+:py:class:`ironic_inspector_client.v1.ClientV1` should be used instead.
+"""
 
 import logging
 
@@ -26,17 +30,12 @@ DEFAULT_API_VERSION = v1.DEFAULT_API_VERSION
 MAX_API_VERSION = v1.MAX_API_VERSION
 
 
-# Reimport for backward compatibility
-ClientError = http.ClientError
-VersionNotSupported = http.VersionNotSupported
-
-
 def introspect(uuid, base_url=None, auth_token=None,
                new_ipmi_password=None, new_ipmi_username=None,
                api_version=DEFAULT_API_VERSION, session=None, **kwargs):
     """Start introspection for a node.
 
-    This function is deprecated. Please use ClientV1.introspect.
+    This function is deprecated. Please use :py:meth:`.ClientV1.introspect`.
 
     :param uuid: node uuid
     :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
@@ -67,7 +66,7 @@ def get_status(uuid, base_url=None, auth_token=None,
                api_version=DEFAULT_API_VERSION, session=None, **kwargs):
     """Get introspection status for a node.
 
-    This function is deprecated. Please use ClientV1.get_status.
+    This function is deprecated. Please use :py:meth:`.ClientV1.get_status`.
 
     New in Ironic Inspector version 1.0.0.
 
@@ -93,7 +92,8 @@ def get_status(uuid, base_url=None, auth_token=None,
 def server_api_versions(base_url=None, session=None, **kwargs):
     """Get minimum and maximum supported API versions from a server.
 
-    This function is deprecated. Please use ClientV1.server_api_versions.
+    This function is deprecated.
+    Please use :py:meth:`.ClientV1.server_api_versions`.
 
     :param base_url: *Ironic Inspector* URL in form: http://host:port[/ver],
                      defaults to ``http://<current host>:5050/v1``.
@@ -110,6 +110,5 @@ def server_api_versions(base_url=None, session=None, **kwargs):
     return c.server_api_versions()
 
 
-__all__ = ['DEFAULT_API_VERSION', 'MAX_API_VERSION', 'ClientError',
-           'VersionNotSupported', 'introspect', 'get_status',
-           'server_api_versions']
+__all__ = ['DEFAULT_API_VERSION', 'MAX_API_VERSION',
+           'introspect', 'get_status', 'server_api_versions']
