@@ -13,3 +13,4 @@
 import pbr.version
 
 version_info = pbr.version.VersionInfo('python-ironic-inspector-client')
+"""Installed package version."""

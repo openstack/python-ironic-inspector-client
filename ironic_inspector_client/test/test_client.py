@@ -114,7 +114,9 @@ class TestExposedAPI(unittest.TestCase):
                    if not x.startswith('__') and
                    not isinstance(getattr(ironic_inspector_client, x),
                                   types.ModuleType)}
-        self.assertEqual(set(client.__all__) | {'ClientV1'}, exposed)
+        self.assertEqual(set(client.__all__) |
+                         {'ClientV1', 'ClientError', 'VersionNotSupported'},
+                         exposed)
 
     def test_client_exposes_everything(self):
         actual = {x for x in dir(client)

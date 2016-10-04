@@ -13,3 +13,4 @@
 
 from .client import *  # noqa
 from .v1 import ClientV1  # noqa
+from .common.http import ClientError, VersionNotSupported  # noqa

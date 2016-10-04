@@ -70,7 +70,12 @@ class ClientError(requests.HTTPError):
 
 
 class VersionNotSupported(Exception):
-    """Denotes that requested API versions is not supported by the server."""
+    """Denotes that requested API versions is not supported by the server.
+
+    :ivar expected: requested version.
+    :ivar supported: sequence with two items: minimum and maximum actually
+        supported versions.
+    """
     def __init__(self, expected, supported):
         msg = (_('Version %(expected)s is not supported by the server, '
                  'supported range is %(supported)s') %
