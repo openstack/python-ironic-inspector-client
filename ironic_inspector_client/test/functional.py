@@ -26,6 +26,7 @@ from ironic_inspector.test import functional
 from oslo_concurrency import processutils
 
 import ironic_inspector_client as client
+from ironic_inspector_client.common import http
 
 
 class TestV1PythonAPI(functional.Base):
@@ -41,7 +42,7 @@ class TestV1PythonAPI(functional.Base):
                                                               'reboot')
 
         status = self.client.get_status(self.uuid)
-        self.assertEqual({'finished': False, 'error': None}, status)
+        self.check_status(status, finished=False)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
@@ -52,7 +53,7 @@ class TestV1PythonAPI(functional.Base):
             node_uuid=self.uuid, address='11:22:33:44:55:66')
 
         status = self.client.get_status(self.uuid)
-        self.assertEqual({'finished': True, 'error': None}, status)
+        self.check_status(status, finished=True)
 
     def test_wait_for_finish(self):
         shared = [0]  # mutable structure to hold number of retries
@@ -71,13 +72,13 @@ class TestV1PythonAPI(functional.Base):
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
         status = self.client.get_status(self.uuid)
-        self.assertEqual({'finished': False, 'error': None}, status)
+        self.check_status(status, finished=False)
 
         self.client.wait_for_finish([self.uuid], sleep_function=fake_waiter,
                                     retry_interval=functional.DEFAULT_SLEEP)
 
         status = self.client.get_status(self.uuid)
-        self.assertEqual({'finished': True, 'error': None}, status)
+        self.check_status(status, finished=True)
 
     @mock.patch.object(swift, 'store_introspection_data', autospec=True)
     @mock.patch.object(swift, 'get_introspection_data', autospec=True)
@@ -97,16 +98,14 @@ class TestV1PythonAPI(functional.Base):
         self.cli.node.set_power_state.assert_called_once_with(self.uuid,
                                                               'reboot')
         status = self.client.get_status(self.uuid)
-        self.assertEqual({'finished': False, 'error': None},
-                         status)
+        self.check_status(status, finished=False)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
         status = self.client.get_status(self.uuid)
-        self.assertEqual({'finished': True, 'error': None},
-                         status)
+        self.check_status(status, finished=True)
         self.cli.port.create.assert_has_calls([port_create_call],
                                               any_order=True)
         self.assertFalse(get_mock.called)
@@ -116,8 +115,7 @@ class TestV1PythonAPI(functional.Base):
         self.assertEqual(202, res.status_code)
         self.assertEqual('', res.text)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.assertEqual({'finished': True, 'error': None},
-                         status)
+        self.check_status(status, finished=True)
 
         self.cli.port.create.assert_has_calls([port_create_call,
                                                port_create_call],
@@ -137,7 +135,7 @@ class TestV1PythonAPI(functional.Base):
                                                               'reboot')
 
         status = self.client.get_status(self.uuid)
-        self.assertEqual({'finished': False, 'error': None}, status)
+        self.check_status(status, finished=False)
 
         res = self.client.abort(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
@@ -146,8 +144,7 @@ class TestV1PythonAPI(functional.Base):
         self.assertEqual('', res.text)
 
         status = self.client.get_status(self.uuid)
-        self.assertEqual({'finished': True, 'error': 'Canceled by '
-                          'operator'}, status)
+        self.check_status(status, finished=True, error='Canceled by operator')
 
         # assert continue doesn't work after abort
         self.call_continue(self.data, expect_error=400)
@@ -247,7 +244,7 @@ class TestSimplePythonAPI(functional.Base):
                                                               'reboot')
 
         status = client.get_status(self.uuid)
-        self.assertEqual({'finished': False, 'error': None}, status)
+        self.check_status(status, finished=False)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
@@ -258,7 +255,7 @@ class TestSimplePythonAPI(functional.Base):
             node_uuid=self.uuid, address='11:22:33:44:55:66')
 
         status = client.get_status(self.uuid)
-        self.assertEqual({'finished': True, 'error': None}, status)
+        self.check_status(status, finished=True)
 
     def test_api_versions(self):
         minv, maxv = client.server_api_versions()
@@ -327,7 +324,7 @@ class TestCLI(BaseCLITest):
                                                               'reboot')
 
         status = self.run_cli('status', self.uuid, parse_json=True)
-        self.assertEqual({'finished': False, 'error': None}, status)
+        self.check_status(status, finished=False)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
@@ -338,7 +335,7 @@ class TestCLI(BaseCLITest):
             node_uuid=self.uuid, address='11:22:33:44:55:66')
 
         status = self.run_cli('status', self.uuid, parse_json=True)
-        self.assertEqual({'finished': True, 'error': None}, status)
+        self.check_status(status, finished=True)
 
     def test_rules_api(self):
         res = self.run_cli('rule', 'list', parse_json=True)
@@ -381,4 +378,6 @@ class TestCLI(BaseCLITest):
 
 if __name__ == '__main__':
     with functional.mocked_server():
+        # Make links predictable
+        http._DEFAULT_URL = 'http://127.0.0.1:5050'
         unittest.main(verbosity=2)
