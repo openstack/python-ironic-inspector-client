@@ -1,7 +1,7 @@
 # The order of packages is significant, because pip processes them in the order
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
-coverage>=3.6 # Apache-2.0
+coverage>=4.0 # Apache-2.0
 doc8 # Apache-2.0
 fixtures>=3.0.0 # Apache-2.0/BSD
 hacking<0.12,>=0.11.0 # Apache-2.0
@@ -9,6 +9,6 @@ mock>=2.0 # BSD
 requests-mock>=1.1 # Apache-2.0
 sphinx!=1.3b1,<1.4,>=1.2.1 # BSD
 oslosphinx>=4.7.0 # Apache-2.0
-reno>=1.8.0 # Apache2
+reno>=1.8.0 # Apache-2.0
 oslo.concurrency>=3.8.0 # Apache-2.0
 oslotest>=1.10.0 # Apache-2.0
