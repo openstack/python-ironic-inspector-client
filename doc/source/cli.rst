@@ -44,6 +44,14 @@ Query introspection status
 
 * ``UUID`` - Ironic node UUID.
 
+Returns following information about a node introspection status:
+
+* ``error``: an error string or ``None``
+* ``finished``: ``True/False``
+* ``finished_at``: an ISO8601 timestamp or ``None`` if not finished
+* ``started_at``: an ISO8601 timestamp
+* ``uuid``: node UUID
+
 Retrieving introspection data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

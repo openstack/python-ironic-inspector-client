@@ -27,6 +27,7 @@ from oslo_concurrency import processutils
 
 import ironic_inspector_client as client
 from ironic_inspector_client.common import http
+from ironic_inspector_client import shell
 
 
 class TestV1PythonAPI(functional.Base):
@@ -304,6 +305,14 @@ class BaseCLITest(functional.Base):
 
 
 class TestCLI(BaseCLITest):
+    def _fake_status(self, **kwargs):
+        # to remove the hidden fields
+        hidden_status_items = shell.StatusCommand.hidden_status_items
+        fake_status = super(TestCLI, self)._fake_status(**kwargs)
+        fake_status = dict(item for item in fake_status.items()
+                           if item[0] not in hidden_status_items)
+        return fake_status
+
     def test_cli_negative(self):
         err = self.run_cli('start', expect_error=True)
         self.assertIn('too few arguments', err)

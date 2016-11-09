@@ -115,6 +115,7 @@ class ReprocessCommand(command.Command):
 
 class StatusCommand(command.ShowOne):
     """Get introspection status."""
+    hidden_status_items = {'links'}
 
     def get_parser(self, prog_name):
         parser = super(StatusCommand, self).get_parser(prog_name)
@@ -124,7 +125,8 @@ class StatusCommand(command.ShowOne):
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
         status = client.get_status(parsed_args.uuid)
-        return zip(*sorted(status.items()))
+        return zip(*sorted(item for item in status.items()
+                           if item[0] not in self.hidden_status_items))
 
 
 class AbortCommand(command.Command):

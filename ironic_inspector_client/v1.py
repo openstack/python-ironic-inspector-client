@@ -25,7 +25,7 @@ from ironic_inspector_client.common.i18n import _
 DEFAULT_API_VERSION = (1, 0)
 """Server API version used by default."""
 
-MAX_API_VERSION = (1, 6)
+MAX_API_VERSION = (1, 7)
 """Maximum API version this client was designed to work with.
 
 This does not mean that other versions won't work at all - the server might
@@ -138,8 +138,13 @@ class ClientV1(http.BaseClient):
         :raises: :py:class:`.VersionNotSupported` if requested api_version
             is not supported
         :raises: *requests* library exception on connection problems.
-        :return: dictionary with keys "finished" (True/False) and "error"
-                 (error string or None).
+        :return: dictionary with the keys:
+                 `error` an error string or None,
+                 `finished` True/False,
+                 `finished_at` an ISO8601 timestamp or None,
+                 `links` with a self-link URL,
+                 `started_at` an ISO8601 timestamp,
+                 `uuid` the node UUID
         """
         if not isinstance(uuid, six.string_types):
             raise TypeError(

@@ -1,0 +1,5 @@
+---
+features:
+  - |
+   the introspection status returns the ``error``, ``finished``,
+   ``finished_at``, ``links``, ``started_at`` and ``uuid`` fields
