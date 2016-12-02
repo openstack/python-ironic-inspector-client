@@ -1,6 +1,9 @@
 Ironic Inspector Client
 =======================
 
+.. image:: http://governance.openstack.org/badges/python-ironic-inspector-client.svg
+    :target: http://governance.openstack.org/reference/tags/index.html
+
 This is a client library and tool for `Ironic Inspector`_.
 
 * Free software: Apache license
