@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import six
 import unittest
 
 from keystoneauth1 import session
@@ -127,6 +128,41 @@ class TestGetStatus(BaseTest):
 
     def test_invalid_input(self, _):
         self.assertRaises(TypeError, self.get_client().get_status, 42)
+
+
+@mock.patch.object(http.BaseClient, 'request')
+class TestListStatuses(BaseTest):
+    def test_default(self, mock_req):
+        mock_req.return_value.json.return_value = {
+            'introspection': None
+        }
+        params = {
+            'marker': None,
+            'limit': None
+        }
+        self.get_client().list_statuses()
+        mock_req.assert_called_once_with('get', '/introspection',
+                                         params=params)
+
+    def test_nondefault(self, mock_req):
+        mock_req.return_value.json.return_value = {
+            'introspection': None
+        }
+        params = {
+            'marker': 'uuid',
+            'limit': 42
+        }
+        self.get_client().list_statuses(**params)
+        mock_req.assert_called_once_with('get', '/introspection',
+                                         params=params)
+
+    def test_invalid_marker(self, _):
+        six.assertRaisesRegex(self, TypeError, 'Expected a string value.*',
+                              self.get_client().list_statuses, marker=42)
+
+    def test_invalid_limit(self, _):
+        six.assertRaisesRegex(self, TypeError, 'Expected an integer.*',
+                              self.get_client().list_statuses, limit='42')
 
 
 @mock.patch.object(ironic_inspector_client.ClientV1, 'get_status',

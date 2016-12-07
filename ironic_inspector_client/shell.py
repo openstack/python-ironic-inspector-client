@@ -117,6 +117,18 @@ class StatusCommand(command.ShowOne):
     """Get introspection status."""
     hidden_status_items = {'links'}
 
+    @classmethod
+    def status_attributes(cls, client_item):
+        """Get status attributes from an API client dict.
+
+        Filters the status fields according to the cls.hidden_status_items
+        :param client_item: an item returned from either the get_status or the
+                            list_statuses client method
+        :return: introspection status as a list of name, value pairs
+        """
+        return [item for item in client_item.items()
+                if item[0] not in cls.hidden_status_items]
+
     def get_parser(self, prog_name):
         parser = super(StatusCommand, self).get_parser(prog_name)
         parser.add_argument('uuid', help='baremetal node UUID')
@@ -125,8 +137,41 @@ class StatusCommand(command.ShowOne):
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
         status = client.get_status(parsed_args.uuid)
-        return zip(*sorted(item for item in status.items()
-                           if item[0] not in self.hidden_status_items))
+        return zip(*sorted(self.status_attributes(status)))
+
+
+class StatusListCommand(command.Lister):
+    """List introspection statuses"""
+
+    COLUMNS = ('UUID', 'Started at', 'Finished at', 'Error')
+
+    @classmethod
+    def status_row(cls, client_item):
+        """Get a row from a client_item.
+
+        The row columns are filtered&sorted according to cls.COLUMNS.
+
+        :param client_item: an item returned from either the get_status or the
+                            list_statuses client method.
+        :return: a list of client_item attributes as the row
+        """
+        status = dict(StatusCommand.status_attributes(client_item))
+        return utils.get_dict_properties(status, cls.COLUMNS)
+
+    def get_parser(self, prog_name):
+        parser = super(StatusListCommand, self).get_parser(prog_name)
+        parser.add_argument('--marker', help='UUID of the last item on the '
+                                             'previous page', default=None)
+        parser.add_argument('--limit', help='the amount of items to return',
+                            type=int, default=None)
+        return parser
+
+    def take_action(self, parsed_args):
+        client = self.app.client_manager.baremetal_introspection
+        statuses = client.list_statuses(marker=parsed_args.marker,
+                                        limit=parsed_args.limit)
+        rows = [self.status_row(status) for status in statuses]
+        return self.COLUMNS, rows
 
 
 class AbortCommand(command.Command):

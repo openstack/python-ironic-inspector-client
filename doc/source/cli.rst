@@ -52,6 +52,29 @@ Returns following information about a node introspection status:
 * ``started_at``: an ISO8601 timestamp
 * ``uuid``: node UUID
 
+List introspection statuses
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This command supports pagination.
+
+::
+
+    $ openstack baremetal introspection list [--marker] [--limit]
+
+* ``--marker`` the last item on the previous page, a UUID
+* ``--limit`` the amount of items to list, an integer, 50 by default
+
+Shows a table with the following columns:
+
+* ``Error``: an error string or ``None``
+* ``Finished at``: an ISO8601 timestamp or ``None`` if not finished
+* ``Started at``: and ISO8601 timestamp
+* ``UUID``: node UUID
+
+.. note::
+    The server orders the introspection status items according to the
+    ``Started at`` column, newer items first.
+
 Retrieving introspection data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

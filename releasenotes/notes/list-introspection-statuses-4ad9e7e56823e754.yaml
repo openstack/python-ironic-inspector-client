@@ -1,0 +1,7 @@
+---
+features:
+  - |
+   Add support for listing introspection statuses both for the API and the CLI
+upgrade:
+  - |
+   Service max API version bumped to 1.8

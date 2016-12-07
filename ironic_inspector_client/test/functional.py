@@ -36,6 +36,10 @@ class TestV1PythonAPI(functional.Base):
         self.client = client.ClientV1()
         functional.cfg.CONF.set_override('store_data', '', 'processing')
 
+    def my_status_index(self, statuses):
+        my_status = self._fake_status()
+        return statuses.index(my_status)
+
     def test_introspect_get_status(self):
         self.client.introspect(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
@@ -55,6 +59,28 @@ class TestV1PythonAPI(functional.Base):
 
         status = self.client.get_status(self.uuid)
         self.check_status(status, finished=True)
+
+    def test_introspect_list_statuses(self):
+        self.client.introspect(self.uuid)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
+                                                              'reboot')
+
+        statuses = self.client.list_statuses()
+        my_status = statuses[self.my_status_index(statuses)]
+        self.check_status(my_status, finished=False)
+
+        res = self.call_continue(self.data)
+        self.assertEqual({'uuid': self.uuid}, res)
+        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
+
+        self.assertCalledWithPatch(self.patch, self.cli.node.update)
+        self.cli.port.create.assert_called_once_with(
+            node_uuid=self.uuid, address='11:22:33:44:55:66')
+
+        statuses = self.client.list_statuses()
+        my_status = statuses[self.my_status_index(statuses)]
+        self.check_status(my_status, finished=True)
 
     def test_wait_for_finish(self):
         shared = [0]  # mutable structure to hold number of retries

@@ -25,7 +25,7 @@ from ironic_inspector_client.common.i18n import _
 DEFAULT_API_VERSION = (1, 0)
 """Server API version used by default."""
 
-MAX_API_VERSION = (1, 7)
+MAX_API_VERSION = (1, 8)
 """Maximum API version this client was designed to work with.
 
 This does not mean that other versions won't work at all - the server might
@@ -129,6 +129,41 @@ class ClientV1(http.BaseClient):
         return self.request('post',
                             '/introspection/%s/data/unprocessed' %
                             uuid)
+
+    def list_statuses(self, marker=None, limit=None):
+        """List introspection statuses.
+
+        Supports pagination via the marker and limit params. The items are
+        sorted by the server according to the `started_at` attribute, newer
+        items first.
+
+        :param marker: pagination maker, UUID or None
+        :param limit: pagination limit, int or None
+        :raises: :py:class:`.ClientError` on error reported from a server
+        :raises: :py:class:`.VersionNotSupported` if requested api_version
+            is not supported
+        :raises: *requests* library exception on connection problems.
+        :return: a list of status dictionaries with the keys:
+                 `error` an error string or None,
+                 `finished` True/False,
+                 `finished_at` an ISO8601 timestamp or None,
+                 `links` with a self-link URL,
+                 `started_at` an ISO8601 timestamp,
+                 `uuid` the node UUID
+        """
+        if not (marker is None or isinstance(marker, six.string_types)):
+            raise TypeError(_('Expected a string value of the marker, got '
+                              '%s instead') % marker)
+        if not (limit is None or isinstance(limit, int)):
+            raise TypeError(_('Expected an integer value of the limit, got '
+                              '%s instead') % limit)
+
+        params = {
+            'marker': marker,
+            'limit': limit,
+        }
+        response = self.request('get', '/introspection', params=params)
+        return response.json()['introspection']
 
     def get_status(self, uuid):
         """Get introspection status for a node.
