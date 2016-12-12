@@ -64,7 +64,8 @@ class StartCommand(command.Lister):
 
     def get_parser(self, prog_name):
         parser = super(StartCommand, self).get_parser(prog_name)
-        parser.add_argument('uuid', help='baremetal node UUID(s)', nargs='+')
+        parser.add_argument('node', help='baremetal node UUID(s) or name(s)',
+                            nargs='+')
         parser.add_argument('--new-ipmi-username',
                             default=None,
                             help='if set, *Ironic Inspector* will update IPMI '
@@ -81,7 +82,7 @@ class StartCommand(command.Lister):
 
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
-        for uuid in parsed_args.uuid:
+        for uuid in parsed_args.node:
             client.introspect(uuid,
                               new_ipmi_username=parsed_args.new_ipmi_username,
                               new_ipmi_password=parsed_args.new_ipmi_password)
@@ -91,7 +92,7 @@ class StartCommand(command.Lister):
 
         if parsed_args.wait:
             print('Waiting for introspection to finish...', file=sys.stderr)
-            result = client.wait_for_finish(parsed_args.uuid)
+            result = client.wait_for_finish(parsed_args.node)
             result = [(uuid, s.get('error'))
                       for uuid, s in result.items()]
         else:
@@ -105,12 +106,12 @@ class ReprocessCommand(command.Command):
 
     def get_parser(self, prog_name):
         parser = super(ReprocessCommand, self).get_parser(prog_name)
-        parser.add_argument('uuid', help='baremetal node UUID')
+        parser.add_argument('node', help='baremetal node UUID or name')
         return parser
 
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
-        client.reprocess(parsed_args.uuid)
+        client.reprocess(parsed_args.node)
 
 
 class StatusCommand(command.ShowOne):
@@ -131,12 +132,12 @@ class StatusCommand(command.ShowOne):
 
     def get_parser(self, prog_name):
         parser = super(StatusCommand, self).get_parser(prog_name)
-        parser.add_argument('uuid', help='baremetal node UUID')
+        parser.add_argument('node', help='baremetal node UUID or name')
         return parser
 
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
-        status = client.get_status(parsed_args.uuid)
+        status = client.get_status(parsed_args.node)
         return zip(*sorted(self.status_attributes(status)))
 
 
@@ -179,12 +180,12 @@ class AbortCommand(command.Command):
 
     def get_parser(self, prog_name):
         parser = super(AbortCommand, self).get_parser(prog_name)
-        parser.add_argument('uuid', help='baremetal node UUID')
+        parser.add_argument('node', help='baremetal node UUID or name')
         return parser
 
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
-        client.abort(parsed_args.uuid)
+        client.abort(parsed_args.node)
 
 
 class RuleImportCommand(command.Lister):
@@ -269,12 +270,12 @@ class DataSaveCommand(command.Command):
         parser.add_argument("--file", metavar="<filename>",
                             help="downloaded introspection data filename "
                             "(default: stdout)")
-        parser.add_argument('uuid', help='baremetal node UUID')
+        parser.add_argument('node', help='baremetal node UUID or name')
         return parser
 
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
-        data = client.get_data(parsed_args.uuid,
+        data = client.get_data(parsed_args.node,
                                raw=bool(parsed_args.file))
         if parsed_args.file:
             with open(parsed_args.file, 'wb') as fp:

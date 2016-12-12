@@ -90,7 +90,7 @@ class ClientV1(http.BaseClient):
     def introspect(self, uuid, new_ipmi_password=None, new_ipmi_username=None):
         """Start introspection for a node.
 
-        :param uuid: node uuid
+        :param uuid: node UUID or name
         :param new_ipmi_password: if set, *Ironic Inspector* will update IPMI
                                   password to this value. DEPRECATED.
         :param new_ipmi_username: if new_ipmi_password is set, this values sets
@@ -120,7 +120,7 @@ class ClientV1(http.BaseClient):
     def reprocess(self, uuid):
         """Reprocess stored introspection data.
 
-        :param uuid: node UUID.
+        :param uuid: node UUID or name.
         :raises: :py:class:`.ClientError` on error reported from a server
         :raises: :py:class:`.VersionNotSupported` if requested api_version
             is not supported
@@ -173,7 +173,7 @@ class ClientV1(http.BaseClient):
     def get_status(self, uuid):
         """Get introspection status for a node.
 
-        :param uuid: node uuid.
+        :param uuid: node UUID or name.
         :raises: :py:class:`.ClientError` on error reported from a server
         :raises: :py:class:`.VersionNotSupported` if requested api_version
             is not supported
@@ -197,7 +197,7 @@ class ClientV1(http.BaseClient):
                         sleep_function=time.sleep):
         """Wait for introspection finishing for given nodes.
 
-        :param uuids: collection of node uuid's.
+        :param uuids: collection of node UUIDs or names.
         :param retry_interval: sleep interval between retries.
         :param max_retries: maximum number of retries.
         :param sleep_function: function used for sleeping between retries.
@@ -239,7 +239,7 @@ class ClientV1(http.BaseClient):
     def get_data(self, uuid, raw=False):
         """Get introspection data from the last introspection of a node.
 
-        :param uuid: node UUID.
+        :param uuid: node UUID or name.
         :param raw: whether to return raw binary data or parsed JSON data
         :returns: bytes or a dict depending on the 'raw' argument
         :raises: :py:class:`.ClientError` on error reported from a server
@@ -261,7 +261,7 @@ class ClientV1(http.BaseClient):
     def abort(self, uuid):
         """Abort running introspection for a node.
 
-        :param uuid: node UUID.
+        :param uuid: node UUID or name.
         :raises: :py:class:`.ClientError` on error reported from a server
         :raises: :py:class:`.VersionNotSupported` if requested api_version
             is not supported

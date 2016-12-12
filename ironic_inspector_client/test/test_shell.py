@@ -34,7 +34,7 @@ class BaseTest(utils.TestCommand):
 class TestIntrospect(BaseTest):
     def test_introspect_one(self):
         arglist = ['uuid1']
-        verifylist = [('uuid', arglist)]
+        verifylist = [('node', arglist)]
 
         cmd = shell.StartCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
@@ -47,51 +47,51 @@ class TestIntrospect(BaseTest):
 
     def test_introspect_many(self):
         arglist = ['uuid1', 'uuid2', 'uuid3']
-        verifylist = [('uuid', arglist)]
+        verifylist = [('node', arglist)]
 
         cmd = shell.StartCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         cmd.take_action(parsed_args)
 
-        calls = [mock.call(uuid, new_ipmi_password=None,
+        calls = [mock.call(node, new_ipmi_password=None,
                            new_ipmi_username=None)
-                 for uuid in arglist]
+                 for node in arglist]
         self.assertEqual(calls, self.client.introspect.call_args_list)
 
     def test_introspect_many_fails(self):
         arglist = ['uuid1', 'uuid2', 'uuid3']
-        verifylist = [('uuid', arglist)]
+        verifylist = [('node', arglist)]
         self.client.introspect.side_effect = (None, RuntimeError())
 
         cmd = shell.StartCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         self.assertRaises(RuntimeError, cmd.take_action, parsed_args)
 
-        calls = [mock.call(uuid, new_ipmi_password=None,
+        calls = [mock.call(node, new_ipmi_password=None,
                            new_ipmi_username=None)
-                 for uuid in arglist[:2]]
+                 for node in arglist[:2]]
         self.assertEqual(calls, self.client.introspect.call_args_list)
 
     def test_introspect_set_credentials(self):
         uuids = ['uuid1', 'uuid2', 'uuid3']
         arglist = ['--new-ipmi-password', '1234'] + uuids
-        verifylist = [('uuid', uuids), ('new_ipmi_password', '1234')]
+        verifylist = [('node', uuids), ('new_ipmi_password', '1234')]
 
         cmd = shell.StartCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         with mock.patch('sys.stdout', write=lambda s: None):
             cmd.take_action(parsed_args)
 
-        calls = [mock.call(uuid, new_ipmi_password='1234',
+        calls = [mock.call(node, new_ipmi_password='1234',
                            new_ipmi_username=None)
-                 for uuid in uuids]
+                 for node in uuids]
         self.assertEqual(calls, self.client.introspect.call_args_list)
 
     def test_introspect_set_credentials_with_username(self):
         uuids = ['uuid1', 'uuid2', 'uuid3']
         arglist = ['--new-ipmi-password', '1234',
                    '--new-ipmi-username', 'root'] + uuids
-        verifylist = [('uuid', uuids), ('new_ipmi_password', '1234'),
+        verifylist = [('node', uuids), ('new_ipmi_password', '1234'),
                       ('new_ipmi_username', 'root')]
 
         cmd = shell.StartCommand(self.app, None)
@@ -99,15 +99,15 @@ class TestIntrospect(BaseTest):
         with mock.patch('sys.stdout', write=lambda s: None):
             cmd.take_action(parsed_args)
 
-        calls = [mock.call(uuid, new_ipmi_password='1234',
+        calls = [mock.call(node, new_ipmi_password='1234',
                            new_ipmi_username='root')
-                 for uuid in uuids]
+                 for node in uuids]
         self.assertEqual(calls, self.client.introspect.call_args_list)
 
     def test_reprocess(self):
         node = 'uuid1'
         arglist = [node]
-        verifylist = [('uuid', node)]
+        verifylist = [('node', node)]
         response_mock = mock.Mock(status_code=202, content=b'')
         self.client.reprocess.return_value = response_mock
 
@@ -122,7 +122,7 @@ class TestIntrospect(BaseTest):
     def test_wait(self):
         nodes = ['uuid1', 'uuid2', 'uuid3']
         arglist = ['--wait'] + nodes
-        verifylist = [('uuid', nodes), ('wait', True)]
+        verifylist = [('node', nodes), ('wait', True)]
         self.client.wait_for_finish.return_value = {
             'uuid1': {'finished': True, 'error': None},
             'uuid2': {'finished': True, 'error': 'boom'},
@@ -133,9 +133,9 @@ class TestIntrospect(BaseTest):
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         _c, values = cmd.take_action(parsed_args)
 
-        calls = [mock.call(uuid, new_ipmi_password=None,
+        calls = [mock.call(node, new_ipmi_password=None,
                            new_ipmi_username=None)
-                 for uuid in nodes]
+                 for node in nodes]
         self.assertEqual(calls, self.client.introspect.call_args_list)
         self.assertEqual([('uuid1', None), ('uuid2', 'boom'), ('uuid3', None)],
                          sorted(values))
@@ -143,7 +143,7 @@ class TestIntrospect(BaseTest):
     def test_abort(self):
         node = 'uuid1'
         arglist = [node]
-        verifylist = [('uuid', node)]
+        verifylist = [('node', node)]
         response_mock = mock.Mock(status_code=202, content=b'')
         self.client.abort.return_value = response_mock
 
@@ -159,7 +159,7 @@ class TestIntrospect(BaseTest):
 class TestGetStatus(BaseTest):
     def test_get_status(self):
         arglist = ['uuid1']
-        verifylist = [('uuid', 'uuid1')]
+        verifylist = [('node', 'uuid1')]
         self.client.get_status.return_value = {'finished': True,
                                                'error': 'boom'}
 
@@ -327,7 +327,7 @@ class TestDataSave(BaseTest):
         buf = six.StringIO()
 
         arglist = ['uuid1']
-        verifylist = [('uuid', 'uuid1')]
+        verifylist = [('node', 'uuid1')]
 
         cmd = shell.DataSaveCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
@@ -341,7 +341,7 @@ class TestDataSave(BaseTest):
 
         with tempfile.NamedTemporaryFile() as fp:
             arglist = ['--file', fp.name, 'uuid1']
-            verifylist = [('uuid', 'uuid1'), ('file', fp.name)]
+            verifylist = [('node', 'uuid1'), ('file', fp.name)]
 
             cmd = shell.DataSaveCommand(self.app, None)
             parsed_args = self.check_parser(cmd, arglist, verifylist)

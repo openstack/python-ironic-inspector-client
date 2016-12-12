@@ -17,9 +17,9 @@ Start introspection on a node
 
 ::
 
-    $ openstack baremetal introspection start [--wait] [--new-ipmi-password=PWD [--new-ipmi-username=USER]] UUID [UUID ...]
+    $ openstack baremetal introspection start [--wait] [--new-ipmi-password=PWD [--new-ipmi-username=USER]] NODE_ID [NODE_ID ...]
 
-* ``UUID`` - Ironic node UUID;
+* ``NODE_ID`` - Ironic node UUID or name;
 * ``new-ipmi-username`` and ``new-ipmi-password`` - deprecated options to set
   IPMI credentials during introspection. Do not use, this feature is pending
   removal.
@@ -40,9 +40,9 @@ Query introspection status
 
 ::
 
-    $ openstack baremetal introspection status UUID
+    $ openstack baremetal introspection status NODE_ID
 
-* ``UUID`` - Ironic node UUID.
+* ``NODE_ID`` - Ironic node UUID or name.
 
 Returns following information about a node introspection status:
 
@@ -80,9 +80,9 @@ Retrieving introspection data
 
 ::
 
-    $ openstack baremetal introspection data save [--file=file_name] UUID
+    $ openstack baremetal introspection data save [--file=file_name] NODE_ID
 
-* ``UUID`` - Ironic node UUID;
+* ``NODE_ID`` - Ironic node UUID or name;
 * ``file_name`` - file name to save data to. If file name is not provided,
   the data is dumped to stdout.
 
@@ -95,18 +95,18 @@ Aborting introspection
 
 ::
 
-  $ openstack baremetal introspection abort UUID
+  $ openstack baremetal introspection abort NODE_ID
 
-* ``UUID`` - Ironic node UUID.
+* ``NODE_ID`` - Ironic node UUID or name.
 
 Reprocess stored introspection data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    $ openstack baremetal introspection reprocess UUID
+    $ openstack baremetal introspection reprocess NODE_ID
 
-* ``UUID`` - Ironic node UUID.
+* ``NODE_ID`` - Ironic node UUID or name.
 
 .. note::
    This feature requires Swift store to be enabled for **Ironic Inspector**
