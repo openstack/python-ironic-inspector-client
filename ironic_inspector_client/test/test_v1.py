@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import OrderedDict
 import six
 import unittest
 
@@ -325,3 +326,122 @@ class TestAbort(BaseTest):
 
     def test_invalid_input(self, _):
         self.assertRaises(TypeError, self.get_client().abort, 42)
+
+
+@mock.patch.object(http.BaseClient, 'request')
+class TestInterfaceApi(BaseTest):
+    def setUp(self):
+        super(TestInterfaceApi, self).setUp()
+
+        self.inspector_db = {
+            "all_interfaces": {
+                'em1': {'mac': "00:11:22:33:44:55", 'ip': "10.10.1.1",
+                        "lldp_processed": {
+                            "switch_chassis_id": "99:aa:bb:cc:dd:ff",
+                            "switch_port_id": "555",
+                            "switch_port_vlans":
+                                [{"id": 101, "name": "vlan101"},
+                                 {"id": 102, "name": "vlan102"},
+                                 {"id": 104, "name": "vlan104"},
+                                 {"id": 201, "name": "vlan201"},
+                                 {"id": 203, "name": "vlan203"}],
+                            "switch_port_mtu": 1514}
+                        },
+                'em2': {'mac': "00:11:22:66:77:88", 'ip': "10.10.1.2",
+                        "lldp_processed": {
+                            "switch_chassis_id": "99:aa:bb:cc:dd:ff",
+                            "switch_port_id": "777",
+                            "switch_port_vlans":
+                                [{"id": 201, "name": "vlan201"},
+                                 {"id": 203, "name": "vlan203"}],
+                            "switch_port_mtu": 9216}
+                        },
+                'em3': {'mac': "00:11:22:aa:bb:cc", 'ip': "10.10.1.2"}
+            }
+        }
+
+    def test_all_interfaces(self, mock_req):
+        mock_req.return_value.json.return_value = self.inspector_db
+
+        fields = ['interface', 'mac', 'switch_chassis_id', 'switch_port_id',
+                  'switch_port_vlans']
+        expected = [['em1', '00:11:22:33:44:55', '99:aa:bb:cc:dd:ff', '555',
+                     [{"id": 101, "name": "vlan101"},
+                      {"id": 102, "name": "vlan102"},
+                      {"id": 104, "name": "vlan104"},
+                      {"id": 201, "name": "vlan201"},
+                      {"id": 203, "name": "vlan203"}]],
+                    ['em2', '00:11:22:66:77:88', '99:aa:bb:cc:dd:ff', '777',
+                     [{"id": 201, "name": "vlan201"},
+                      {"id": 203, "name": "vlan203"}]],
+                    ['em3', '00:11:22:aa:bb:cc', None, None, None]]
+
+        actual = self.get_client().get_all_interface_data(self.uuid,
+                                                          fields)
+
+        self.assertEqual(sorted(expected), sorted(actual))
+
+        # Change fields
+        fields = ['interface', 'switch_port_mtu']
+        expected = [
+            ['em1', 1514],
+            ['em2', 9216],
+            ['em3', None]]
+
+        actual = self.get_client().get_all_interface_data(self.uuid, fields)
+        self.assertEqual(expected, sorted(actual))
+
+    def test_all_interfaces_filtered(self, mock_req):
+        mock_req.return_value.json.return_value = self.inspector_db
+
+        fields = ['interface', 'mac', 'switch_chassis_id', 'switch_port_id',
+                  'switch_port_vlan_ids']
+        expected = [['em1', '00:11:22:33:44:55', '99:aa:bb:cc:dd:ff', '555',
+                     [101, 102, 104, 201, 203]]]
+
+        # Filter on expected VLAN
+        vlan = [104]
+        actual = self.get_client().get_all_interface_data(self.uuid,
+                                                          fields, vlan=vlan)
+        self.assertEqual(expected, actual)
+
+        # VLANs don't match existing vlans
+        vlan = [111, 555]
+        actual = self.get_client().get_all_interface_data(self.uuid,
+                                                          fields, vlan=vlan)
+        self.assertEqual([], actual)
+
+    def test_one_interface(self, mock_req):
+        mock_req.return_value.json.return_value = self.inspector_db
+
+        # Note that a value for 'switch_foo' will not be found
+        fields = ["node_ident", "interface", "mac", "switch_port_vlan_ids",
+                  "switch_chassis_id", "switch_port_id",
+                  "switch_port_mtu", "switch_port_vlans", "switch_foo"]
+
+        expected_values = OrderedDict(
+            [('node_ident', self.uuid),
+             ('interface', "em1"),
+             ('mac', "00:11:22:33:44:55"),
+             ('switch_port_vlan_ids',
+             [101, 102, 104, 201, 203]),
+             ('switch_chassis_id', "99:aa:bb:cc:dd:ff"),
+             ('switch_port_id', "555"),
+             ('switch_port_mtu', 1514),
+             ('switch_port_vlans',
+             [{"id": 101, "name": "vlan101"},
+              {"id": 102, "name": "vlan102"},
+              {"id": 104, "name": "vlan104"},
+              {"id": 201, "name": "vlan201"},
+              {"id": 203, "name": "vlan203"}]),
+             ("switch_foo", None)])
+
+        iface_dict = self.get_client().get_interface_data(
+            self.uuid, "em1", fields)
+        self.assertEqual(expected_values, iface_dict)
+
+        # Test interface name not in 'all_interfaces'
+        expected_values = OrderedDict()
+        iface_dict = self.get_client().get_interface_data(
+            self.uuid, "em55", fields)
+        self.assertEqual(expected_values, iface_dict)

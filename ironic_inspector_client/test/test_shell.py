@@ -13,6 +13,7 @@
 
 import sys
 
+from collections import OrderedDict
 import mock
 from osc_lib.tests import utils
 import six
@@ -351,3 +352,204 @@ class TestDataSave(BaseTest):
 
         self.assertEqual(b'{"answer": 42}', content)
         self.client.get_data.assert_called_once_with('uuid1', raw=True)
+
+
+class TestInterfaceCmds(BaseTest):
+    def setUp(self):
+        super(TestInterfaceCmds, self).setUp()
+
+        self.inspector_db = {
+            "all_interfaces":
+                {
+                    'em1': {'mac': "00:11:22:33:44:55", 'ip': "10.10.1.1",
+                            "lldp_processed": {
+                                "switch_chassis_id": "99:aa:bb:cc:dd:ff",
+                                "switch_port_id": "555",
+                                "switch_port_vlans":
+                                    [{"id": 101, "name": "vlan101"},
+                                     {"id": 102, "name": "vlan102"},
+                                     {"id": 104, "name": "vlan104"},
+                                     {"id": 201, "name": "vlan201"},
+                                     {"id": 203, "name": "vlan203"}],
+                                "switch_port_mtu": 1514
+                            }
+                            }
+                }
+        }
+
+    def test_list(self):
+        self.client.get_all_interface_data.return_value = [
+            ["em1", "00:11:22:33:44:55", [101, 102, 104, 201, 203],
+             "99:aa:bb:cc:dd:ff", "555"],
+            ["em2", "00:11:22:66:77:88", [201, 203],
+             "99:aa:bb:cc:dd:ff", "777"],
+            ["em3", "00:11:22:aa:bb:cc", '', '', '']]
+
+        arglist = ['uuid1']
+        verifylist = [('node_ident', 'uuid1')]
+
+        cmd = shell.InterfaceListCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cols, values = cmd.take_action(parsed_args)
+
+        expected_cols = ("Interface", "MAC Address", "Switch Port VLAN IDs",
+                         "Switch Chassis ID", "Switch Port ID")
+
+        # Note that em3 has no lldp data
+        expected_rows = [["em1", "00:11:22:33:44:55",
+                          [101, 102, 104, 201, 203],
+                          "99:aa:bb:cc:dd:ff",
+                          "555"],
+                         ["em2", "00:11:22:66:77:88",
+                          [201, 203],
+                          "99:aa:bb:cc:dd:ff",
+                          "777"],
+                         ["em3", "00:11:22:aa:bb:cc", '', '', '']]
+
+        self.assertEqual(expected_cols, cols)
+        self.assertEqual(expected_rows, values)
+
+    def test_list_field(self):
+        self.client.get_all_interface_data.return_value = [
+            ["em1", 1514],
+            ["em2", 9216],
+            ["em3", '']]
+
+        arglist = ['uuid1', '--fields', 'interface',
+                   "switch_port_mtu"]
+        verifylist = [('node_ident', 'uuid1'),
+                      ('fields', ["interface", "switch_port_mtu"])]
+
+        cmd = shell.InterfaceListCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cols, values = cmd.take_action(parsed_args)
+
+        expected_cols = ("Interface", "Switch Port MTU")
+        expected_rows = [["em1", 1514],
+                         ["em2", 9216],
+                         ["em3", '']]
+
+        self.assertEqual(expected_cols, cols)
+        self.assertEqual(expected_rows, values)
+
+    def test_list_filtered(self):
+        self.client.get_all_interface_data.return_value = [
+            ["em1",
+             "00:11:22:33:44:55",
+             [101, 102, 104, 201, 203],
+             "99:aa:bb:cc:dd:ff",
+             "555"]]
+
+        arglist = ['uuid1', '--vlan', '104']
+        verifylist = [('node_ident', 'uuid1'),
+                      ('vlan', [104])]
+
+        cmd = shell.InterfaceListCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cols, values = cmd.take_action(parsed_args)
+
+        expected_cols = ("Interface", "MAC Address", "Switch Port VLAN IDs",
+                         "Switch Chassis ID", "Switch Port ID")
+        expected_rows = [["em1", "00:11:22:33:44:55",
+                          [101, 102, 104, 201, 203],
+                          "99:aa:bb:cc:dd:ff",
+                          "555"]]
+
+        self.assertEqual(expected_cols, cols)
+        self.assertEqual(expected_rows, values)
+
+    def test_list_no_data(self):
+        self.client.get_all_interface_data.return_value = [[]]
+
+        arglist = ['uuid1']
+        verifylist = [('node_ident', 'uuid1')]
+
+        cmd = shell.InterfaceListCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cols, values = cmd.take_action(parsed_args)
+
+        expected_cols = ("Interface", "MAC Address", "Switch Port VLAN IDs",
+                         "Switch Chassis ID", "Switch Port ID")
+        expected_rows = [[]]
+
+        self.assertEqual(expected_cols, cols)
+        self.assertEqual(expected_rows, values)
+
+    def test_show(self):
+        self.client.get_data.return_value = self.inspector_db
+
+        data = OrderedDict(
+            [('node_ident', "uuid1"),
+             ('interface', "em1"),
+             ('mac', "00:11:22:33:44:55"),
+             ('switch_chassis_id', "99:aa:bb:cc:dd:ff"),
+             ('switch_port_id', "555"),
+             ('switch_port_mtu', 1514),
+             ('switch_port_vlans',
+              [{"id": 101, "name": "vlan101"},
+               {"id": 102, "name": "vlan102"},
+               {"id": 104, "name": "vlan104"},
+               {"id": 201, "name": "vlan201"},
+               {"id": 203, "name": "vlan203"}])]
+        )
+
+        self.client.get_interface_data.return_value = data
+
+        arglist = ['uuid1', 'em1']
+        verifylist = [('node_ident', 'uuid1'), ('interface', 'em1')]
+
+        cmd = shell.InterfaceShowCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cols, values = cmd.take_action(parsed_args)
+
+        expected_cols = ("node_ident", "interface", "mac",
+                         "switch_chassis_id", "switch_port_id",
+                         "switch_port_mtu", "switch_port_vlans")
+
+        expected_rows = ("uuid1", "em1", "00:11:22:33:44:55",
+                         "99:aa:bb:cc:dd:ff", "555", 1514,
+                         [{"id": 101, "name": "vlan101"},
+                          {"id": 102, "name": "vlan102"},
+                          {"id": 104, "name": "vlan104"},
+                          {"id": 201, "name": "vlan201"},
+                          {"id": 203, "name": "vlan203"}])
+
+        self.assertEqual(expected_cols, cols)
+        self.assertEqual(expected_rows, values)
+
+    def test_show_field(self):
+        self.client.get_data.return_value = self.inspector_db
+
+        data = OrderedDict([('node_ident', "uuid1"),
+                            ('interface', "em1"),
+                            ('switch_port_vlans',
+                             [{"id": 101, "name": "vlan101"},
+                              {"id": 102, "name": "vlan102"},
+                              {"id": 104, "name": "vlan104"},
+                              {"id": 201, "name": "vlan201"},
+                              {"id": 203, "name": "vlan203"}])
+                            ])
+
+        self.client.get_interface_data.return_value = data
+
+        arglist = ['uuid1', 'em1', '--fields', 'node_ident', 'interface',
+                   "switch_port_vlans"]
+        verifylist = [('node_ident', 'uuid1'), ('interface', 'em1'),
+                      ('fields', ["node_ident", "interface",
+                                  "switch_port_vlans"])]
+
+        cmd = shell.InterfaceShowCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cols, values = cmd.take_action(parsed_args)
+
+        expected_cols = ("node_ident", "interface", "switch_port_vlans")
+
+        expected_rows = ("uuid1", "em1",
+                         [{"id": 101, "name": "vlan101"},
+                          {"id": 102, "name": "vlan102"},
+                          {"id": 104, "name": "vlan104"},
+                          {"id": 201, "name": "vlan201"},
+                          {"id": 203, "name": "vlan203"}])
+
+        self.assertEqual(expected_cols, cols)
+        self.assertEqual(expected_rows, values)

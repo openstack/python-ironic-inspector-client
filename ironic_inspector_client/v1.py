@@ -13,6 +13,7 @@
 
 """Client for V1 API."""
 
+from collections import OrderedDict
 import logging
 import time
 
@@ -273,6 +274,84 @@ class ClientV1(http.BaseClient):
                               " %r") % uuid)
 
         return self.request('post', '/introspection/%s/abort' % uuid)
+
+    def get_interface_data(self, node_ident, interface, field_sel):
+        """Get interface data for the input node and interface
+
+          To get LLDP data, collection must be enabled by the kernel parameter
+          ipa-collect-lldp=1, and the inspector plugin ``basic_lldp`` must
+          be enabled.
+
+        :param node_ident: node UUID or name
+        :param interface: interface name
+        :param field_sel: list of all fields for which to get data
+        :returns interface data in OrderedDict
+        """
+        # Use OrderedDict to maintain order of user-entered fields
+        iface_data = OrderedDict()
+
+        data = self.get_data(node_ident)
+        all_interfaces = data.get('all_interfaces', [])
+
+        # Make sure interface name is valid
+        if interface not in all_interfaces:
+            return iface_data
+
+        # If lldp data not available this will still return interface,
+        # mac, node_ident etc.
+        lldp_proc = all_interfaces[interface].get('lldp_processed', {})
+
+        for f in field_sel:
+            if f == 'node_ident':
+                iface_data[f] = node_ident
+            elif f == 'interface':
+                iface_data[f] = interface
+            elif f == 'mac':
+                iface_data[f] = all_interfaces[interface].get(f)
+            elif f == 'switch_port_vlan_ids':
+                iface_data[f] = [item['id'] for item in
+                                 lldp_proc.get('switch_port_vlans', [])]
+            else:
+                iface_data[f] = lldp_proc.get(f)
+
+        return iface_data
+
+    def get_all_interface_data(self, node_ident,
+                               field_sel, vlan=None):
+        """Get interface data for all of the interfaces on this node
+
+        :param node_ident: node UUID or name
+        :param field_sel: list of all fields for which to get data
+        :param vlan: list of vlans used to filter the lists returned
+        :returns list of interface data, each interface in a list
+        """
+
+        # Get inventory data for this node
+        data = self.get_data(node_ident)
+        all_interfaces = data.get('all_interfaces', [])
+
+        rows = []
+        if vlan:
+            vlan = set(vlan)
+        # walk all interfaces, appending data to row if not filtered
+        for interface in all_interfaces:
+            iface_dict = self.get_interface_data(node_ident,
+                                                 interface,
+                                                 field_sel)
+
+            values = list(iface_dict.values())
+
+            # Use (optional) vlans to filter row
+            if not vlan:
+                rows.append(values)
+                continue
+
+            # curr_vlans may be None
+            curr_vlans = iface_dict.get('switch_port_vlan_ids', [])
+            if curr_vlans and (vlan & set(curr_vlans)):
+                rows.append(values)  # vlan matches, display this row
+
+        return rows
 
 
 class RulesAPI(object):
