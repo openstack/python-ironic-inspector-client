@@ -171,6 +171,60 @@ class TestGetStatus(BaseTest):
         self.client.get_status.assert_called_once_with('uuid1')
 
 
+class TestStatusList(BaseTest):
+    def setUp(self):
+        super(TestStatusList, self).setUp()
+        self.COLUMNS = ('UUID', 'Started at', 'Finished at', 'Error')
+        self.status1 = {
+            'error': None,
+            'finished': True,
+            'finished_at': '1970-01-01T00:10',
+            'links': None,
+            'started_at': '1970-01-01T00:00',
+            'uuid': 'uuid1'
+
+        }
+        self.status2 = {
+            'error': None,
+            'finished': False,
+            'finished_at': None,
+            'links': None,
+            'started_at': '1970-01-01T00:01',
+            'uuid': 'uuid2'
+        }
+
+    def status_row(self, status):
+        status = dict(item for item in status.items()
+                      if item[0] != 'links')
+        return (status['uuid'], status['started_at'], status['finished_at'],
+                status['error'])
+
+    def test_list_statuses(self):
+        status_list = [self.status1, self.status2]
+        self.client.list_statuses.return_value = status_list
+        arglist = []
+        verifylist = []
+        cmd = shell.StatusListCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        result = cmd.take_action(parsed_args)
+        self.assertEqual((self.COLUMNS, [self.status_row(status)
+                                         for status in status_list]),
+                         result)
+        self.client.list_statuses.assert_called_once_with(limit=None,
+                                                          marker=None)
+
+    def test_list_statuses_marker_limit(self):
+        self.client.list_statuses.return_value = []
+        arglist = ['--marker', 'uuid1', '--limit', '42']
+        verifylist = [('marker', 'uuid1'), ('limit', 42)]
+        cmd = shell.StatusListCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        result = cmd.take_action(parsed_args)
+        self.assertEqual((self.COLUMNS, []), result)
+        self.client.list_statuses.assert_called_once_with(limit=42,
+                                                          marker='uuid1')
+
+
 class TestRules(BaseTest):
     def test_import_single(self):
         f = tempfile.NamedTemporaryFile()
