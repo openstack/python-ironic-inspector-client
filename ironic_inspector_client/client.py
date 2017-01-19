@@ -42,10 +42,10 @@ def introspect(uuid, base_url=None, auth_token=None,
                      defaults to ``http://<current host>:5050/v1``.
     :param auth_token: deprecated, use session instead.
     :param new_ipmi_password: if set, *Ironic Inspector* will update IPMI
-                              password to this value.
+                              password to this value. DEPRECATED.
     :param new_ipmi_username: if new_ipmi_password is set, this values sets
                               new IPMI user name. Defaults to one in
-                              driver_info.
+                              driver_info. DEPRECATED.
     :param api_version: requested Ironic Inspector API version, defaults to
                         ``DEFAULT_API_VERSION`` attribute.
     :param session: keystone session.

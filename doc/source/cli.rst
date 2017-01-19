@@ -20,9 +20,9 @@ Start introspection on a node
     $ openstack baremetal introspection start [--wait] [--new-ipmi-password=PWD [--new-ipmi-username=USER]] UUID [UUID ...]
 
 * ``UUID`` - Ironic node UUID;
-* ``new-ipmi-username`` and ``new-ipmi-password`` - if these are set,
-  **Ironic Inspector** will switch to manual power on and assigning IPMI
-  credentials on introspection. See `Setting IPMI Credentials`_ for details.
+* ``new-ipmi-username`` and ``new-ipmi-password`` - deprecated options to set
+  IPMI credentials during introspection. Do not use, this feature is pending
+  removal.
 
 Note that the CLI call accepts several UUID's and will stop on the first error.
 
@@ -159,5 +159,4 @@ Starting with baremetal introspection API 1.5 (provided by **Ironic Inspector**
 calls.
 
 
-.. _Setting IPMI Credentials: http://docs.openstack.org/developer/ironic-inspector/usage.html#setting-ipmi-credentials
 .. _introspection rules documentation: http://docs.openstack.org/developer/ironic-inspector/usage.html#introspection-rules

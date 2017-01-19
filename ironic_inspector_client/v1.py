@@ -19,7 +19,7 @@ import time
 import six
 
 from ironic_inspector_client.common import http
-from ironic_inspector_client.common.i18n import _
+from ironic_inspector_client.common.i18n import _, _LW
 
 
 DEFAULT_API_VERSION = (1, 0)
@@ -92,10 +92,10 @@ class ClientV1(http.BaseClient):
 
         :param uuid: node uuid
         :param new_ipmi_password: if set, *Ironic Inspector* will update IPMI
-                                  password to this value.
+                                  password to this value. DEPRECATED.
         :param new_ipmi_username: if new_ipmi_password is set, this values sets
                                   new IPMI user name. Defaults to one in
-                                  driver_info.
+                                  driver_info. DEPRECATED.
         :raises: :py:class:`.ClientError` on error reported from a server
         :raises: :py:class:`.VersionNotSupported` if requested api_version
             is not supported
@@ -107,6 +107,11 @@ class ClientV1(http.BaseClient):
         if new_ipmi_username and not new_ipmi_password:
             raise ValueError(
                 _("Setting IPMI user name requires a new password"))
+
+        if new_ipmi_password:
+            LOG.warning(_LW('Setting IPMI credentials via ironic-inspector '
+                            'is deprecated, this feature will be removed '
+                            'in the Pike release'))
 
         params = {'new_ipmi_username': new_ipmi_username,
                   'new_ipmi_password': new_ipmi_password}

@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    Support for setting IPMI credentials via ironic-inspector is deprecated
+    and will be removed completely in Pike. For reasoning see
+    https://bugs.launchpad.net/ironic-inspector/+bug/1654318.
