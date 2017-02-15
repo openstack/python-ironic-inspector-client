@@ -160,3 +160,34 @@ calls.
 
 
 .. _introspection rules documentation: http://docs.openstack.org/developer/ironic-inspector/usage.html#introspection-rules
+
+
+List interface data
+~~~~~~~~~~~~~~~~~~~
+
+::
+
+   $ openstack baremetal introspection interface list NODE_IDENT
+   [--fields=<field>] [--vlan=<vlan>]
+
+* ``NODE_IDENT`` - Ironic node UUID or name
+* ``fields`` - name of one or more interface columns to display.
+* ``vlan`` - list only interfaces configured for this vlan id
+
+Returns a list of interface data, including attached switch information,
+for each interface on the node.
+
+Show interface data
+~~~~~~~~~~~~~~~~~~~
+
+::
+
+   $ openstack baremetal introspection interface show NODE_IDENT INTERFACE
+   [--fields=<field>]
+
+* ``NODE_IDENT`` - Ironic node UUID or name
+* ``INTERFACE`` - interface name on this node
+* ``fields`` - name of one or more interface rows to display.
+
+Show interface data, including attached switch information,
+for a particular node and interface.

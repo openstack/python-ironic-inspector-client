@@ -1,0 +1,8 @@
+---
+features:
+  - Add ``introspection interface list`` and ``introspection interface show``
+    commands to display stored introspection data for the node including
+    attached switch port information.  In order to get switch data,
+    LLDP data collection must be enabled by the kernel parameter
+    ``ipa-collect-lldp=1`` and the inspector plugin ``basic_lldp`` must
+    be enabled.

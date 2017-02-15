@@ -22,7 +22,7 @@ from osc_lib.command import command
 from osc_lib import utils
 
 import ironic_inspector_client
-
+from ironic_inspector_client import resource as res
 
 API_NAME = 'baremetal_introspection'
 API_VERSION_OPTION = 'inspector_api_version'
@@ -282,3 +282,77 @@ class DataSaveCommand(command.Command):
                 fp.write(data)
         else:
             json.dump(data, sys.stdout)
+
+
+class InterfaceListCommand(command.Lister):
+    """List interface data including attached switch port information."""
+
+    def get_parser(self, prog_name):
+        parser = super(InterfaceListCommand, self).get_parser(prog_name)
+        parser.add_argument('node_ident', help='baremetal node UUID or name')
+        parser.add_argument("--vlan",
+                            action='append',
+                            default=[], type=int,
+                            help="List only interfaces configured "
+                            "for this vlan id, can be repeated")
+        display_group = parser.add_mutually_exclusive_group()
+        display_group.add_argument(
+            '--long', dest='detail',
+            action='store_true', default=False,
+            help="Show detailed information about interfaces.")
+        display_group.add_argument(
+            '--fields', nargs='+', dest='fields',
+            metavar='<field>',
+            choices=sorted(res.InterfaceResource(detailed=True).fields),
+            help="Display one or more fields.  "
+            "Can not be used when '--long' is specified")
+
+        return parser
+
+    def take_action(self, parsed_args):
+
+        client = self.app.client_manager.baremetal_introspection
+
+        # If --long defined, use all fields
+        interface_res = res.InterfaceResource(parsed_args.fields,
+                                              parsed_args.detail)
+
+        rows = client.get_all_interface_data(parsed_args.node_ident,
+                                             interface_res.fields,
+                                             vlan=parsed_args.vlan)
+
+        return interface_res.labels, rows
+
+
+class InterfaceShowCommand(command.ShowOne):
+    """Show interface data including attached switch port information."""
+
+    COLUMNS = ("Field", "Value")
+
+    def get_parser(self, prog_name):
+        parser = super(InterfaceShowCommand, self).get_parser(prog_name)
+        parser.add_argument('node_ident', help='baremetal node UUID or name')
+        parser.add_argument('interface', help='interface name')
+        parser.add_argument(
+            '--fields', nargs='+', dest='fields',
+            metavar='<field>',
+            choices=sorted(res.InterfaceResource(detailed=True).fields),
+            help="Display one or more fields.")
+
+        return parser
+
+    def take_action(self, parsed_args):
+
+        client = self.app.client_manager.baremetal_introspection
+
+        if parsed_args.fields:
+            interface_res = res.InterfaceResource(parsed_args.fields)
+        else:
+            # Show all fields in detailed resource
+            interface_res = res.InterfaceResource(detailed=True)
+
+        iface_dict = client.get_interface_data(parsed_args.node_ident,
+                                               parsed_args.interface,
+                                               interface_res.fields)
+
+        return tuple(zip(*(iface_dict.items())))

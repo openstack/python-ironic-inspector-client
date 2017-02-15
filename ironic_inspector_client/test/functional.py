@@ -14,6 +14,7 @@
 import eventlet
 eventlet.monkey_patch()
 
+import copy
 import json
 import mock
 import os
@@ -331,6 +332,34 @@ class BaseCLITest(functional.Base):
 
 
 class TestCLI(BaseCLITest):
+    def setup_lldp(self):
+        functional.cfg.CONF.set_override('store_data', 'swift', 'processing')
+
+        self.all_interfaces = {
+            'eth1': {'mac': self.macs[0], 'ip': self.ips[0],
+                     'client_id': None, 'lldp_processed':
+                         {'switch_chassis_id': "11:22:33:aa:bb:cc",
+                          'switch_port_vlans':
+                          [{"name": "vlan101", "id": 101},
+                           {"name": "vlan102", "id": 102},
+                           {"name": "vlan104", "id": 104},
+                           {"name": "vlan201", "id": 201},
+                           {"name": "vlan203", "id": 203}],
+                          'switch_port_id': "554",
+                          'switch_port_mtu': 1514}},
+            'eth3': {'mac': self.macs[1], 'ip': None,
+                     'client_id': None, 'lldp_processed':
+                         {'switch_chassis_id': "11:22:33:aa:bb:cc",
+                          'switch_port_vlans':
+                          [{"name": "vlan101", "id": 101},
+                           {"name": "vlan102", "id": 102},
+                           {"name": "vlan104", "id": 106}],
+                          'switch_port_id': "557",
+                          'switch_port_mtu': 9216}}
+        }
+
+        self.data['all_interfaces'] = self.all_interfaces
+
     def _fake_status(self, **kwargs):
         # to remove the hidden fields
         hidden_status_items = shell.StatusCommand.hidden_status_items
@@ -351,6 +380,9 @@ class TestCLI(BaseCLITest):
         self.assertIn('not found', err)
         err = self.run_cli('rule', 'delete', 'uuid', expect_error=True)
         self.assertIn('not found', err)
+
+        err = self.run_cli('interface', 'list', expect_error=True)
+        self.assertIn('too few arguments', err)
 
     def test_introspect_get_status(self):
         self.run_cli('start', self.uuid)
@@ -410,6 +442,62 @@ class TestCLI(BaseCLITest):
         res = self.run_cli('rule', 'list', parse_json=True)
         self.assertEqual([], res)
 
+    @mock.patch.object(swift, 'get_introspection_data', autospec=True)
+    def test_interface_list(self, get_mock):
+        self.setup_lldp()
+        get_mock.return_value = json.dumps(copy.deepcopy(self.data))
+
+        expected_eth1 = {u'Interface': u'eth1',
+                         u'MAC Address': u'11:22:33:44:55:66',
+                         u'Switch Chassis ID': u'11:22:33:aa:bb:cc',
+                         u'Switch Port ID': u'554',
+                         u'Switch Port VLAN IDs': [101, 102, 104, 201, 203]}
+        expected_eth3 = {u'Interface': u'eth3',
+                         u'MAC Address': u'66:55:44:33:22:11',
+                         u'Switch Chassis ID': u'11:22:33:aa:bb:cc',
+                         u'Switch Port ID': u'557',
+                         u'Switch Port VLAN IDs': [101, 102, 106]}
+
+        res = self.run_cli('interface', 'list', self.uuid, parse_json=True)
+        res.sort()
+        self.assertEqual(expected_eth1, res[0])
+        self.assertEqual(expected_eth3, res[1])
+
+        # Filter on vlan
+        res = self.run_cli('interface', 'list', self.uuid, '--vlan', '106',
+                           parse_json=True)
+        res.sort()
+        self.assertEqual(expected_eth3, res[0])
+
+        # Select fields
+        res = self.run_cli('interface', 'list', self.uuid, '--fields',
+                           'switch_port_mtu',
+                           parse_json=True)
+        res.sort()
+        self.assertEqual({u'Switch Port MTU': 1514}, res[0])
+        self.assertEqual({u'Switch Port MTU': 9216}, res[1])
+
+    @mock.patch.object(swift, 'get_introspection_data', autospec=True)
+    def test_interface_show(self, get_mock):
+        self.setup_lldp()
+        get_mock.return_value = json.dumps(copy.deepcopy(self.data))
+
+        res = self.run_cli('interface', 'show', self.uuid, "eth1",
+                           parse_json=True)
+
+        expected = {u'interface': u'eth1',
+                    u'mac': u'11:22:33:44:55:66',
+                    u'switch_chassis_id': u'11:22:33:aa:bb:cc',
+                    u'switch_port_id': u'554',
+                    u'switch_port_mtu': 1514,
+                    u'switch_port_vlan_ids': [101, 102, 104, 201, 203],
+                    u'switch_port_vlans': [{u'id': 101, u'name': u'vlan101'},
+                                           {u'id': 102, u'name': u'vlan102'},
+                                           {u'id': 104, u'name': u'vlan104'},
+                                           {u'id': 201, u'name': u'vlan201'},
+                                           {u'id': 203, u'name': u'vlan203'}]}
+
+        self.assertDictContainsSubset(expected, res)
 
 if __name__ == '__main__':
     with functional.mocked_server():
