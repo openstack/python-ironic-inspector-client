@@ -20,7 +20,7 @@ import time
 import six
 
 from ironic_inspector_client.common import http
-from ironic_inspector_client.common.i18n import _, _LW
+from ironic_inspector_client.common.i18n import _
 
 
 DEFAULT_API_VERSION = (1, 0)
@@ -110,9 +110,9 @@ class ClientV1(http.BaseClient):
                 _("Setting IPMI user name requires a new password"))
 
         if new_ipmi_password:
-            LOG.warning(_LW('Setting IPMI credentials via ironic-inspector '
-                            'is deprecated, this feature will be removed '
-                            'in the Pike release'))
+            LOG.warning('Setting IPMI credentials via ironic-inspector '
+                        'is deprecated, this feature will be removed '
+                        'in the Pike release')
 
         params = {'new_ipmi_username': new_ipmi_username,
                   'new_ipmi_password': new_ipmi_password}

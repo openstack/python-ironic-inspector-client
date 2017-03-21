@@ -23,7 +23,7 @@ from oslo_utils import netutils
 import requests
 import six
 
-from ironic_inspector_client.common.i18n import _, _LW
+from ironic_inspector_client.common.i18n import _
 
 
 _DEFAULT_URL = 'http://' + netutils.get_my_ipv4() + ':5050'
@@ -112,8 +112,8 @@ class BaseClient(object):
 
         if session is None:
             if auth_token:
-                LOG.warning(_LW('Passing auth_token to client objects '
-                                'is deprecated, please pass session instead'))
+                LOG.warning('Passing auth_token to client objects '
+                            'is deprecated, please pass session instead')
                 auth = token_endpoint.Token(endpoint=self._base_url,
                                             token=auth_token)
             else:
@@ -129,8 +129,8 @@ class BaseClient(object):
                         interface=interface,
                         region_name=region_name) or _DEFAULT_URL
                 except ks_exc.EndpointNotFound:
-                    LOG.warning(_LW('Endpoint for service %s was not found, '
-                                    'falling back to local host on port 5050'),
+                    LOG.warning('Endpoint for service %s was not found, '
+                                'falling back to local host on port 5050',
                                 service_type)
 
         self._base_url = self._base_url.rstrip('/')

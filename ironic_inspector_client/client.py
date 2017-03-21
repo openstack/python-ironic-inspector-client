@@ -20,7 +20,6 @@ All these functions are deprecated, and
 import logging
 
 from ironic_inspector_client.common import http
-from ironic_inspector_client.common.i18n import _LW
 from ironic_inspector_client import v1
 
 
@@ -54,8 +53,8 @@ def introspect(uuid, base_url=None, auth_token=None,
     :raises: VersionNotSupported if requested api_version is not supported
     :raises: *requests* library exception on connection problems.
     """
-    LOG.warning(_LW('The "introspect" function is deprecated, please use '
-                    'ClientV1.introspect method instead'))
+    LOG.warning('The "introspect" function is deprecated, please use '
+                'ClientV1.introspect method instead')
     c = v1.ClientV1(api_version=api_version, auth_token=auth_token,
                     inspector_url=base_url, session=session, **kwargs)
     return c.introspect(uuid, new_ipmi_username=new_ipmi_username,
@@ -82,8 +81,8 @@ def get_status(uuid, base_url=None, auth_token=None,
     :raises: VersionNotSupported if requested api_version is not supported
     :raises: *requests* library exception on connection problems.
     """
-    LOG.warning(_LW('The "get_status" function is deprecated, please use '
-                    'ClientV1.get_status method instead'))
+    LOG.warning('The "get_status" function is deprecated, please use '
+                'ClientV1.get_status method instead')
     c = v1.ClientV1(api_version=api_version, auth_token=auth_token,
                     inspector_url=base_url, session=session, **kwargs)
     return c.get_status(uuid)
@@ -104,8 +103,8 @@ def server_api_versions(base_url=None, session=None, **kwargs):
     :raises: *requests* library exception on connection problems.
     :raises: ValueError if returned version cannot be parsed
     """
-    LOG.warning(_LW('The "server_api_versions" function is deprecated, '
-                    'please use ClientV1.server_api_versions method instead'))
+    LOG.warning('The "server_api_versions" function is deprecated, '
+                'please use ClientV1.server_api_versions method instead')
     c = http.BaseClient(1, inspector_url=base_url, session=session, **kwargs)
     return c.server_api_versions()
 
