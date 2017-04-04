@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    ``python-openstackclient`` is no more a requirement for
+    ``python-ironic-inspector-client``. If you wish to use
+    **ironic-inspector** cli, you should install
+    ``python-openstackclient`` manually or use setuptools "extra"::
+
+         pip install python-ironic-inspector-client[cli]
