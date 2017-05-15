@@ -23,6 +23,7 @@ import tempfile
 import unittest
 
 from ironic_inspector.common import swift
+from ironic_inspector import introspection_state as istate
 from ironic_inspector.test import functional
 from oslo_concurrency import processutils
 
@@ -35,7 +36,7 @@ class TestV1PythonAPI(functional.Base):
     def setUp(self):
         super(TestV1PythonAPI, self).setUp()
         self.client = client.ClientV1()
-        functional.cfg.CONF.set_override('store_data', '', 'processing')
+        functional.cfg.CONF.set_override('store_data', 'none', 'processing')
 
     def my_status_index(self, statuses):
         my_status = self._fake_status()
@@ -48,7 +49,7 @@ class TestV1PythonAPI(functional.Base):
                                                               'reboot')
 
         status = self.client.get_status(self.uuid)
-        self.check_status(status, finished=False)
+        self.check_status(status, finished=False, state=istate.States.waiting)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
@@ -56,10 +57,11 @@ class TestV1PythonAPI(functional.Base):
 
         self.assertCalledWithPatch(self.patch, self.cli.node.update)
         self.cli.port.create.assert_called_once_with(
-            node_uuid=self.uuid, address='11:22:33:44:55:66')
+            node_uuid=self.uuid, address='11:22:33:44:55:66',
+            pxe_enabled=True, extra={})
 
         status = self.client.get_status(self.uuid)
-        self.check_status(status, finished=True)
+        self.check_status(status, finished=True, state=istate.States.finished)
 
     def test_introspect_list_statuses(self):
         self.client.introspect(self.uuid)
@@ -69,7 +71,8 @@ class TestV1PythonAPI(functional.Base):
 
         statuses = self.client.list_statuses()
         my_status = statuses[self.my_status_index(statuses)]
-        self.check_status(my_status, finished=False)
+        self.check_status(my_status, finished=False,
+                          state=istate.States.waiting)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
@@ -77,11 +80,13 @@ class TestV1PythonAPI(functional.Base):
 
         self.assertCalledWithPatch(self.patch, self.cli.node.update)
         self.cli.port.create.assert_called_once_with(
-            node_uuid=self.uuid, address='11:22:33:44:55:66')
+            node_uuid=self.uuid, address='11:22:33:44:55:66',
+            pxe_enabled=True, extra={})
 
         statuses = self.client.list_statuses()
         my_status = statuses[self.my_status_index(statuses)]
-        self.check_status(my_status, finished=True)
+        self.check_status(my_status, finished=True,
+                          state=istate.States.finished)
 
     def test_wait_for_finish(self):
         shared = [0]  # mutable structure to hold number of retries
@@ -100,13 +105,13 @@ class TestV1PythonAPI(functional.Base):
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
         status = self.client.get_status(self.uuid)
-        self.check_status(status, finished=False)
+        self.check_status(status, finished=False, state=istate.States.waiting)
 
         self.client.wait_for_finish([self.uuid], sleep_function=fake_waiter,
                                     retry_interval=functional.DEFAULT_SLEEP)
 
         status = self.client.get_status(self.uuid)
-        self.check_status(status, finished=True)
+        self.check_status(status, finished=True, state=istate.States.finished)
 
     @mock.patch.object(swift, 'store_introspection_data', autospec=True)
     @mock.patch.object(swift, 'get_introspection_data', autospec=True)
@@ -114,7 +119,8 @@ class TestV1PythonAPI(functional.Base):
                                                  store_mock):
         functional.cfg.CONF.set_override('store_data', 'swift', 'processing')
         port_create_call = mock.call(node_uuid=self.uuid,
-                                     address='11:22:33:44:55:66')
+                                     address='11:22:33:44:55:66',
+                                     pxe_enabled=True, extra={})
         get_mock.return_value = json.dumps(self.data)
 
         # assert reprocessing doesn't work before introspection
@@ -126,14 +132,14 @@ class TestV1PythonAPI(functional.Base):
         self.cli.node.set_power_state.assert_called_once_with(self.uuid,
                                                               'reboot')
         status = self.client.get_status(self.uuid)
-        self.check_status(status, finished=False)
+        self.check_status(status, finished=False, state=istate.States.waiting)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
         status = self.client.get_status(self.uuid)
-        self.check_status(status, finished=True)
+        self.check_status(status, finished=True, state=istate.States.finished)
         self.cli.port.create.assert_has_calls([port_create_call],
                                               any_order=True)
         self.assertFalse(get_mock.called)
@@ -143,7 +149,7 @@ class TestV1PythonAPI(functional.Base):
         self.assertEqual(202, res.status_code)
         self.assertEqual('', res.text)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.check_status(status, finished=True)
+        self.check_status(status, finished=True, state=istate.States.finished)
 
         self.cli.port.create.assert_has_calls([port_create_call,
                                                port_create_call],
@@ -163,7 +169,7 @@ class TestV1PythonAPI(functional.Base):
                                                               'reboot')
 
         status = self.client.get_status(self.uuid)
-        self.check_status(status, finished=False)
+        self.check_status(status, finished=False, state=istate.States.waiting)
 
         res = self.client.abort(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
@@ -172,7 +178,8 @@ class TestV1PythonAPI(functional.Base):
         self.assertEqual('', res.text)
 
         status = self.client.get_status(self.uuid)
-        self.check_status(status, finished=True, error='Canceled by operator')
+        self.check_status(status, finished=True, state=istate.States.error,
+                          error='Canceled by operator')
 
         # assert continue doesn't work after abort
         self.call_continue(self.data, expect_error=400)
@@ -272,7 +279,7 @@ class TestSimplePythonAPI(functional.Base):
                                                               'reboot')
 
         status = client.get_status(self.uuid)
-        self.check_status(status, finished=False)
+        self.check_status(status, finished=False, state=istate.States.waiting)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
@@ -280,10 +287,11 @@ class TestSimplePythonAPI(functional.Base):
 
         self.assertCalledWithPatch(self.patch, self.cli.node.update)
         self.cli.port.create.assert_called_once_with(
-            node_uuid=self.uuid, address='11:22:33:44:55:66')
+            node_uuid=self.uuid, address='11:22:33:44:55:66',
+            pxe_enabled=True, extra={})
 
         status = client.get_status(self.uuid)
-        self.check_status(status, finished=True)
+        self.check_status(status, finished=True, state=istate.States.finished)
 
     def test_api_versions(self):
         minv, maxv = client.server_api_versions()
@@ -391,7 +399,7 @@ class TestCLI(BaseCLITest):
                                                               'reboot')
 
         status = self.run_cli('status', self.uuid, parse_json=True)
-        self.check_status(status, finished=False)
+        self.check_status(status, finished=False, state=istate.States.waiting)
 
         res = self.call_continue(self.data)
         self.assertEqual({'uuid': self.uuid}, res)
@@ -399,10 +407,11 @@ class TestCLI(BaseCLITest):
 
         self.assertCalledWithPatch(self.patch, self.cli.node.update)
         self.cli.port.create.assert_called_once_with(
-            node_uuid=self.uuid, address='11:22:33:44:55:66')
+            node_uuid=self.uuid, address='11:22:33:44:55:66',
+            pxe_enabled=True, extra={})
 
         status = self.run_cli('status', self.uuid, parse_json=True)
-        self.check_status(status, finished=True)
+        self.check_status(status, finished=True, state=istate.States.finished)
 
     def test_rules_api(self):
         res = self.run_cli('rule', 'list', parse_json=True)
