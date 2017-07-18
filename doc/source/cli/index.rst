@@ -1,8 +1,12 @@
 Command Line Reference
 ======================
 
+
+CLI tool is based on OpenStackClient_ with prefix
+``openstack baremetal introspection``.
+
 Common arguments
-~~~~~~~~~~~~~~~~
+----------------
 
 All commands accept the following arguments:
 
@@ -13,7 +17,7 @@ All commands accept the following arguments:
   for details.
 
 Start introspection on a node
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 ::
 
@@ -36,7 +40,7 @@ With ``--wait`` flag it waits until introspection ends for all given nodes,
 then displays the results as a table.
 
 Query introspection status
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 ::
 
@@ -53,7 +57,7 @@ Returns following information about a node introspection status:
 * ``uuid``: node UUID
 
 List introspection statuses
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 This command supports pagination.
 
@@ -76,7 +80,7 @@ Shows a table with the following columns:
     ``Started at`` column, newer items first.
 
 Retrieving introspection data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 ::
 
@@ -91,7 +95,7 @@ Retrieving introspection data
     by setting ``[processing]store_data`` configuration option to ``swift``.
 
 Aborting introspection
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 ::
 
@@ -100,7 +104,7 @@ Aborting introspection
 * ``NODE_ID`` - Ironic node UUID or name.
 
 Reprocess stored introspection data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
 ::
 
@@ -113,10 +117,10 @@ Reprocess stored introspection data
    by setting ``[processing]store_data`` configuration option to ``swift``.
 
 Introspection Rules API
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 Creating a rule
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~
 
 ::
 
@@ -126,7 +130,7 @@ Creating a rule
   :py:meth:`ironic_inspector_client.RulesAPI.from_json` for details.
 
 Listing all rules
-^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -136,14 +140,14 @@ Returns list of short rule representations, containing only description, UUID
 and links.
 
 Deleting all rules
-^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~
 
 ::
 
     $ openstack baremetal introspection rule purge
 
 Deleting a rule
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~
 
 ::
 
@@ -152,7 +156,7 @@ Deleting a rule
 * ``UUID`` rule UUID.
 
 Using names instead of UUID
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 Starting with baremetal introspection API 1.5 (provided by **Ironic Inspector**
 3.3.0) it's possible to use node names instead of UUIDs in all Python and CLI
@@ -163,7 +167,7 @@ calls.
 
 
 List interface data
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 ::
 
@@ -178,7 +182,7 @@ Returns a list of interface data, including attached switch information,
 for each interface on the node.
 
 Show interface data
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 ::
 
@@ -191,3 +195,5 @@ Show interface data
 
 Show interface data, including attached switch information,
 for a particular node and interface.
+
+.. _OpenStackClient: https://docs.openstack.org/python-openstackclient/latest/
