@@ -285,7 +285,7 @@ class ClientV1(http.BaseClient):
         :param node_ident: node UUID or name
         :param interface: interface name
         :param field_sel: list of all fields for which to get data
-        :returns interface data in OrderedDict
+        :returns: interface data in OrderedDict
         """
         # Use OrderedDict to maintain order of user-entered fields
         iface_data = OrderedDict()
@@ -323,7 +323,7 @@ class ClientV1(http.BaseClient):
         :param node_ident: node UUID or name
         :param field_sel: list of all fields for which to get data
         :param vlan: list of vlans used to filter the lists returned
-        :returns list of interface data, each interface in a list
+        :returns: list of interface data, each interface in a list
         """
 
         # Get inventory data for this node
