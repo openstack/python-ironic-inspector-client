@@ -8,7 +8,7 @@ This is a client library and tool for `Ironic Inspector`_.
 
 * Free software: Apache license
 * Source: https://git.openstack.org/cgit/openstack/python-ironic-inspector-client
-* Documentation: https://docs.openstack.org/developer/python-ironic-inspector-client
+* Documentation: https://docs.openstack.org/python-ironic-inspector-client/latest/
 * Bugs: https://bugs.launchpad.net/python-ironic-inspector-client
 * Downloads: https://pypi.python.org/pypi/python-ironic-inspector-client
 
@@ -21,5 +21,5 @@ Refer to the `HTTP API reference`_ for information on the
 
 .. _Gerrit Workflow: https://docs.openstack.org/infra/manual/developers.html#development-workflow
 .. _Ironic Inspector: https://pypi.python.org/pypi/ironic-inspector
-.. _Inspector contributing guide: https://docs.openstack.org/developer/ironic-inspector/contributing.html
-.. _HTTP API reference: https://docs.openstack.org/developer/ironic-inspector/http-api.html
+.. _Inspector contributing guide: https://docs.openstack.org/ironic-inspector/latest/contributing.html
+.. _HTTP API reference: https://docs.openstack.org/ironic-inspector/latest/http-api.html

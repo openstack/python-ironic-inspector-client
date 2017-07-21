@@ -58,7 +58,7 @@ class ClientV1(http.BaseClient):
 
     This code creates a client with API version *1.0* and a given Keystone
     `session
-    <http://docs.openstack.org/developer/keystoneauth/using-sessions.html>`_.
+    <https://docs.openstack.org/keystoneauth/latest/using-sessions.html>`_.
     The service URL is fetched from the service catalog in this case. Optional
     arguments ``service_type``, ``interface`` and ``region_name`` can be
     provided to modify how the URL is looked up.

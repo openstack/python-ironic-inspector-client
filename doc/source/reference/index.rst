@@ -35,4 +35,4 @@ API Reference
 
    api/autoindex
 
-.. _Keystone session: http://docs.openstack.org/developer/keystoneauth/using-sessions.html
+.. _Keystone session: https://docs.openstack.org/keystoneauth/latest/using-sessions.html

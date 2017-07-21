@@ -163,7 +163,7 @@ Starting with baremetal introspection API 1.5 (provided by **Ironic Inspector**
 calls.
 
 
-.. _introspection rules documentation: http://docs.openstack.org/developer/ironic-inspector/usage.html#introspection-rules
+.. _introspection rules documentation: https://docs.openstack.org/ironic-inspector/latest/usage.html#introspection-rules
 
 
 List interface data
