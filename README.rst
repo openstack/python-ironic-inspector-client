@@ -21,5 +21,5 @@ Refer to the `HTTP API reference`_ for information on the
 
 .. _Gerrit Workflow: https://docs.openstack.org/infra/manual/developers.html#development-workflow
 .. _Ironic Inspector: https://pypi.python.org/pypi/ironic-inspector
-.. _Inspector contributing guide: https://docs.openstack.org/ironic-inspector/latest/contributing.html
-.. _HTTP API reference: https://docs.openstack.org/ironic-inspector/latest/http-api.html
+.. _Inspector contributing guide: https://docs.openstack.org/ironic-inspector/latest/contributor/index.html
+.. _HTTP API reference: https://docs.openstack.org/ironic-inspector/latest/user/http-api.html
