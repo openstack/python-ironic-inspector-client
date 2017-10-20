@@ -66,14 +66,6 @@ class StartCommand(command.Lister):
         parser = super(StartCommand, self).get_parser(prog_name)
         parser.add_argument('node', help='baremetal node UUID(s) or name(s)',
                             nargs='+')
-        parser.add_argument('--new-ipmi-username',
-                            default=None,
-                            help='if set, *Ironic Inspector* will update IPMI '
-                            'user name to this value')
-        parser.add_argument('--new-ipmi-password',
-                            default=None,
-                            help='if set, *Ironic Inspector* will update IPMI '
-                            'password to this value')
         parser.add_argument('--wait',
                             action='store_true',
                             help='wait for introspection to finish; the result'
@@ -83,12 +75,7 @@ class StartCommand(command.Lister):
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
         for uuid in parsed_args.node:
-            client.introspect(uuid,
-                              new_ipmi_username=parsed_args.new_ipmi_username,
-                              new_ipmi_password=parsed_args.new_ipmi_password)
-        if parsed_args.new_ipmi_password:
-            print('Setting IPMI credentials requested, please power on '
-                  'the machine manually', file=sys.stderr)
+            client.introspect(uuid)
 
         if parsed_args.wait:
             print('Waiting for introspection to finish...', file=sys.stderr)

@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    Experimental setting IPMI credentials feature was removed.

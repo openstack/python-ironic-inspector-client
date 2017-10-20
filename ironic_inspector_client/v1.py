@@ -88,15 +88,10 @@ class ClientV1(http.BaseClient):
         super(ClientV1, self).__init__(**kwargs)
         self.rules = RulesAPI(self.request)
 
-    def introspect(self, uuid, new_ipmi_password=None, new_ipmi_username=None):
+    def introspect(self, uuid):
         """Start introspection for a node.
 
         :param uuid: node UUID or name
-        :param new_ipmi_password: if set, *Ironic Inspector* will update IPMI
-                                  password to this value. DEPRECATED.
-        :param new_ipmi_username: if new_ipmi_password is set, this values sets
-                                  new IPMI user name. Defaults to one in
-                                  driver_info. DEPRECATED.
         :raises: :py:class:`.ClientError` on error reported from a server
         :raises: :py:class:`.VersionNotSupported` if requested api_version
             is not supported
@@ -105,18 +100,8 @@ class ClientV1(http.BaseClient):
         if not isinstance(uuid, six.string_types):
             raise TypeError(
                 _("Expected string for uuid argument, got %r") % uuid)
-        if new_ipmi_username and not new_ipmi_password:
-            raise ValueError(
-                _("Setting IPMI user name requires a new password"))
 
-        if new_ipmi_password:
-            LOG.warning('Setting IPMI credentials via ironic-inspector '
-                        'is deprecated, this feature will be removed '
-                        'in the Pike release')
-
-        params = {'new_ipmi_username': new_ipmi_username,
-                  'new_ipmi_password': new_ipmi_password}
-        self.request('post', '/introspection/%s' % uuid, params=params)
+        self.request('post', '/introspection/%s' % uuid)
 
     def reprocess(self, uuid):
         """Reprocess stored introspection data.

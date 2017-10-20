@@ -42,9 +42,7 @@ class TestIntrospect(BaseTest):
         result = cmd.take_action(parsed_args)
 
         self.assertEqual((shell.StartCommand.COLUMNS, []), result)
-        self.client.introspect.assert_called_once_with('uuid1',
-                                                       new_ipmi_password=None,
-                                                       new_ipmi_username=None)
+        self.client.introspect.assert_called_once_with('uuid1')
 
     def test_introspect_many(self):
         arglist = ['uuid1', 'uuid2', 'uuid3']
@@ -54,9 +52,7 @@ class TestIntrospect(BaseTest):
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         cmd.take_action(parsed_args)
 
-        calls = [mock.call(node, new_ipmi_password=None,
-                           new_ipmi_username=None)
-                 for node in arglist]
+        calls = [mock.call(node) for node in arglist]
         self.assertEqual(calls, self.client.introspect.call_args_list)
 
     def test_introspect_many_fails(self):
@@ -68,41 +64,7 @@ class TestIntrospect(BaseTest):
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         self.assertRaises(RuntimeError, cmd.take_action, parsed_args)
 
-        calls = [mock.call(node, new_ipmi_password=None,
-                           new_ipmi_username=None)
-                 for node in arglist[:2]]
-        self.assertEqual(calls, self.client.introspect.call_args_list)
-
-    def test_introspect_set_credentials(self):
-        uuids = ['uuid1', 'uuid2', 'uuid3']
-        arglist = ['--new-ipmi-password', '1234'] + uuids
-        verifylist = [('node', uuids), ('new_ipmi_password', '1234')]
-
-        cmd = shell.StartCommand(self.app, None)
-        parsed_args = self.check_parser(cmd, arglist, verifylist)
-        with mock.patch('sys.stdout', write=lambda s: None):
-            cmd.take_action(parsed_args)
-
-        calls = [mock.call(node, new_ipmi_password='1234',
-                           new_ipmi_username=None)
-                 for node in uuids]
-        self.assertEqual(calls, self.client.introspect.call_args_list)
-
-    def test_introspect_set_credentials_with_username(self):
-        uuids = ['uuid1', 'uuid2', 'uuid3']
-        arglist = ['--new-ipmi-password', '1234',
-                   '--new-ipmi-username', 'root'] + uuids
-        verifylist = [('node', uuids), ('new_ipmi_password', '1234'),
-                      ('new_ipmi_username', 'root')]
-
-        cmd = shell.StartCommand(self.app, None)
-        parsed_args = self.check_parser(cmd, arglist, verifylist)
-        with mock.patch('sys.stdout', write=lambda s: None):
-            cmd.take_action(parsed_args)
-
-        calls = [mock.call(node, new_ipmi_password='1234',
-                           new_ipmi_username='root')
-                 for node in uuids]
+        calls = [mock.call(node) for node in arglist[:2]]
         self.assertEqual(calls, self.client.introspect.call_args_list)
 
     def test_reprocess(self):
@@ -134,9 +96,7 @@ class TestIntrospect(BaseTest):
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         _c, values = cmd.take_action(parsed_args)
 
-        calls = [mock.call(node, new_ipmi_password=None,
-                           new_ipmi_username=None)
-                 for node in nodes]
+        calls = [mock.call(node) for node in nodes]
         self.assertEqual(calls, self.client.introspect.call_args_list)
         self.assertEqual([('uuid1', None), ('uuid2', 'boom'), ('uuid3', None)],
                          sorted(values))

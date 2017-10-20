@@ -86,21 +86,10 @@ class TestIntrospect(BaseTest):
     def test(self, mock_req):
         self.get_client().introspect(self.uuid)
         mock_req.assert_called_once_with(
-            'post', '/introspection/%s' % self.uuid,
-            params={'new_ipmi_username': None, 'new_ipmi_password': None})
+            'post', '/introspection/%s' % self.uuid)
 
     def test_invalid_input(self, mock_req):
         self.assertRaises(TypeError, self.get_client().introspect, 42)
-        self.assertRaises(ValueError, self.get_client().introspect, 'uuid',
-                          new_ipmi_username='user')
-
-    def test_set_ipmi_credentials(self, mock_req):
-        self.get_client().introspect(self.uuid,
-                                     new_ipmi_password='p',
-                                     new_ipmi_username='u')
-        mock_req.assert_called_once_with(
-            'post', '/introspection/%s' % self.uuid,
-            params={'new_ipmi_username': 'u', 'new_ipmi_password': 'p'})
 
 
 @mock.patch.object(http.BaseClient, 'request')

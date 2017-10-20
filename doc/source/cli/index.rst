@@ -21,12 +21,9 @@ Start introspection on a node
 
 ::
 
-    $ openstack baremetal introspection start [--wait] [--new-ipmi-password=PWD [--new-ipmi-username=USER]] NODE_ID [NODE_ID ...]
+    $ openstack baremetal introspection start [--wait] NODE_ID [NODE_ID ...]
 
 * ``NODE_ID`` - Ironic node UUID or name;
-* ``new-ipmi-username`` and ``new-ipmi-password`` - deprecated options to set
-  IPMI credentials during introspection. Do not use, this feature is pending
-  removal.
 
 Note that the CLI call accepts several UUID's and will stop on the first error.
 

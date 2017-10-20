@@ -184,18 +184,6 @@ class TestV1PythonAPI(functional.Base):
         # assert continue doesn't work after abort
         self.call_continue(self.data, expect_error=400)
 
-    def test_setup_ipmi(self):
-        self.node.provision_state = 'enroll'
-        self.client.introspect(self.uuid, new_ipmi_username='admin',
-                               new_ipmi_password='pwd')
-        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.assertFalse(self.cli.node.set_power_state.called)
-
-        res = self.call_continue(self.data)
-        self.assertEqual('admin', res['ipmi_username'])
-        self.assertEqual('pwd', res['ipmi_password'])
-        self.assertTrue(res['ipmi_setup_credentials'])
-
     def test_api_versions(self):
         minv, maxv = self.client.server_api_versions()
         self.assertEqual((1, 0), minv)
@@ -344,9 +332,6 @@ class TestCLI(BaseCLITest):
         self.assertIn('too few arguments', err)
         err = self.run_cli('status', expect_error=True)
         self.assertIn('too few arguments', err)
-        err = self.run_cli('start', 'uuid', '--new-ipmi-username', 'user',
-                           expect_error=True)
-        self.assertIn('requires a new password', err)
         err = self.run_cli('rule', 'show', 'uuid', expect_error=True)
         self.assertIn('not found', err)
         err = self.run_cli('rule', 'delete', 'uuid', expect_error=True)
