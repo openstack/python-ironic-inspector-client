@@ -11,6 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .client import *  # noqa
-from .v1 import ClientV1  # noqa
+from .v1 import ClientV1, DEFAULT_API_VERSION, MAX_API_VERSION  # noqa
 from .common.http import ClientError, VersionNotSupported  # noqa

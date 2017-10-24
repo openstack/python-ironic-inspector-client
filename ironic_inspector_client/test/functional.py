@@ -271,43 +271,6 @@ class TestV1PythonAPI(functional.Base):
                           self.uuid)
 
 
-class TestSimplePythonAPI(functional.Base):
-    def test_introspect_get_status(self):
-        client.introspect(self.uuid)
-        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
-                                                              'reboot')
-
-        status = client.get_status(self.uuid)
-        self.check_status(status, finished=False, state=istate.States.waiting)
-
-        res = self.call_continue(self.data)
-        self.assertEqual({'uuid': self.uuid}, res)
-        eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-
-        self.assertCalledWithPatch(self.patch, self.cli.node.update)
-        self.cli.port.create.assert_called_once_with(
-            node_uuid=self.uuid, address='11:22:33:44:55:66',
-            pxe_enabled=True, extra={})
-
-        status = client.get_status(self.uuid)
-        self.check_status(status, finished=True, state=istate.States.finished)
-
-    def test_api_versions(self):
-        minv, maxv = client.server_api_versions()
-        self.assertEqual((1, 0), minv)
-        self.assertGreaterEqual(maxv, (1, 0))
-        self.assertLess(maxv, (2, 0))
-
-        self.assertRaises(client.VersionNotSupported,
-                          client.introspect, self.uuid, api_version=(1, 999))
-        self.assertRaises(client.VersionNotSupported,
-                          client.get_status, self.uuid, api_version=(1, 999))
-        # Error 404
-        self.assertRaises(client.ClientError,
-                          client.get_status, self.uuid, api_version=(1, 0))
-
-
 BASE_CMD = [os.path.join(sys.prefix, 'bin', 'openstack'),
             '--os-auth-type', 'token_endpoint', '--os-token', 'fake',
             '--os-url', 'http://127.0.0.1:5050']

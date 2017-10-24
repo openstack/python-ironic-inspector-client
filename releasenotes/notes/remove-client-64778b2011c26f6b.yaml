@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The deprecated module ``ironic_inspector_client.client`` was removed,
+    please use ``ironic_inspector_client.ClientV1`` instead.
