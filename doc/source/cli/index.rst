@@ -81,7 +81,7 @@ Retrieving introspection data
 
 ::
 
-    $ openstack baremetal introspection data save [--file=file_name] NODE_ID
+    $ openstack baremetal introspection data save [--file file_name] NODE_ID
 
 * ``NODE_ID`` - Ironic node UUID or name;
 * ``file_name`` - file name to save data to. If file name is not provided,
