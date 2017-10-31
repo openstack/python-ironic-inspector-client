@@ -1,0 +1,26 @@
+- job:
+    name: python-ironic-inspector-client-tox-func
+    parent: legacy-base
+    run: playbooks/legacy/python-ironic-inspector-client-tox-func/run.yaml
+    post-run: playbooks/legacy/python-ironic-inspector-client-tox-func/post.yaml
+    timeout: 2400
+    required-projects:
+      - openstack/requirements
+
+- job:
+    name: python-ironic-inspector-client-tempest-dsvm
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/python-ironic-inspector-client-tempest-dsvm/run.yaml
+    post-run: playbooks/legacy/python-ironic-inspector-client-tempest-dsvm/post.yaml
+    timeout: 10800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/ironic
+      - openstack/ironic-inspector
+      - openstack/ironic-lib
+      - openstack/ironic-python-agent
+      - openstack/pyghmi
+      - openstack/python-ironic-inspector-client
+      - openstack/python-ironicclient
+      - openstack/tempest
+      - openstack/virtualbmc
