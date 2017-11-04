@@ -2,7 +2,7 @@
     name: openstack/python-ironic-inspector-client
     check:
       jobs:
-        - python-ironic-inspector-client-tox-func:
+        - openstack-tox-functional:
             irrelevant-files:
               - ^.*\.rst$
               - ^doc/.*$
@@ -16,7 +16,7 @@
               - ^setup.cfg$
     gate:
       jobs:
-        - python-ironic-inspector-client-tox-func:
+        - openstack-tox-functional:
             irrelevant-files:
               - ^.*\.rst$
               - ^doc/.*$
