@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    The tox ``func`` environment has been renamed to ``functional``.
