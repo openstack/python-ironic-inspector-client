@@ -1,9 +1,15 @@
 - job:
     name: python-ironic-inspector-client-tempest-dsvm
     parent: legacy-dsvm-base
-    run: playbooks/legacy/python-ironic-inspector-client-tempest-dsvm/run.yaml
-    post-run: playbooks/legacy/python-ironic-inspector-client-tempest-dsvm/post.yaml
-    timeout: 10800
+    irrelevant-files:
+      - ^(func|)test-requirements.txt$
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^ironic_inspector_client/test/.*$
+      - ^releasenotes/.*$
+      - ^setup.cfg$
+      - ^tools/.*$
+      - ^tox.ini$
     required-projects:
       - openstack-infra/devstack-gate
       - openstack/ironic
@@ -15,3 +21,6 @@
       - openstack/python-ironicclient
       - openstack/tempest
       - openstack/virtualbmc
+    run: playbooks/legacy/python-ironic-inspector-client-tempest-dsvm/run.yaml
+    post-run: playbooks/legacy/python-ironic-inspector-client-tempest-dsvm/post.yaml
+    timeout: 10800

@@ -2,29 +2,9 @@
     name: openstack/python-ironic-inspector-client
     check:
       jobs:
-        - openstack-tox-functional:
-            irrelevant-files:
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^releasenotes/.*$
-        - python-ironic-inspector-client-tempest-dsvm:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
+        - openstack-tox-functional
+        - python-ironic-inspector-client-tempest-dsvm
     gate:
       jobs:
-        - openstack-tox-functional:
-            irrelevant-files:
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^releasenotes/.*$
-        - python-ironic-inspector-client-tempest-dsvm:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
+        - openstack-tox-functional
+        - python-ironic-inspector-client-tempest-dsvm
