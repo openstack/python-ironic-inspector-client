@@ -209,9 +209,6 @@ class TestV1PythonAPI(functional.Base):
             client.ClientV1(inspector_url='http://127.0.0.1:5050/v1')
             .server_api_versions())
 
-        self.assertTrue(client.ClientV1(auth_token='some token')
-                        .server_api_versions())
-
     def test_rules_api(self):
         res = self.client.rules.get_all()
         self.assertEqual([], res)
