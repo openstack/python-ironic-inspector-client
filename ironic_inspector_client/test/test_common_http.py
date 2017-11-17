@@ -25,7 +25,7 @@ class TestCheckVersion(unittest.TestCase):
     @mock.patch.object(http.BaseClient, 'server_api_versions',
                        lambda *args, **kwargs: ((1, 0), (1, 99)))
     def _check(self, version):
-        cli = http.BaseClient(1)
+        cli = http.BaseClient(1, inspector_url='http://127.0.0.1:5050')
         return cli._check_api_version(version)
 
     def test_tuple(self):
@@ -64,7 +64,9 @@ FAKE_HEADERS = {
                       'return_value.headers': FAKE_HEADERS})
 class TestServerApiVersions(unittest.TestCase):
     def _check(self, current=1):
-        return http.BaseClient(api_version=current).server_api_versions()
+        return http.BaseClient(
+            api_version=current,
+            inspector_url='http://127.0.0.1:5050').server_api_versions()
 
     def test_no_headers(self, mock_get):
         mock_get.return_value.headers = {}
@@ -102,7 +104,7 @@ class TestServerApiVersions(unittest.TestCase):
 
 
 class TestRequest(unittest.TestCase):
-    base_url = http._DEFAULT_URL + '/v1'
+    base_url = 'http://127.0.0.1:5050/v1'
 
     def setUp(self):
         super(TestRequest, self).setUp()
@@ -131,24 +133,18 @@ class TestRequest(unittest.TestCase):
             service_type='baremetal-introspection',
             interface=None, region_name=None)
 
-    def test_ok_no_endpoint(self):
+    def test_no_endpoint(self):
         self.session.get_endpoint.return_value = None
-        res = self.get_client().request('get', '/foo/bar')
+        self.assertRaises(http.EndpointNotFound, self.get_client)
 
-        self.assertIs(self.req.return_value, res)
-        self.req.assert_called_once_with(self.base_url + '/foo/bar', 'get',
-                                         raise_exc=False, headers=self.headers)
         self.session.get_endpoint.assert_called_once_with(
             service_type='baremetal-introspection',
             interface=None, region_name=None)
 
-    def test_ok_endpoint_not_found(self):
+    def test_endpoint_not_found(self):
         self.session.get_endpoint.side_effect = exceptions.EndpointNotFound()
-        res = self.get_client().request('get', '/foo/bar')
+        self.assertRaises(http.EndpointNotFound, self.get_client)
 
-        self.assertIs(self.req.return_value, res)
-        self.req.assert_called_once_with(self.base_url + '/foo/bar', 'get',
-                                         raise_exc=False, headers=self.headers)
         self.session.get_endpoint.assert_called_once_with(
             service_type='baremetal-introspection',
             interface=None, region_name=None)
@@ -156,11 +152,13 @@ class TestRequest(unittest.TestCase):
     @mock.patch.object(session.Session, 'request', autospec=True,
                        **{'return_value.status_code': 200})
     def test_ok_no_auth(self, mock_req):
-        res = self.get_client(use_session=False).request('get', '/foo/bar')
+        res = self.get_client(
+            use_session=False,
+            inspector_url='http://some/host').request('get', '/foo/bar')
 
         self.assertIs(mock_req.return_value, res)
         mock_req.assert_called_once_with(mock.ANY,
-                                         self.base_url + '/foo/bar', 'get',
+                                         'http://some/host/v1/foo/bar', 'get',
                                          raise_exc=False, headers=self.headers)
 
     def test_explicit_version(self):
@@ -169,22 +167,6 @@ class TestRequest(unittest.TestCase):
         self.assertIs(self.req.return_value, res)
         self.headers[http._VERSION_HEADER] = '1.2'
         self.req.assert_called_once_with(self.base_url + '/foo/bar', 'get',
-                                         raise_exc=False, headers=self.headers)
-
-    def test_explicit_url(self):
-        res = self.get_client(inspector_url='http://host').request(
-            'get', '/foo/bar')
-
-        self.assertIs(self.req.return_value, res)
-        self.req.assert_called_once_with('http://host/v1/foo/bar', 'get',
-                                         raise_exc=False, headers=self.headers)
-
-    def test_explicit_url_with_version(self):
-        res = self.get_client(inspector_url='http://host/v1').request(
-            'get', '/foo/bar')
-
-        self.assertIs(self.req.return_value, res)
-        self.req.assert_called_once_with('http://host/v1/foo/bar', 'get',
                                          raise_exc=False, headers=self.headers)
 
     def test_error(self):

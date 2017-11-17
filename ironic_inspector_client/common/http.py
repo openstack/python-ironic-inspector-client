@@ -18,14 +18,12 @@ import logging
 
 from keystoneauth1 import exceptions as ks_exc
 from keystoneauth1 import session as ks_session
-from oslo_utils import netutils
 import requests
 import six
 
 from ironic_inspector_client.common.i18n import _
 
 
-_DEFAULT_URL = 'http://' + netutils.get_my_ipv4() + ':5050'
 _ERROR_ENCODING = 'utf-8'
 LOG = logging.getLogger('ironic_inspector_client')
 
@@ -85,6 +83,19 @@ class VersionNotSupported(Exception):
         super(Exception, self).__init__(msg)
 
 
+class EndpointNotFound(Exception):
+    """Denotes that endpoint for the introspection service was not found.
+
+    ivar service_type: requested service type
+    """
+
+    def __init__(self, service_type):
+        self.service_type = service_type
+        msg = _('Endpoint of type %s was not found in the service catalog '
+                'and was not provided explicitly') % service_type
+        super(Exception, self).__init__(msg)
+
+
 class BaseClient(object):
     """Base class for clients, provides common HTTP code."""
 
@@ -105,8 +116,11 @@ class BaseClient(object):
         :param interface: interface type (public, internal, etc) to use when
             looking up the URL
         :param region_name: region name to use when looking up the URL
+        :raises: EndpointNotFound if the introspection service endpoint
+            was not provided via inspector_url and was not found in the
+            service catalog.
         """
-        self._base_url = inspector_url or _DEFAULT_URL
+        self._base_url = inspector_url
 
         if session is None:
             self._session = ks_session.Session(None)
@@ -117,11 +131,21 @@ class BaseClient(object):
                     self._base_url = session.get_endpoint(
                         service_type=service_type,
                         interface=interface,
-                        region_name=region_name) or _DEFAULT_URL
-                except ks_exc.EndpointNotFound:
-                    LOG.warning('Endpoint for service %s was not found, '
-                                'falling back to local host on port 5050',
-                                service_type)
+                        region_name=region_name)
+                except ks_exc.CatalogException as exc:
+                    LOG.error('%(iface)s endpoint for %(stype)s in region '
+                              '%(region)s was not found in the service '
+                              'catalog: %(error)s',
+                              {'iface': interface,
+                               'stype': service_type,
+                               'region': region_name,
+                               'error': exc})
+                    raise EndpointNotFound(service_type=service_type)
+
+        if not self._base_url:
+            # This handles the case when session=None and no inspector_url is
+            # provided, as well as keystoneauth plugins that may return None.
+            raise EndpointNotFound(service_type=service_type)
 
         self._base_url = self._base_url.rstrip('/')
         self._api_version = self._check_api_version(api_version)

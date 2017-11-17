@@ -23,6 +23,7 @@ class TestExposedAPI(unittest.TestCase):
                    if not x.startswith('__') and
                    not isinstance(getattr(ironic_inspector_client, x),
                                   types.ModuleType)}
-        self.assertEqual({'ClientV1', 'ClientError', 'VersionNotSupported',
+        self.assertEqual({'ClientV1', 'ClientError', 'EndpointNotFound',
+                          'VersionNotSupported',
                           'MAX_API_VERSION', 'DEFAULT_API_VERSION'},
                          exposed)
