@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Support for passing ``auth_token`` to ``ClientV1`` was removed. Please
+    create a **keystoneauth** session and pass it via the ``session`` argument
+    instead. If no ``session`` is passed, a new session without authentication
+    is created.

@@ -36,11 +36,9 @@ FAKE_HEADERS = {
                                           status_code=200))
 class TestInit(unittest.TestCase):
     my_ip = 'http://' + netutils.get_my_ipv4() + ':5050'
-    token = "token"
 
     def get_client(self, **kwargs):
-        return ironic_inspector_client.ClientV1(auth_token=self.token,
-                                                **kwargs)
+        return ironic_inspector_client.ClientV1(**kwargs)
 
     def test_ok(self, mock_get):
         self.get_client()
@@ -72,13 +70,11 @@ class BaseTest(unittest.TestCase):
         super(BaseTest, self).setUp()
         self.uuid = uuidutils.generate_uuid()
         self.my_ip = 'http://' + netutils.get_my_ipv4() + ':5050'
-        self.token = "token"
 
     @mock.patch.object(http.BaseClient, 'server_api_versions',
                        lambda self: ((1, 0), (1, 99)))
     def get_client(self, **kwargs):
-        return ironic_inspector_client.ClientV1(auth_token=self.token,
-                                                **kwargs)
+        return ironic_inspector_client.ClientV1(**kwargs)
 
 
 @mock.patch.object(http.BaseClient, 'request')

@@ -114,13 +114,9 @@ class TestRequest(unittest.TestCase):
 
     @mock.patch.object(http.BaseClient, 'server_api_versions',
                        lambda self: ((1, 0), (1, 42)))
-    def get_client(self, version=1, inspector_url=None, use_session=True,
-                   use_token=True):
+    def get_client(self, version=1, inspector_url=None, use_session=True):
         if use_session:
             return http.BaseClient(version, session=self.session,
-                                   inspector_url=inspector_url)
-        elif use_token:
-            return http.BaseClient(version, auth_token='token',
                                    inspector_url=inspector_url)
         else:
             return http.BaseClient(version, inspector_url=inspector_url)
@@ -159,19 +155,8 @@ class TestRequest(unittest.TestCase):
 
     @mock.patch.object(session.Session, 'request', autospec=True,
                        **{'return_value.status_code': 200})
-    def test_ok_with_auth_token(self, mock_req):
-        res = self.get_client(use_session=False).request('get', '/foo/bar')
-
-        self.assertIs(mock_req.return_value, res)
-        mock_req.assert_called_once_with(mock.ANY,
-                                         self.base_url + '/foo/bar', 'get',
-                                         raise_exc=False, headers=self.headers)
-
-    @mock.patch.object(session.Session, 'request', autospec=True,
-                       **{'return_value.status_code': 200})
     def test_ok_no_auth(self, mock_req):
-        res = self.get_client(use_session=False,
-                              use_token=False).request('get', '/foo/bar')
+        res = self.get_client(use_session=False).request('get', '/foo/bar')
 
         self.assertIs(mock_req.return_value, res)
         mock_req.assert_called_once_with(mock.ANY,

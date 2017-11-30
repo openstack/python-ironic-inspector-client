@@ -18,7 +18,6 @@ import logging
 
 from keystoneauth1 import exceptions as ks_exc
 from keystoneauth1 import session as ks_session
-from keystoneauth1 import token_endpoint
 from oslo_utils import netutils
 import requests
 import six
@@ -89,7 +88,7 @@ class VersionNotSupported(Exception):
 class BaseClient(object):
     """Base class for clients, provides common HTTP code."""
 
-    def __init__(self, api_version, inspector_url=None, auth_token=None,
+    def __init__(self, api_version, inspector_url=None,
                  session=None, service_type='baremetal-introspection',
                  interface=None, region_name=None):
         """Create a client.
@@ -100,26 +99,17 @@ class BaseClient(object):
             http://host:port[/ver]. When session is provided, defaults to
             service URL from the catalog. As a last resort
             defaults to ``http://<current host>:5050/v<MAJOR>``.
-        :param auth_token: authentication token (deprecated, use session)
-        :param session: existing keystone session
+        :param session: existing keystone session. A session without
+            authentication is created if this is set to None.
         :param service_type: service type to use when looking up the URL
         :param interface: interface type (public, internal, etc) to use when
             looking up the URL
         :param region_name: region name to use when looking up the URL
         """
         self._base_url = inspector_url or _DEFAULT_URL
-        self._auth_token = auth_token
 
         if session is None:
-            if auth_token:
-                LOG.warning('Passing auth_token to client objects '
-                            'is deprecated, please pass session instead')
-                auth = token_endpoint.Token(endpoint=self._base_url,
-                                            token=auth_token)
-            else:
-                auth = None
-
-            self._session = ks_session.Session(auth)
+            self._session = ks_session.Session(None)
         else:
             self._session = session
             if not inspector_url:
