@@ -38,6 +38,7 @@ class TestInit(unittest.TestCase):
     my_ip = 'http://' + netutils.get_my_ipv4() + ':5050'
 
     def get_client(self, **kwargs):
+        kwargs.setdefault('inspector_url', self.my_ip)
         return ironic_inspector_client.ClientV1(**kwargs)
 
     def test_ok(self, mock_get):
@@ -74,6 +75,7 @@ class BaseTest(unittest.TestCase):
     @mock.patch.object(http.BaseClient, 'server_api_versions',
                        lambda self: ((1, 0), (1, 99)))
     def get_client(self, **kwargs):
+        kwargs.setdefault('inspector_url', self.my_ip)
         return ironic_inspector_client.ClientV1(**kwargs)
 
 

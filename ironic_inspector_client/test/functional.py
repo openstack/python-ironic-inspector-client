@@ -25,17 +25,21 @@ import unittest
 from ironic_inspector.common import swift
 from ironic_inspector import introspection_state as istate
 from ironic_inspector.test import functional
+from keystoneauth1 import session as ks_session
+from keystoneauth1 import token_endpoint
 from oslo_concurrency import processutils
 
 import ironic_inspector_client as client
-from ironic_inspector_client.common import http
 from ironic_inspector_client import shell
 
 
 class TestV1PythonAPI(functional.Base):
     def setUp(self):
         super(TestV1PythonAPI, self).setUp()
-        self.client = client.ClientV1()
+        self.auth = token_endpoint.Token(endpoint='http://127.0.0.1:5050',
+                                         token='token')
+        self.session = ks_session.Session(self.auth)
+        self.client = client.ClientV1(session=self.session)
         functional.cfg.CONF.set_override('store_data', 'none', 'processing')
 
     def my_status_index(self, statuses):
@@ -192,15 +196,18 @@ class TestV1PythonAPI(functional.Base):
 
     def test_client_init(self):
         self.assertRaises(client.VersionNotSupported,
-                          client.ClientV1, api_version=(1, 999))
+                          client.ClientV1, session=self.session,
+                          api_version=(1, 999))
         self.assertRaises(client.VersionNotSupported,
-                          client.ClientV1, api_version=2)
+                          client.ClientV1, session=self.session,
+                          api_version=2)
 
-        self.assertTrue(client.ClientV1(api_version=1).server_api_versions())
-        self.assertTrue(client.ClientV1(api_version='1.0')
-                        .server_api_versions())
-        self.assertTrue(client.ClientV1(api_version=(1, 0))
-                        .server_api_versions())
+        self.assertTrue(client.ClientV1(
+            api_version=1, session=self.session).server_api_versions())
+        self.assertTrue(client.ClientV1(
+            api_version='1.0', session=self.session).server_api_versions())
+        self.assertTrue(client.ClientV1(
+            api_version=(1, 0), session=self.session).server_api_versions())
 
         self.assertTrue(
             client.ClientV1(inspector_url='http://127.0.0.1:5050')
@@ -455,6 +462,4 @@ class TestCLI(BaseCLITest):
 
 if __name__ == '__main__':
     with functional.mocked_server():
-        # Make links predictable
-        http._DEFAULT_URL = 'http://127.0.0.1:5050'
         unittest.main(verbosity=2)

@@ -1,0 +1,11 @@
+---
+upgrade:
+  - |
+    There is no longer a default introspection API endpoint. Previously,
+    if no endpoint was requested and no endpoint found in the service catalog,
+    ``127.0.0.1:5050`` was used by default.
+other:
+  - |
+    The ``ClientV1`` constructor now raises a new ``EndpointNotFound``
+    exception when no introspection API endpoint can be detected. Previously
+    this condition was ignored and ``127.0.0.1:5050`` was used as a fallback.
