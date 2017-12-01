@@ -161,6 +161,15 @@ class TestRequest(unittest.TestCase):
                                          'http://some/host/v1/foo/bar', 'get',
                                          raise_exc=False, headers=self.headers)
 
+    def test_ok_with_session_and_url(self):
+        res = self.get_client(
+            use_session=True,
+            inspector_url='http://some/host').request('get', '/foo/bar')
+
+        self.assertIs(self.req.return_value, res)
+        self.req.assert_called_once_with('http://some/host/v1/foo/bar', 'get',
+                                         raise_exc=False, headers=self.headers)
+
     def test_explicit_version(self):
         res = self.get_client(version='1.2').request('get', '/foo/bar')
 
