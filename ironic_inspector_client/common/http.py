@@ -86,7 +86,7 @@ class VersionNotSupported(Exception):
 class EndpointNotFound(Exception):
     """Denotes that endpoint for the introspection service was not found.
 
-    ivar service_type: requested service type
+    :ivar service_type: requested service type
     """
 
     def __init__(self, service_type):

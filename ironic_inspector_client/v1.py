@@ -135,12 +135,13 @@ class ClientV1(http.BaseClient):
             is not supported
         :raises: *requests* library exception on connection problems.
         :return: a list of status dictionaries with the keys:
-                 `error` an error string or None,
-                 `finished` True/False,
-                 `finished_at` an ISO8601 timestamp or None,
-                 `links` with a self-link URL,
-                 `started_at` an ISO8601 timestamp,
-                 `uuid` the node UUID
+
+            * `error` an error string or None,
+            * `finished` whether introspection was finished,
+            * `finished_at` an ISO8601 timestamp or None,
+            * `links` with a self-link URL,
+            * `started_at` an ISO8601 timestamp,
+            * `uuid` the node UUID
         """
         if not (marker is None or isinstance(marker, six.string_types)):
             raise TypeError(_('Expected a string value of the marker, got '
@@ -165,12 +166,13 @@ class ClientV1(http.BaseClient):
             is not supported
         :raises: *requests* library exception on connection problems.
         :return: dictionary with the keys:
-                 `error` an error string or None,
-                 `finished` True/False,
-                 `finished_at` an ISO8601 timestamp or None,
-                 `links` with a self-link URL,
-                 `started_at` an ISO8601 timestamp,
-                 `uuid` the node UUID
+
+            * `error` an error string or None,
+            * `finished` whether introspection was finished,
+            * `finished_at` an ISO8601 timestamp or None,
+            * `links` with a self-link URL,
+            * `started_at` an ISO8601 timestamp,
+            * `uuid` the node UUID
         """
         if not isinstance(uuid, six.string_types):
             raise TypeError(
@@ -263,9 +265,9 @@ class ClientV1(http.BaseClient):
     def get_interface_data(self, node_ident, interface, field_sel):
         """Get interface data for the input node and interface
 
-          To get LLDP data, collection must be enabled by the kernel parameter
-          ipa-collect-lldp=1, and the inspector plugin ``basic_lldp`` must
-          be enabled.
+        To get LLDP data, collection must be enabled by the kernel parameter
+        ``ipa-collect-lldp=1``, and the inspector plugin ``basic_lldp`` must
+        be enabled.
 
         :param node_ident: node UUID or name
         :param interface: interface name
@@ -352,10 +354,10 @@ class RulesAPI(object):
     def create(self, conditions, actions, uuid=None, description=None):
         """Create a new introspection rule.
 
-        :conditions: list of rule conditions
-        :actions: list of rule actions
-        :uuid: rule UUID, will be generated if not specified
-        :description: optional rule description
+        :param conditions: list of rule conditions
+        :param actions: list of rule actions
+        :param uuid: rule UUID, will be generated if not specified
+        :param description: optional rule description
         :returns: rule representation
         :raises: :py:class:`.ClientError` on error reported from a server
         :raises: :py:class:`.VersionNotSupported` if requested api_version

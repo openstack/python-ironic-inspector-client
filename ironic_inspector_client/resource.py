@@ -55,12 +55,14 @@ class InterfaceResource(object):
         'switch_protocol_identities': 'Switch Protocol Identities',
         'switch_system_name': 'Switch System Name'
     }
+    """A mapping of all known interface fields to their descriptions."""
 
     DEFAULT_FIELD_IDS = ['interface',
                          'mac',
                          'switch_port_vlan_ids',
                          'switch_chassis_id',
                          'switch_port_id']
+    """Interface fields displayed by default."""
 
     def __init__(self, field_ids=None, detailed=False):
         """Create an InterfaceResource object
@@ -83,10 +85,12 @@ class InterfaceResource(object):
 
     @property
     def fields(self):
+        """List of fields displayed for this resource."""
         return self._fields
 
     @property
     def labels(self):
+        """List of labels for fields displayed for this resource."""
         return self._labels
 
 
