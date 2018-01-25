@@ -1,5 +1,4 @@
 - project:
-    name: openstack/python-ironic-inspector-client
     check:
       jobs:
         - openstack-tox-functional
