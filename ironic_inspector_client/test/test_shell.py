@@ -13,7 +13,7 @@
 
 import sys
 
-from collections import OrderedDict
+import collections
 import mock
 from osc_lib.tests import utils
 import six
@@ -438,7 +438,7 @@ class TestInterfaceCmds(BaseTest):
     def test_show(self):
         self.client.get_data.return_value = self.inspector_db
 
-        data = OrderedDict(
+        data = collections.OrderedDict(
             [('node_ident', "uuid1"),
              ('interface', "em1"),
              ('mac', "00:11:22:33:44:55"),
@@ -480,15 +480,15 @@ class TestInterfaceCmds(BaseTest):
     def test_show_field(self):
         self.client.get_data.return_value = self.inspector_db
 
-        data = OrderedDict([('node_ident', "uuid1"),
-                            ('interface', "em1"),
-                            ('switch_port_vlans',
-                             [{"id": 101, "name": "vlan101"},
-                              {"id": 102, "name": "vlan102"},
-                              {"id": 104, "name": "vlan104"},
-                              {"id": 201, "name": "vlan201"},
-                              {"id": 203, "name": "vlan203"}])
-                            ])
+        data = collections.OrderedDict([('node_ident', "uuid1"),
+                                        ('interface', "em1"),
+                                        ('switch_port_vlans',
+                                         [{"id": 101, "name": "vlan101"},
+                                          {"id": 102, "name": "vlan102"},
+                                          {"id": 104, "name": "vlan104"},
+                                          {"id": 201, "name": "vlan201"},
+                                          {"id": 203, "name": "vlan203"}])
+                                        ])
 
         self.client.get_interface_data.return_value = data
 

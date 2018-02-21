@@ -13,7 +13,7 @@
 
 """Client for V1 API."""
 
-from collections import OrderedDict
+import collections
 import logging
 import time
 
@@ -275,7 +275,7 @@ class ClientV1(http.BaseClient):
         :returns: interface data in OrderedDict
         """
         # Use OrderedDict to maintain order of user-entered fields
-        iface_data = OrderedDict()
+        iface_data = collections.OrderedDict()
 
         data = self.get_data(node_ident)
         all_interfaces = data.get('all_interfaces', [])
