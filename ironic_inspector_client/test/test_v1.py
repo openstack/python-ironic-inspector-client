@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import OrderedDict
+import collections
 import six
 import unittest
 
@@ -406,7 +406,7 @@ class TestInterfaceApi(BaseTest):
                   "switch_chassis_id", "switch_port_id",
                   "switch_port_mtu", "switch_port_vlans", "switch_foo"]
 
-        expected_values = OrderedDict(
+        expected_values = collections.OrderedDict(
             [('node_ident', self.uuid),
              ('interface', "em1"),
              ('mac', "00:11:22:33:44:55"),
@@ -428,7 +428,7 @@ class TestInterfaceApi(BaseTest):
         self.assertEqual(expected_values, iface_dict)
 
         # Test interface name not in 'all_interfaces'
-        expected_values = OrderedDict()
+        expected_values = collections.OrderedDict()
         iface_dict = self.get_client().get_interface_data(
             self.uuid, "em55", fields)
         self.assertEqual(expected_values, iface_dict)
