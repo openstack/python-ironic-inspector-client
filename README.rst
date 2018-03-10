@@ -1,8 +1,8 @@
 Ironic Inspector Client
 =======================
 
-.. image:: https://governance.openstack.org/badges/python-ironic-inspector-client.svg
-    :target: https://governance.openstack.org/reference/tags/index.html
+.. image:: https://governance.openstack.org/tc/badges/python-ironic-inspector-client.svg
+    :target: https://governance.openstack.org/tc/reference/tags/index.html
 
 This is a client library and tool for `Ironic Inspector`_.
 
