@@ -106,6 +106,9 @@ class ClientV1(http.BaseClient):
     def reprocess(self, uuid):
         """Reprocess stored introspection data.
 
+        If swift support is disabled, introspection data won't be stored,
+        this request will return error response with 404 code.
+
         :param uuid: node UUID or name.
         :raises: :py:class:`.ClientError` on error reported from a server
         :raises: :py:class:`.VersionNotSupported` if requested api_version
@@ -226,6 +229,9 @@ class ClientV1(http.BaseClient):
 
     def get_data(self, uuid, raw=False):
         """Get introspection data from the last introspection of a node.
+
+        If swift support is disabled, introspection data won't be stored,
+        this request will return error response with 404 code.
 
         :param uuid: node UUID or name.
         :param raw: whether to return raw binary data or parsed JSON data
