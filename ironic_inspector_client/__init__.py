@@ -13,3 +13,7 @@
 
 from .v1 import ClientV1, DEFAULT_API_VERSION, MAX_API_VERSION  # noqa
 from .common.http import ClientError, EndpointNotFound, VersionNotSupported  # noqa
+
+
+__all__ = ['ClientV1', 'DEFAULT_API_VERSION', 'MAX_API_VERSION',
+           'ClientError', 'EndpointNotFound', 'VersionNotSupported']

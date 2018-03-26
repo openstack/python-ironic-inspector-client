@@ -92,9 +92,10 @@ class ClientV1(http.BaseClient):
         """Start introspection for a node.
 
         :param uuid: node UUID or name
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         :raises: *requests* library exception on connection problems.
         """
         if not isinstance(uuid, six.string_types):
@@ -110,9 +111,10 @@ class ClientV1(http.BaseClient):
         this request will return error response with 404 code.
 
         :param uuid: node UUID or name.
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         :raises: *requests* library exception on connection problems.
         :raises: TypeError if uuid is not a string.
         """
@@ -133,9 +135,10 @@ class ClientV1(http.BaseClient):
 
         :param marker: pagination maker, UUID or None
         :param limit: pagination limit, int or None
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         :raises: *requests* library exception on connection problems.
         :return: a list of status dictionaries with the keys:
 
@@ -164,9 +167,10 @@ class ClientV1(http.BaseClient):
         """Get introspection status for a node.
 
         :param uuid: node UUID or name.
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported`
+            if requested api_version is not supported
         :raises: *requests* library exception on connection problems.
         :return: dictionary with the keys:
 
@@ -192,10 +196,12 @@ class ClientV1(http.BaseClient):
         :param retry_interval: sleep interval between retries.
         :param max_retries: maximum number of retries.
         :param sleep_function: function used for sleeping between retries.
-        :raises: :py:class:`.WaitTimeoutError` on timeout
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.WaitTimeoutError` on
+            timeout
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         :raises: *requests* library exception on connection problems.
         :return: dictionary UUID -> status (the same as in get_status).
         """
@@ -236,9 +242,10 @@ class ClientV1(http.BaseClient):
         :param uuid: node UUID or name.
         :param raw: whether to return raw binary data or parsed JSON data
         :returns: bytes or a dict depending on the 'raw' argument
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         :raises: *requests* library exception on connection problems.
         :raises: TypeError if uuid is not a string
         """
@@ -256,9 +263,10 @@ class ClientV1(http.BaseClient):
         """Abort running introspection for a node.
 
         :param uuid: node UUID or name.
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         :raises: *requests* library exception on connection problems.
         :raises: TypeError if uuid is not a string.
         """
@@ -365,9 +373,10 @@ class RulesAPI(object):
         :param uuid: rule UUID, will be generated if not specified
         :param description: optional rule description
         :returns: rule representation
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         """
         if uuid is not None and not isinstance(uuid, six.string_types):
             raise TypeError(
@@ -389,9 +398,10 @@ class RulesAPI(object):
         :param json_rule: rule information as a dict with keys matching
             arguments of :py:meth:`RulesAPI.create`.
         :returns: rule representation
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         """
         return self._request('post', '/rules', json=json_rule).json()
 
@@ -400,9 +410,10 @@ class RulesAPI(object):
 
         :returns: list of short rule representations (uuid, description
                   and links)
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         """
         return self._request('get', '/rules').json()['rules']
 
@@ -411,9 +422,10 @@ class RulesAPI(object):
 
         :param uuid: rule UUID
         :returns: rule representation
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         """
         if not isinstance(uuid, six.string_types):
             raise TypeError(
@@ -424,9 +436,10 @@ class RulesAPI(object):
         """Delete an introspection rule.
 
         :param uuid: rule UUID
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         """
         if not isinstance(uuid, six.string_types):
             raise TypeError(
@@ -436,8 +449,9 @@ class RulesAPI(object):
     def delete_all(self):
         """Delete all introspection rules.
 
-        :raises: :py:class:`.ClientError` on error reported from a server
-        :raises: :py:class:`.VersionNotSupported` if requested api_version
-            is not supported
+        :raises: :py:class:`ironic_inspector_client.ClientError` on error
+            reported from a server
+        :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
+            requested api_version is not supported
         """
         self._request('delete', '/rules')
