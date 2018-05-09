@@ -1,3 +1,3 @@
 # NOTE(jroll) these are pinned to the same SHA, update when needed.
-git+git://git.openstack.org/openstack/ironic-inspector@f02eda0315cb21b737d2a1f982b389ed2291617c#egg=ironic-inspector
--r https://git.openstack.org/cgit/openstack/ironic-inspector/plain/test-requirements.txt?h=f02eda0315cb21b737d2a1f982b389ed2291617c
+git+git://git.openstack.org/openstack/ironic-inspector@c29c28e64b3501b53c93a370043e00af20dc4119#egg=ironic-inspector
+-r https://git.openstack.org/cgit/openstack/ironic-inspector/plain/test-requirements.txt?h=c29c28e64b3501b53c93a370043e00af20dc4119
