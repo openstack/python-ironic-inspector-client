@@ -427,8 +427,7 @@ class TestInterfaceApi(BaseTest):
             self.uuid, "em1", fields)
         self.assertEqual(expected_values, iface_dict)
 
-        # Test interface name not in 'all_interfaces'
-        expected_values = collections.OrderedDict()
-        iface_dict = self.get_client().get_interface_data(
-            self.uuid, "em55", fields)
-        self.assertEqual(expected_values, iface_dict)
+    def test_invalid_interface(self, mock_req):
+        mock_req.return_value.json.return_value = self.inspector_db
+        self.assertRaises(ValueError, self.get_client().get_interface_data,
+                          self.uuid, "em55", ["node_ident", "interface"])
