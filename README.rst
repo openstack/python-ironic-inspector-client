@@ -11,6 +11,7 @@ This is a client library and tool for `Ironic Inspector`_.
 * Documentation: https://docs.openstack.org/python-ironic-inspector-client/latest/
 * Bugs: https://storyboard.openstack.org/#!/project/958
 * Downloads: https://pypi.org/project/python-ironic-inspector-client
+* Release Notes: https://docs.openstack.org/releasenotes/python-ironic-inspector-client/
 
 Please follow usual OpenStack `Gerrit Workflow`_ to submit a patch, see
 `Inspector contributing guide`_ for more detail.
