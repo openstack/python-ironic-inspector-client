@@ -294,6 +294,7 @@ class ClientV1(http.BaseClient):
         :param interface: interface name
         :param field_sel: list of all fields for which to get data
         :returns: interface data in OrderedDict
+        :raises: ValueError if interface is not found.
         """
         # Use OrderedDict to maintain order of user-entered fields
         iface_data = collections.OrderedDict()
@@ -303,7 +304,9 @@ class ClientV1(http.BaseClient):
 
         # Make sure interface name is valid
         if interface not in all_interfaces:
-            return iface_data
+            raise ValueError(
+                _("Interface %s was not found on this node")
+                % interface)
 
         # If lldp data not available this will still return interface,
         # mac, node_ident etc.
