@@ -22,6 +22,8 @@ import sys
 import tempfile
 import unittest
 
+import six
+
 from ironic_inspector.common import swift
 from ironic_inspector import introspection_state as istate
 from ironic_inspector.test import functional
@@ -332,17 +334,21 @@ class TestCLI(BaseCLITest):
         return fake_status
 
     def test_cli_negative(self):
+        if six.PY3:
+            msg_missing_param = 'the following arguments are required'
+        else:
+            msg_missing_param = 'too few arguments'
         err = self.run_cli('start', expect_error=True)
-        self.assertIn('too few arguments', err)
+        self.assertIn(msg_missing_param, err)
         err = self.run_cli('status', expect_error=True)
-        self.assertIn('too few arguments', err)
+        self.assertIn(msg_missing_param, err)
         err = self.run_cli('rule', 'show', 'uuid', expect_error=True)
         self.assertIn('not found', err)
         err = self.run_cli('rule', 'delete', 'uuid', expect_error=True)
         self.assertIn('not found', err)
 
         err = self.run_cli('interface', 'list', expect_error=True)
-        self.assertIn('too few arguments', err)
+        self.assertIn(msg_missing_param, err)
 
     def test_introspect_get_status(self):
         self.run_cli('start', self.uuid)
@@ -373,7 +379,7 @@ class TestCLI(BaseCLITest):
                 'actions': [{'action': 'fail', 'message': 'boom'}],
                 'description': 'Cool actions',
                 'uuid': self.uuid}
-        with tempfile.NamedTemporaryFile() as fp:
+        with tempfile.NamedTemporaryFile(mode='w') as fp:
             json.dump(rule, fp)
             fp.flush()
             res = self.run_cli('rule', 'import', fp.name, parse_json=True)
@@ -393,7 +399,7 @@ class TestCLI(BaseCLITest):
         res = self.run_cli('rule', 'list', parse_json=True)
         self.assertEqual([], res)
 
-        with tempfile.NamedTemporaryFile() as fp:
+        with tempfile.NamedTemporaryFile(mode='w') as fp:
             rule.pop('uuid')
             json.dump([rule, rule], fp)
             fp.flush()
@@ -420,23 +426,21 @@ class TestCLI(BaseCLITest):
                          u'Switch Port VLAN IDs': [101, 102, 106]}
 
         res = self.run_cli('interface', 'list', self.uuid, parse_json=True)
-        res.sort()
-        self.assertEqual(expected_eth1, res[0])
-        self.assertEqual(expected_eth3, res[1])
+        self.assertIn(expected_eth1, res)
+        self.assertIn(expected_eth3, res)
 
         # Filter on vlan
         res = self.run_cli('interface', 'list', self.uuid, '--vlan', '106',
                            parse_json=True)
-        res.sort()
-        self.assertEqual(expected_eth3, res[0])
+        self.assertIn(expected_eth3, res)
 
         # Select fields
         res = self.run_cli('interface', 'list', self.uuid, '--fields',
                            'switch_port_mtu',
                            parse_json=True)
-        res.sort()
-        self.assertEqual({u'Switch Port MTU': 1514}, res[0])
-        self.assertEqual({u'Switch Port MTU': 9216}, res[1])
+
+        self.assertIn({u'Switch Port MTU': 1514}, res)
+        self.assertIn({u'Switch Port MTU': 9216}, res)
 
     @mock.patch.object(swift, 'get_introspection_data', autospec=True)
     def test_interface_show(self, get_mock):

@@ -10,10 +10,12 @@
     check:
       jobs:
         - openstack-tox-functional
+        - openstack-tox-functional-py35
         - python-ironic-inspector-client-tempest-dsvm
         - openstack-tox-lower-constraints
     gate:
       jobs:
         - openstack-tox-functional
+        - openstack-tox-functional-py35
         - python-ironic-inspector-client-tempest-dsvm
         - openstack-tox-lower-constraints
