@@ -1,0 +1,6 @@
+---
+fixes:
+  - The error message returned when running the
+    `openstack baremetal introspection interface show`
+    command with an interface not associated with the node has been fixed.
+    It now indicates that the interface was invalid.
