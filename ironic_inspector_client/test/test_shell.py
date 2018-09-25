@@ -230,6 +230,32 @@ class TestRules(BaseTest):
         self.rules_api.from_json.assert_any_call({'foo': 'bar'})
         self.rules_api.from_json.assert_any_call({'answer': 42})
 
+    def test_import_yaml(self):
+        f = tempfile.NamedTemporaryFile()
+        self.addCleanup(f.close)
+        f.write(b"""---
+- foo: bar
+- answer: 42
+""")
+        f.flush()
+
+        arglist = [f.name]
+        verifylist = [('file', f.name)]
+
+        self.rules_api.from_json.side_effect = iter([
+            {'uuid': '1', 'description': 'd1', 'links': []},
+            {'uuid': '2', 'description': 'd2', 'links': []}
+        ])
+
+        cmd = shell.RuleImportCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        cols, values = cmd.take_action(parsed_args)
+
+        self.assertEqual(('UUID', 'Description'), cols)
+        self.assertEqual([('1', 'd1'), ('2', 'd2')], values)
+        self.rules_api.from_json.assert_any_call({'foo': 'bar'})
+        self.rules_api.from_json.assert_any_call({'answer': 42})
+
     def test_list(self):
         self.rules_api.get_all.return_value = [
             {'uuid': '1', 'description': 'd1', 'links': []},
