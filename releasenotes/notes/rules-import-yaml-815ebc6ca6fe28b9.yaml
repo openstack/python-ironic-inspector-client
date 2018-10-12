@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Supports importing introspection rules from YAML files (in addition to
+    already supported JSON format).

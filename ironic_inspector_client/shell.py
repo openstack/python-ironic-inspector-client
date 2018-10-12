@@ -20,6 +20,7 @@ import sys
 
 from osc_lib.command import command
 from osc_lib import utils
+import yaml
 
 import ironic_inspector_client
 from ironic_inspector_client import resource as res
@@ -176,19 +177,19 @@ class AbortCommand(command.Command):
 
 
 class RuleImportCommand(command.Lister):
-    """Import one or several introspection rules from a json file."""
+    """Import one or several introspection rules from a JSON/YAML file."""
 
     COLUMNS = ("UUID", "Description")
 
     def get_parser(self, prog_name):
         parser = super(RuleImportCommand, self).get_parser(prog_name)
-        parser.add_argument('file', help='JSON file to import, may contain '
-                            'one or several rules')
+        parser.add_argument('file', help='JSON or YAML file to import, may '
+                            'contain one or several rules')
         return parser
 
     def take_action(self, parsed_args):
         with open(parsed_args.file, 'r') as fp:
-            rules = json.load(fp)
+            rules = yaml.safe_load(fp)
             if not isinstance(rules, list):
                 rules = [rules]
         client = self.app.client_manager.baremetal_introspection
