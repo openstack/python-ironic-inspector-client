@@ -11,11 +11,13 @@
       jobs:
         - openstack-tox-functional
         - openstack-tox-functional-py35
-        - python-ironic-inspector-client-tempest-dsvm
+        - python-ironic-inspector-client-tempest-dsvm-python2
+        - python-ironic-inspector-client-tempest-dsvm-python3
         - openstack-tox-lower-constraints
     gate:
       jobs:
         - openstack-tox-functional
         - openstack-tox-functional-py35
-        - python-ironic-inspector-client-tempest-dsvm
+        - python-ironic-inspector-client-tempest-dsvm-python2
+        - python-ironic-inspector-client-tempest-dsvm-python3
         - openstack-tox-lower-constraints
