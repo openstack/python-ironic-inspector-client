@@ -21,7 +21,7 @@ Start introspection on a node
 
 ::
 
-    $ openstack baremetal introspection start [--wait] NODE_ID [NODE_ID ...]
+    $ openstack baremetal introspection start [--wait] [--check-errors] NODE_ID [NODE_ID ...]
 
 * ``NODE_ID`` - Ironic node UUID or name;
 
@@ -35,6 +35,9 @@ Note that the CLI call accepts several UUID's and will stop on the first error.
 
 With ``--wait`` flag it waits until introspection ends for all given nodes,
 then displays the results as a table.
+
+The ``--check-errors`` flag can only be used together with the ``--wait`` flag,
+otherwise will throw an error.
 
 Query introspection status
 --------------------------

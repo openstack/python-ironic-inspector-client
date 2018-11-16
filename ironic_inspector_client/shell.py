@@ -19,6 +19,8 @@ import json
 import sys
 
 from osc_lib.command import command
+from osc_lib import exceptions
+from osc_lib.i18n import _
 from osc_lib import utils
 import yaml
 
@@ -71,9 +73,18 @@ class StartCommand(command.Lister):
                             action='store_true',
                             help='wait for introspection to finish; the result'
                             ' will be displayed in the end')
+        parser.add_argument('--check-errors',
+                            action='store_true',
+                            help='check if errors occurred during the'
+                            ' introspection; if any error occurs only the'
+                            ' errors are displayed')
         return parser
 
     def take_action(self, parsed_args):
+        if parsed_args.check_errors and not parsed_args.wait:
+            raise exceptions.CommandError(
+                _("--check-errors can only be used with --wait"))
+
         client = self.app.client_manager.baremetal_introspection
         for uuid in parsed_args.node:
             client.introspect(uuid)
@@ -83,6 +94,14 @@ class StartCommand(command.Lister):
             result = client.wait_for_finish(parsed_args.node)
             result = [(uuid, s.get('error'))
                       for uuid, s in result.items()]
+            if parsed_args.check_errors:
+                uuids_errors = ", ".join("%s (%s)" % node_info
+                                         for node_info in result
+                                         if node_info[1] is not None)
+                if uuids_errors:
+                    raise Exception(
+                        _("Introspection failed for some nodes: %s")
+                        % uuids_errors)
         else:
             result = []
 

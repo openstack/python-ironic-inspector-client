@@ -15,6 +15,7 @@ import sys
 
 import collections
 import mock
+from osc_lib import exceptions
 from osc_lib.tests import utils
 import six
 import tempfile
@@ -100,6 +101,56 @@ class TestIntrospect(BaseTest):
         self.assertEqual(calls, self.client.introspect.call_args_list)
         self.assertEqual([('uuid1', None), ('uuid2', 'boom'), ('uuid3', None)],
                          sorted(values))
+
+    def test_wait_with_check_errors_no_raise_exception(self):
+        nodes = ['uuid1', 'uuid2', 'uuid3']
+        arglist = ['--wait'] + ['--check-errors'] + nodes
+        verifylist = [('node', nodes), ('wait', True),  ('check_errors', True)]
+        self.client.wait_for_finish.return_value = {
+            'uuid1': {'finished': True, 'error': None},
+            'uuid2': {'finished': True, 'error': None},
+            'uuid3': {'finished': True, 'error': None},
+        }
+
+        cmd = shell.StartCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        _c, values = cmd.take_action(parsed_args)
+
+        calls = [mock.call(node) for node in nodes]
+        self.assertEqual(calls, self.client.introspect.call_args_list)
+        self.assertEqual([('uuid1', None), ('uuid2', None), ('uuid3', None)],
+                         sorted(values))
+
+    def test_wait_with_check_errors(self):
+        nodes = ['uuid1', 'uuid2', 'uuid3']
+        arglist = ['--wait'] + ['--check-errors'] + nodes
+        verifylist = [('node', nodes), ('wait', True), ('check_errors', True)]
+        self.client.wait_for_finish.return_value = {
+            'uuid1': {'finished': True, 'error': None},
+            'uuid2': {'finished': True, 'error': 'boom'},
+            'uuid3': {'finished': True, 'error': None},
+        }
+
+        cmd = shell.StartCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        msg = "Introspection failed for"
+        self.assertRaisesRegex(Exception, msg, cmd.take_action, parsed_args)
+
+    def test_check_errors_alone(self):
+        nodes = ['uuid1', 'uuid2', 'uuid3']
+        arglist = ['--check-errors'] + nodes
+        verifylist = [('node', nodes), ('check_errors', True)]
+        self.client.wait_for_finish.return_value = {
+            'uuid1': {'finished': True, 'error': None},
+            'uuid2': {'finished': True, 'error': 'boom'},
+            'uuid3': {'finished': True, 'error': None},
+        }
+
+        cmd = shell.StartCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        msg = "--check-errors can only be used with --wait"
+        self.assertRaisesRegex(exceptions.CommandError, msg, cmd.take_action,
+                               parsed_args)
 
     def test_abort(self):
         node = 'uuid1'
