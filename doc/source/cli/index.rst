@@ -36,8 +36,13 @@ Note that the CLI call accepts several UUID's and will stop on the first error.
 With ``--wait`` flag it waits until introspection ends for all given nodes,
 then displays the results as a table.
 
-The ``--check-errors`` flag can only be used together with the ``--wait`` flag,
-otherwise will throw an error.
+The ``--check-errors`` flag verifies if any error occurred during the
+introspection of the selected nodes while waiting for the results. If any error
+has occurred in the introspection result of selected nodes no output is
+displayed, otherwise it shows the result as a table.
+
+.. note::
+    ``--check-errors`` can only be used with ``--wait``
 
 Query introspection status
 --------------------------

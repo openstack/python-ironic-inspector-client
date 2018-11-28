@@ -77,7 +77,8 @@ class StartCommand(command.Lister):
                             action='store_true',
                             help='check if errors occurred during the'
                             ' introspection; if any error occurs only the'
-                            ' errors are displayed')
+                            ' errors are displayed; can only be used with'
+                            ' --wait')
         return parser
 
     def take_action(self, parsed_args):
@@ -95,7 +96,7 @@ class StartCommand(command.Lister):
             result = [(uuid, s.get('error'))
                       for uuid, s in result.items()]
             if parsed_args.check_errors:
-                uuids_errors = ", ".join("%s (%s)" % node_info
+                uuids_errors = "\n".join("%s (%s)" % node_info
                                          for node_info in result
                                          if node_info[1] is not None)
                 if uuids_errors:
