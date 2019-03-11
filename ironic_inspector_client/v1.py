@@ -16,6 +16,7 @@
 import collections
 import logging
 import time
+import warnings
 
 import six
 
@@ -88,10 +89,28 @@ class ClientV1(http.BaseClient):
         super(ClientV1, self).__init__(**kwargs)
         self.rules = RulesAPI(self.request)
 
-    def introspect(self, uuid, manage_boot=None):
+    def _check_parameters(self, node_id, uuid):
+        """Deprecate uuid parameters.
+
+        Check the parameters and return a deprecation warning
+        if the uuid parameter is present.
+        """
+
+        node_id = node_id or uuid
+        if not isinstance(node_id, six.string_types):
+            raise TypeError(
+                _("Expected string for node_id argument, got %r") % node_id)
+        if uuid:
+            warnings.warn("Parameter uuid is deprecated and will be "
+                          "removed in future releases, please use "
+                          "node_id instead.", DeprecationWarning)
+        return node_id
+
+    def introspect(self, node_id, manage_boot=None, uuid=None):
         """Start introspection for a node.
 
-        :param uuid: node UUID or name
+        :param uuid: node UUID or name, deprecated
+        :param node_id: node node_id or name
         :param manage_boot: whether to manage boot during introspection of
             this node. If it is None (the default), then this argument is not
             passed to API and the server default is used instead.
@@ -101,23 +120,22 @@ class ClientV1(http.BaseClient):
             requested api_version is not supported
         :raises: *requests* library exception on connection problems.
         """
-        if not isinstance(uuid, six.string_types):
-            raise TypeError(
-                _("Expected string for uuid argument, got %r") % uuid)
+        node_id = self._check_parameters(node_id, uuid)
 
         params = {}
         if manage_boot is not None:
             params['manage_boot'] = str(int(manage_boot))
 
-        self.request('post', '/introspection/%s' % uuid, params=params)
+        self.request('post', '/introspection/%s' % node_id, params=params)
 
-    def reprocess(self, uuid):
+    def reprocess(self, node_id, uuid=None):
         """Reprocess stored introspection data.
 
         If swift support is disabled, introspection data won't be stored,
         this request will return error response with 404 code.
 
-        :param uuid: node UUID or name.
+        :param uuid: node UUID or name, deprecated
+        :param node_id: node node_id or name
         :raises: :py:class:`ironic_inspector_client.ClientError` on error
             reported from a server
         :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
@@ -125,13 +143,11 @@ class ClientV1(http.BaseClient):
         :raises: *requests* library exception on connection problems.
         :raises: TypeError if uuid is not a string.
         """
-        if not isinstance(uuid, six.string_types):
-            raise TypeError(_("Expected string for uuid argument, got"
-                              " %r instead") % uuid)
+        node_id = self._check_parameters(node_id, uuid)
 
         return self.request('post',
                             '/introspection/%s/data/unprocessed' %
-                            uuid)
+                            node_id)
 
     def list_statuses(self, marker=None, limit=None):
         """List introspection statuses.
@@ -170,10 +186,11 @@ class ClientV1(http.BaseClient):
         response = self.request('get', '/introspection', params=params)
         return response.json()['introspection']
 
-    def get_status(self, uuid):
+    def get_status(self, node_id, uuid=None):
         """Get introspection status for a node.
 
-        :param uuid: node UUID or name.
+        :param uuid: node UUID or name, deprecated
+        :param node_id: node node_id or name
         :raises: :py:class:`ironic_inspector_client.ClientError` on error
             reported from a server
         :raises: :py:class:`ironic_inspector_client.VersionNotSupported`
@@ -188,18 +205,17 @@ class ClientV1(http.BaseClient):
             * `started_at` an ISO8601 timestamp,
             * `uuid` the node UUID
         """
-        if not isinstance(uuid, six.string_types):
-            raise TypeError(
-                _("Expected string for uuid argument, got %r") % uuid)
+        node_id = self._check_parameters(node_id, uuid)
 
-        return self.request('get', '/introspection/%s' % uuid).json()
+        return self.request('get', '/introspection/%s' % node_id).json()
 
-    def wait_for_finish(self, uuids, retry_interval=DEFAULT_RETRY_INTERVAL,
+    def wait_for_finish(self, node_ids, retry_interval=DEFAULT_RETRY_INTERVAL,
                         max_retries=DEFAULT_MAX_RETRIES,
-                        sleep_function=time.sleep):
+                        sleep_function=time.sleep, uuids=None):
         """Wait for introspection finishing for given nodes.
 
-        :param uuids: collection of node UUIDs or names.
+        :param uuids: collection of node UUIDs or names, deprecated
+        :param node_ids: collection of node node_ids or names
         :param retry_interval: sleep interval between retries.
         :param max_retries: maximum number of retries.
         :param sleep_function: function used for sleeping between retries.
@@ -213,24 +229,29 @@ class ClientV1(http.BaseClient):
         :return: dictionary UUID -> status (the same as in get_status).
         """
         result = {}
+        node_ids = node_ids or uuids
+        if uuids:
+            warnings.warn("Parameter uuid is deprecated and will be "
+                          "removed in future releases, please use "
+                          "node_id instead.", DeprecationWarning)
 
         # Number of attempts = number of retries + first attempt
         for attempt in range(max_retries + 1):
-            new_active_uuids = []
-            for uuid in uuids:
-                status = self.get_status(uuid)
+            new_active_node_ids = []
+            for node_id in node_ids:
+                status = self.get_status(node_id)
                 if status.get('finished'):
-                    result[uuid] = status
+                    result[node_id] = status
                 else:
-                    new_active_uuids.append(uuid)
+                    new_active_node_ids.append(node_id)
 
-            if new_active_uuids:
+            if new_active_node_ids:
                 if attempt != max_retries:
-                    uuids = new_active_uuids
+                    node_ids = new_active_node_ids
                     LOG.debug('Still waiting for introspection results for '
                               '%(count)d nodes, attempt %(attempt)d of '
                               '%(total)d',
-                              {'count': len(new_active_uuids),
+                              {'count': len(new_active_node_ids),
                                'attempt': attempt + 1,
                                'total': max_retries + 1})
                     sleep_function(retry_interval)
@@ -238,15 +259,16 @@ class ClientV1(http.BaseClient):
                 return result
 
         raise WaitTimeoutError(_("Timeout while waiting for introspection "
-                                 "of nodes %s") % new_active_uuids)
+                                 "of nodes %s") % new_active_node_ids)
 
-    def get_data(self, uuid, raw=False):
+    def get_data(self, node_id, raw=False, uuid=None):
         """Get introspection data from the last introspection of a node.
 
         If swift support is disabled, introspection data won't be stored,
         this request will return error response with 404 code.
 
-        :param uuid: node UUID or name.
+        :param uuid: node UUID or name, deprecated
+        :param node_id: node node_id or name
         :param raw: whether to return raw binary data or parsed JSON data
         :returns: bytes or a dict depending on the 'raw' argument
         :raises: :py:class:`ironic_inspector_client.ClientError` on error
@@ -256,20 +278,19 @@ class ClientV1(http.BaseClient):
         :raises: *requests* library exception on connection problems.
         :raises: TypeError if uuid is not a string
         """
-        if not isinstance(uuid, six.string_types):
-            raise TypeError(
-                _("Expected string for uuid argument, got %r") % uuid)
+        node_id = self._check_parameters(node_id, uuid)
 
-        resp = self.request('get', '/introspection/%s/data' % uuid)
+        resp = self.request('get', '/introspection/%s/data' % node_id)
         if raw:
             return resp.content
         else:
             return resp.json()
 
-    def abort(self, uuid):
+    def abort(self, node_id, uuid=None):
         """Abort running introspection for a node.
 
-        :param uuid: node UUID or name.
+        :param uuid: node UUID or name, deprecated
+        :param node_id: node node_id or name
         :raises: :py:class:`ironic_inspector_client.ClientError` on error
             reported from a server
         :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
@@ -277,11 +298,9 @@ class ClientV1(http.BaseClient):
         :raises: *requests* library exception on connection problems.
         :raises: TypeError if uuid is not a string.
         """
-        if not isinstance(uuid, six.string_types):
-            raise TypeError(_("Expected string for uuid argument, got"
-                              " %r") % uuid)
+        node_id = self._check_parameters(node_id, uuid)
 
-        return self.request('post', '/introspection/%s/abort' % uuid)
+        return self.request('post', '/introspection/%s/abort' % node_id)
 
     def get_interface_data(self, node_ident, interface, field_sel):
         """Get interface data for the input node and interface

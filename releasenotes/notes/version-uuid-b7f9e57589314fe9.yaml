@@ -1,0 +1,4 @@
+---
+deprecations:
+  - Parameter uuid is deprecated in ClientV1 and will be removed in future
+    releases, please use node_id instead.
