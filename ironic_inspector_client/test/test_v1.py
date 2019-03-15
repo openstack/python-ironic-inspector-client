@@ -12,13 +12,13 @@
 # limitations under the License.
 
 import collections
-import six
 import unittest
 
 from keystoneauth1 import session
 import mock
 from oslo_utils import netutils
 from oslo_utils import uuidutils
+import six
 
 import ironic_inspector_client
 from ironic_inspector_client.common import http

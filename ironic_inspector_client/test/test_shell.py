@@ -11,14 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-
 import collections
+import sys
+import tempfile
+
 import mock
 from osc_lib import exceptions
 from osc_lib.tests import utils
 import six
-import tempfile
 
 from ironic_inspector_client import shell
 from ironic_inspector_client import v1

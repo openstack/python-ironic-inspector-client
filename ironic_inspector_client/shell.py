@@ -27,6 +27,7 @@ import yaml
 import ironic_inspector_client
 from ironic_inspector_client import resource as res
 
+
 API_NAME = 'baremetal_introspection'
 API_VERSION_OPTION = 'inspector_api_version'
 DEFAULT_API_VERSION = '1'

@@ -11,25 +11,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import eventlet
-eventlet.monkey_patch()
-
 import copy
 import json
-import mock
 import os
 import sys
 import tempfile
 import unittest
 
-import six
-
+import eventlet
+eventlet.monkey_patch()  # noqa
 from ironic_inspector.common import swift
 from ironic_inspector import introspection_state as istate
 from ironic_inspector.test import functional
 from keystoneauth1 import session as ks_session
 from keystoneauth1 import token_endpoint
+import mock
 from oslo_concurrency import processutils
+import six
 
 import ironic_inspector_client as client
 from ironic_inspector_client import shell
