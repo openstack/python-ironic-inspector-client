@@ -55,8 +55,8 @@
         SWIFT_TEMPURL_KEY: secretkey
 
       devstack_plugins:
-        ironic: git://git.openstack.org/openstack/ironic
-        ironic-inspector: git://git.openstack.org/openstack/ironic-inspector
+        ironic: https://git.openstack.org/openstack/ironic
+        ironic-inspector: https://git.openstack.org/openstack/ironic-inspector
       zuul_copy_output:
         '{{ devstack_base_dir }}/ironic-bm-logs': 'logs'
       devstack_services:
