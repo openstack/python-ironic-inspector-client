@@ -9,7 +9,7 @@
       - openstack/ironic-lib
       - openstack/ironic-python-agent
       - openstack/ironic-tempest-plugin
-      - openstack/pyghmi
+      - x/pyghmi
       - openstack/python-ironic-inspector-client
       - openstack/python-ironicclient
       - openstack/virtualbmc
@@ -30,7 +30,7 @@
         FORCE_CONFIG_DRIVE: True
         INSTALL_TEMPEST: False # Don't install a tempest package globaly
         OVERRIDE_PUBLIC_BRIDGE_MTU: 1400
-        TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/git.openstack.org/openstack/ironic-tempest-plugin'"
+        TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/opendev.org/openstack/ironic-tempest-plugin'"
         VIRT_DRIVER: ironic
         BUILD_TIMEOUT: 600
         IRONIC_BAREMETAL_BASIC_OPS: True
@@ -55,8 +55,8 @@
         SWIFT_TEMPURL_KEY: secretkey
 
       devstack_plugins:
-        ironic: https://git.openstack.org/openstack/ironic
-        ironic-inspector: https://git.openstack.org/openstack/ironic-inspector
+        ironic: https://opendev.org/openstack/ironic
+        ironic-inspector: https://opendev.org/openstack/ironic-inspector
       zuul_copy_output:
         '{{ devstack_base_dir }}/ironic-bm-logs': 'logs'
       devstack_services:
