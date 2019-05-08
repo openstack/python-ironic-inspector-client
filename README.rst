@@ -7,7 +7,7 @@ Ironic Inspector Client
 This is a client library and tool for `Ironic Inspector`_.
 
 * Free software: Apache license
-* Source: https://git.openstack.org/cgit/openstack/python-ironic-inspector-client
+* Source: https://opendev.org/openstack/python-ironic-inspector-client/
 * Documentation: https://docs.openstack.org/python-ironic-inspector-client/latest/
 * Bugs: https://storyboard.openstack.org/#!/project/958
 * Downloads: https://pypi.org/project/python-ironic-inspector-client
