@@ -40,8 +40,14 @@ for mversion in range(ironic_inspector_client.MAX_API_VERSION[1] + 1):
 
 
 def make_client(instance):
+    url = instance.get_configuration().get('inspector_url')
+    if not url:
+        url = instance.get_endpoint_for_service_type(
+            'baremetal-introspection', interface=instance.interface,
+            region_name=instance._region_name
+        )
     return ironic_inspector_client.ClientV1(
-        inspector_url=instance.get_configuration().get('inspector_url'),
+        inspector_url=url,
         session=instance.session,
         api_version=instance._api_version[API_NAME],
         interface=instance._interface,
@@ -49,6 +55,7 @@ def make_client(instance):
 
 
 def build_option_parser(parser):
+    # TODO(dtantsur): deprecate these options in favor of more generic OS_*
     parser.add_argument('--inspector-api-version',
                         default=utils.env('INSPECTOR_VERSION',
                                           default=DEFAULT_API_VERSION),
