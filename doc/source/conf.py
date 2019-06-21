@@ -7,17 +7,12 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinxcontrib.apidoc',
               'sphinx.ext.viewcode',
+              'sphinxcontrib.rsvgconverter',
+              'openstackdocstheme',
               ]
 
-try:
-    import openstackdocstheme
-    extensions.append('openstackdocstheme')
-except ImportError:
-    openstackdocstheme = None
-
 repository_name = 'openstack/python-ironic-inspector-client'
-bug_project = 'python-ironic-inspector-client'
-bug_tag = ''
+use_storyboard = True
 
 wsme_protocols = ['restjson']
 
@@ -41,7 +36,6 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Ironic Inspector Client'
 copyright = u'OpenStack Foundation'
 
 # A list of ignored prefixes for module index sorting.
@@ -61,17 +55,15 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-if openstackdocstheme is not None:
-    html_theme = 'openstackdocs'
-else:
-    html_theme = 'default'
+html_theme = 'openstackdocs'
 #html_theme_path = ["."]
 #html_theme = '_theme'
 #html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = '%sdoc' % project
+htmlhelp_basename = 'python-ironic-inspector-clientdoc'
 
+latex_use_xindy = False
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass
@@ -79,8 +71,8 @@ htmlhelp_basename = '%sdoc' % project
 latex_documents = [
     (
         'index',
-        '%s.tex' % project,
-        u'%s Documentation' % project,
+        'doc-python-ironic-inspector-client.tex',
+        u'Python Ironic Inspector Client Documentation',
         u'OpenStack Foundation',
         'manual'
     ),
