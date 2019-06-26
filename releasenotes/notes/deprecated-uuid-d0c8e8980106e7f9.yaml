@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes regression in 3.6.0 that caused the deprecated ``uuid`` argument
+    to various calls to stop working.

@@ -106,7 +106,7 @@ class ClientV1(http.BaseClient):
                           "node_id instead.", DeprecationWarning)
         return node_id
 
-    def introspect(self, node_id, manage_boot=None, uuid=None):
+    def introspect(self, node_id=None, manage_boot=None, uuid=None):
         """Start introspection for a node.
 
         :param uuid: node UUID or name, deprecated
@@ -128,7 +128,7 @@ class ClientV1(http.BaseClient):
 
         self.request('post', '/introspection/%s' % node_id, params=params)
 
-    def reprocess(self, node_id, uuid=None):
+    def reprocess(self, node_id=None, uuid=None):
         """Reprocess stored introspection data.
 
         If swift support is disabled, introspection data won't be stored,
@@ -186,7 +186,7 @@ class ClientV1(http.BaseClient):
         response = self.request('get', '/introspection', params=params)
         return response.json()['introspection']
 
-    def get_status(self, node_id, uuid=None):
+    def get_status(self, node_id=None, uuid=None):
         """Get introspection status for a node.
 
         :param uuid: node UUID or name, deprecated
@@ -209,7 +209,8 @@ class ClientV1(http.BaseClient):
 
         return self.request('get', '/introspection/%s' % node_id).json()
 
-    def wait_for_finish(self, node_ids, retry_interval=DEFAULT_RETRY_INTERVAL,
+    def wait_for_finish(self, node_ids=None,
+                        retry_interval=DEFAULT_RETRY_INTERVAL,
                         max_retries=DEFAULT_MAX_RETRIES,
                         sleep_function=time.sleep, uuids=None):
         """Wait for introspection finishing for given nodes.
@@ -234,6 +235,8 @@ class ClientV1(http.BaseClient):
             warnings.warn("Parameter uuid is deprecated and will be "
                           "removed in future releases, please use "
                           "node_id instead.", DeprecationWarning)
+        elif not node_ids:
+            raise TypeError("The node_ids argument is required")
 
         # Number of attempts = number of retries + first attempt
         for attempt in range(max_retries + 1):
@@ -261,7 +264,7 @@ class ClientV1(http.BaseClient):
         raise WaitTimeoutError(_("Timeout while waiting for introspection "
                                  "of nodes %s") % new_active_node_ids)
 
-    def get_data(self, node_id, raw=False, uuid=None):
+    def get_data(self, node_id=None, raw=False, uuid=None):
         """Get introspection data from the last introspection of a node.
 
         If swift support is disabled, introspection data won't be stored,
@@ -286,7 +289,7 @@ class ClientV1(http.BaseClient):
         else:
             return resp.json()
 
-    def abort(self, node_id, uuid=None):
+    def abort(self, node_id=None, uuid=None):
         """Abort running introspection for a node.
 
         :param uuid: node UUID or name, deprecated

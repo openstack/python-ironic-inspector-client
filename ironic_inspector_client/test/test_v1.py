@@ -87,6 +87,12 @@ class TestIntrospect(BaseTest):
             'post', '/introspection/%s' % self.uuid,
             params={})
 
+    def test_deprecated_uuid(self, mock_req):
+        self.get_client().introspect(uuid=self.uuid)
+        mock_req.assert_called_once_with(
+            'post', '/introspection/%s' % self.uuid,
+            params={})
+
     def test_invalid_input(self, mock_req):
         self.assertRaises(TypeError, self.get_client().introspect, 42)
 
@@ -106,6 +112,13 @@ class TestReprocess(BaseTest):
             '/introspection/%s/data/unprocessed' % self.uuid
         )
 
+    def test_deprecated_uuid(self, mock_req):
+        self.get_client().reprocess(uuid=self.uuid)
+        mock_req.assert_called_once_with(
+            'post',
+            '/introspection/%s/data/unprocessed' % self.uuid
+        )
+
     def test_invalid_input(self, mock_req):
         self.assertRaises(TypeError, self.get_client().reprocess, 42)
         self.assertFalse(mock_req.called)
@@ -117,6 +130,14 @@ class TestGetStatus(BaseTest):
         mock_req.return_value.json.return_value = 'json'
 
         self.get_client().get_status(self.uuid)
+
+        mock_req.assert_called_once_with(
+            'get', '/introspection/%s' % self.uuid)
+
+    def test_deprecated_uuid(self, mock_req):
+        mock_req.return_value.json.return_value = 'json'
+
+        self.get_client().get_status(uuid=self.uuid)
 
         mock_req.assert_called_once_with(
             'get', '/introspection/%s' % self.uuid)
@@ -180,6 +201,19 @@ class TestWaitForFinish(BaseTest):
         self.sleep.assert_called_with(v1.DEFAULT_RETRY_INTERVAL)
         self.assertEqual(5, self.sleep.call_count)
 
+    def test_deprecated_uuids(self, mock_get_st):
+        mock_get_st.side_effect = (
+            [{'finished': False, 'error': None}] * 5
+            + [{'finished': True, 'error': None}]
+        )
+
+        res = self.get_client().wait_for_finish(uuids=['uuid1'],
+                                                sleep_function=self.sleep)
+        self.assertEqual({'uuid1': {'finished': True, 'error': None}},
+                         res)
+        self.sleep.assert_called_with(v1.DEFAULT_RETRY_INTERVAL)
+        self.assertEqual(5, self.sleep.call_count)
+
     def test_timeout(self, mock_get_st):
         mock_get_st.return_value = {'finished': False, 'error': None}
 
@@ -212,6 +246,10 @@ class TestWaitForFinish(BaseTest):
         self.sleep.assert_called_with(v1.DEFAULT_RETRY_INTERVAL)
         self.assertEqual(2, self.sleep.call_count)
 
+    def test_no_arguments(self, mock_get_st):
+        self.assertRaises(TypeError,
+                          self.get_client().wait_for_finish)
+
 
 @mock.patch.object(http.BaseClient, 'request')
 class TestGetData(BaseTest):
@@ -219,6 +257,14 @@ class TestGetData(BaseTest):
         mock_req.return_value.json.return_value = 'json'
 
         self.assertEqual('json', self.get_client().get_data(self.uuid))
+
+        mock_req.assert_called_once_with(
+            'get', '/introspection/%s/data' % self.uuid)
+
+    def test_deprecated_uuid(self, mock_req):
+        mock_req.return_value.json.return_value = 'json'
+
+        self.assertEqual('json', self.get_client().get_data(uuid=self.uuid))
 
         mock_req.assert_called_once_with(
             'get', '/introspection/%s/data' % self.uuid)
