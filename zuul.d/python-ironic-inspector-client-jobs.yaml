@@ -1,7 +1,7 @@
 - job:
     name: python-ironic-inspector-client-base
     description: Base job for devstack/tempest based python-ironic-inspector-client jobs.
-    parent: devstack-tempest
+    parent: ironic-base
     timeout: 10800
     required-projects:
       - openstack/ironic
@@ -26,12 +26,7 @@
       tempest_test_regex: ironic_tempest_plugin.tests.scenario.test_introspection_basic
       tempest_concurrency: 1
       devstack_localrc:
-        DEFAULT_INSTANCE_TYPE: baremetal
         FORCE_CONFIG_DRIVE: True
-        INSTALL_TEMPEST: False # Don't install a tempest package globaly
-        OVERRIDE_PUBLIC_BRIDGE_MTU: 1400
-        TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/opendev.org/openstack/ironic-tempest-plugin'"
-        VIRT_DRIVER: ironic
         BUILD_TIMEOUT: 600
         IRONIC_BAREMETAL_BASIC_OPS: True
         IRONIC_BUILD_DEPLOY_RAMDISK: False
