@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import json
 import os
 import sys
@@ -20,8 +19,8 @@ import unittest
 
 import eventlet
 eventlet.monkey_patch()  # noqa
-from ironic_inspector.common import swift
 from ironic_inspector import introspection_state as istate
+from ironic_inspector import process
 from ironic_inspector.test import functional
 from keystoneauth1 import session as ks_session
 from keystoneauth1 import token_endpoint
@@ -40,7 +39,6 @@ class TestV1PythonAPI(functional.Base):
                                          token='token')
         self.session = ks_session.Session(self.auth)
         self.client = client.ClientV1(session=self.session)
-        functional.cfg.CONF.set_override('store_data', 'none', 'processing')
 
     def my_status_index(self, statuses):
         my_status = self._fake_status()
@@ -117,15 +115,10 @@ class TestV1PythonAPI(functional.Base):
         status = self.client.get_status(self.uuid)
         self.check_status(status, finished=True, state=istate.States.finished)
 
-    @mock.patch.object(swift, 'store_introspection_data', autospec=True)
-    @mock.patch.object(swift, 'get_introspection_data', autospec=True)
-    def test_reprocess_stored_introspection_data(self, get_mock,
-                                                 store_mock):
-        functional.cfg.CONF.set_override('store_data', 'swift', 'processing')
+    def test_reprocess_stored_introspection_data(self):
         port_create_call = mock.call(node_uuid=self.uuid,
                                      address='11:22:33:44:55:66',
                                      pxe_enabled=True, extra={})
-        get_mock.return_value = json.dumps(self.data)
 
         # assert reprocessing doesn't work before introspection
         self.assertRaises(client.ClientError, self.client.reprocess,
@@ -146,8 +139,6 @@ class TestV1PythonAPI(functional.Base):
         self.check_status(status, finished=True, state=istate.States.finished)
         self.cli.port.create.assert_has_calls([port_create_call],
                                               any_order=True)
-        self.assertFalse(get_mock.called)
-        self.assertTrue(store_mock.called)
 
         res = self.client.reprocess(self.uuid)
         self.assertEqual(202, res.status_code)
@@ -158,9 +149,6 @@ class TestV1PythonAPI(functional.Base):
         self.cli.port.create.assert_has_calls([port_create_call,
                                                port_create_call],
                                               any_order=True)
-        self.assertTrue(get_mock.called)
-        # incoming, processing, reapplying data
-        self.assertEqual(3, store_mock.call_count)
 
     def test_abort_introspection(self):
         # assert abort doesn't work before introspect request
@@ -264,8 +252,7 @@ class TestV1PythonAPI(functional.Base):
 
 
 BASE_CMD = [os.path.join(sys.prefix, 'bin', 'openstack'),
-            '--os-auth-type', 'token_endpoint', '--os-token', 'fake',
-            '--os-url', 'http://127.0.0.1:5050']
+            '--os-auth-type', 'none', '--os-endpoint', 'http://127.0.0.1:5050']
 
 
 class BaseCLITest(functional.Base):
@@ -296,8 +283,6 @@ class BaseCLITest(functional.Base):
 
 class TestCLI(BaseCLITest):
     def setup_lldp(self):
-        functional.cfg.CONF.set_override('store_data', 'swift', 'processing')
-
         self.all_interfaces = {
             'eth1': {'mac': self.macs[0], 'ip': self.ips[0],
                      'client_id': None, 'lldp_processed':
@@ -407,10 +392,10 @@ class TestCLI(BaseCLITest):
         res = self.run_cli('rule', 'list', parse_json=True)
         self.assertEqual([], res)
 
-    @mock.patch.object(swift, 'get_introspection_data', autospec=True)
+    @mock.patch.object(process, 'get_introspection_data', autospec=True)
     def test_interface_list(self, get_mock):
         self.setup_lldp()
-        get_mock.return_value = json.dumps(copy.deepcopy(self.data))
+        get_mock.return_value = json.dumps(self.data)
 
         expected_eth1 = {u'Interface': u'eth1',
                          u'MAC Address': u'11:22:33:44:55:66',
@@ -440,10 +425,10 @@ class TestCLI(BaseCLITest):
         self.assertIn({u'Switch Port MTU': 1514}, res)
         self.assertIn({u'Switch Port MTU': 9216}, res)
 
-    @mock.patch.object(swift, 'get_introspection_data', autospec=True)
+    @mock.patch.object(process, 'get_introspection_data', autospec=True)
     def test_interface_show(self, get_mock):
         self.setup_lldp()
-        get_mock.return_value = json.dumps(copy.deepcopy(self.data))
+        get_mock.return_value = json.dumps(self.data)
 
         res = self.run_cli('interface', 'show', self.uuid, "eth1",
                            parse_json=True)
