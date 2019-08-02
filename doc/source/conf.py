@@ -18,7 +18,6 @@ except ImportError:
 repository_name = 'openstack/python-ironic-inspector-client'
 bug_project = 'python-ironic-inspector-client'
 bug_tag = ''
-html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 wsme_protocols = ['restjson']
 
@@ -44,17 +43,6 @@ master_doc = 'index'
 # General information about the project.
 project = u'Ironic Inspector Client'
 copyright = u'OpenStack Foundation'
-
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-#
-# The short X.Y version.
-from ironic_inspector_client import version as il_version
-# The full version, including alpha/beta/rc tags.
-release = il_version.version_info.release_string()
-# The short X.Y version.
-version = il_version.version_info.version_string()
 
 # A list of ignored prefixes for module index sorting.
 modindex_common_prefix = ['ironic_inspector_client']
