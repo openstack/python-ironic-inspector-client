@@ -1,6 +1,5 @@
 - project:
     templates:
-      - openstack-python-jobs
       - openstack-python3-ussuri-jobs
       - publish-openstack-docs-pti
       - check-requirements
@@ -8,15 +7,11 @@
       - openstackclient-plugin-jobs
     check:
       jobs:
-        - openstack-tox-functional
         - openstack-tox-functional-py36
-        - python-ironic-inspector-client-tempest-python2
         - python-ironic-inspector-client-tempest-python3
         - openstack-tox-lower-constraints
     gate:
       jobs:
-        - openstack-tox-functional
         - openstack-tox-functional-py36
-        - python-ironic-inspector-client-tempest-python2
         - python-ironic-inspector-client-tempest-python3
         - openstack-tox-lower-constraints
