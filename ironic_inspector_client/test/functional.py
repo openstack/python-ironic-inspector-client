@@ -26,7 +26,6 @@ from keystoneauth1 import session as ks_session
 from keystoneauth1 import token_endpoint
 import mock
 from oslo_concurrency import processutils
-import six
 
 import ironic_inspector_client as client
 from ironic_inspector_client import shell
@@ -317,10 +316,7 @@ class TestCLI(BaseCLITest):
         return fake_status
 
     def test_cli_negative(self):
-        if six.PY3:
-            msg_missing_param = 'the following arguments are required'
-        else:
-            msg_missing_param = 'too few arguments'
+        msg_missing_param = 'the following arguments are required'
         err = self.run_cli('start', expect_error=True)
         self.assertIn(msg_missing_param, err)
         err = self.run_cli('status', expect_error=True)

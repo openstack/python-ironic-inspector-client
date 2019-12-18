@@ -12,13 +12,13 @@
 # limitations under the License.
 
 import collections
+import io
 import sys
 import tempfile
 
 import mock
 from osc_lib import exceptions
 from osc_lib.tests import utils
-import six
 
 from ironic_inspector_client import shell
 from ironic_inspector_client import v1
@@ -362,7 +362,7 @@ class TestRules(BaseTest):
 class TestDataSave(BaseTest):
     def test_stdout(self):
         self.client.get_data.return_value = {'answer': 42}
-        buf = six.StringIO()
+        buf = io.StringIO()
 
         arglist = ['uuid1']
         verifylist = [('node', 'uuid1')]

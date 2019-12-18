@@ -183,12 +183,12 @@ class TestRequest(unittest.TestCase):
         self.req.return_value.content = json.dumps(
             {'error': {'message': 'boom'}}).encode('utf-8')
 
-        self.assertRaisesRegexp(http.ClientError, 'boom',
-                                self.get_client().request, 'get', 'url')
+        self.assertRaisesRegex(http.ClientError, 'boom',
+                               self.get_client().request, 'get', 'url')
 
     def test_error_discoverd_style(self):
         self.req.return_value.status_code = 400
         self.req.return_value.content = b'boom'
 
-        self.assertRaisesRegexp(http.ClientError, 'boom',
-                                self.get_client().request, 'get', 'url')
+        self.assertRaisesRegex(http.ClientError, 'boom',
+                               self.get_client().request, 'get', 'url')

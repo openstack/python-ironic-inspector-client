@@ -18,7 +18,6 @@ from keystoneauth1 import session
 import mock
 from oslo_utils import netutils
 from oslo_utils import uuidutils
-import six
 
 import ironic_inspector_client
 from ironic_inspector_client.common import http
@@ -173,12 +172,12 @@ class TestListStatuses(BaseTest):
                                          params=params)
 
     def test_invalid_marker(self, _):
-        six.assertRaisesRegex(self, TypeError, 'Expected a string value.*',
-                              self.get_client().list_statuses, marker=42)
+        self.assertRaisesRegex(TypeError, 'Expected a string value.*',
+                               self.get_client().list_statuses, marker=42)
 
     def test_invalid_limit(self, _):
-        six.assertRaisesRegex(self, TypeError, 'Expected an integer.*',
-                              self.get_client().list_statuses, limit='42')
+        self.assertRaisesRegex(TypeError, 'Expected an integer.*',
+                               self.get_client().list_statuses, limit='42')
 
 
 @mock.patch.object(ironic_inspector_client.ClientV1, 'get_status',

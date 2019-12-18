@@ -18,8 +18,6 @@ import logging
 import time
 import warnings
 
-import six
-
 from ironic_inspector_client.common import http
 from ironic_inspector_client.common.i18n import _
 
@@ -97,7 +95,7 @@ class ClientV1(http.BaseClient):
         """
 
         node_id = node_id or uuid
-        if not isinstance(node_id, six.string_types):
+        if not isinstance(node_id, str):
             raise TypeError(
                 _("Expected string for node_id argument, got %r") % node_id)
         if uuid:
@@ -172,7 +170,7 @@ class ClientV1(http.BaseClient):
             * `started_at` an ISO8601 timestamp,
             * `uuid` the node UUID
         """
-        if not (marker is None or isinstance(marker, six.string_types)):
+        if not (marker is None or isinstance(marker, str)):
             raise TypeError(_('Expected a string value of the marker, got '
                               '%s instead') % marker)
         if not (limit is None or isinstance(limit, int)):
@@ -410,7 +408,7 @@ class RulesAPI(object):
         :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
             requested api_version is not supported
         """
-        if uuid is not None and not isinstance(uuid, six.string_types):
+        if uuid is not None and not isinstance(uuid, str):
             raise TypeError(
                 _("Expected string for uuid argument, got %r") % uuid)
         for name, arg in [('conditions', conditions), ('actions', actions)]:
@@ -459,7 +457,7 @@ class RulesAPI(object):
         :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
             requested api_version is not supported
         """
-        if not isinstance(uuid, six.string_types):
+        if not isinstance(uuid, str):
             raise TypeError(
                 _("Expected string for uuid argument, got %r") % uuid)
         return self._request('get', '/rules/%s' % uuid).json()
@@ -473,7 +471,7 @@ class RulesAPI(object):
         :raises: :py:class:`ironic_inspector_client.VersionNotSupported` if
             requested api_version is not supported
         """
-        if not isinstance(uuid, six.string_types):
+        if not isinstance(uuid, str):
             raise TypeError(
                 _("Expected string for uuid argument, got %r") % uuid)
         self._request('delete', '/rules/%s' % uuid)

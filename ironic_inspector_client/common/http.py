@@ -19,7 +19,6 @@ import logging
 from keystoneauth1 import exceptions as ks_exc
 from keystoneauth1 import session as ks_session
 import requests
-import six
 
 from ironic_inspector_client.common.i18n import _
 
@@ -162,7 +161,7 @@ class BaseClient(object):
     def _check_api_version(self, api_version):
         if isinstance(api_version, int):
             api_version = (api_version, 0)
-        if isinstance(api_version, six.string_types):
+        if isinstance(api_version, str):
             api_version = _parse_version(api_version)
         api_version = tuple(api_version)
         if not all(isinstance(x, int) for x in api_version):
