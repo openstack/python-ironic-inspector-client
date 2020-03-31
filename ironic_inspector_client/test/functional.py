@@ -46,8 +46,8 @@ class TestV1PythonAPI(functional.Base):
     def test_introspect_get_status(self):
         self.client.introspect(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
-                                                              'reboot')
+        self.cli.set_node_power_state.assert_called_once_with(self.uuid,
+                                                              'rebooting')
 
         status = self.client.get_status(self.uuid)
         self.check_status(status, finished=False, state=istate.States.waiting)
@@ -56,10 +56,10 @@ class TestV1PythonAPI(functional.Base):
         self.assertEqual({'uuid': self.uuid}, res)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
-        self.assertCalledWithPatch(self.patch, self.cli.node.update)
-        self.cli.port.create.assert_called_once_with(
+        self.assertCalledWithPatch(self.patch, self.cli.patch_node)
+        self.cli.create_port.assert_called_once_with(
             node_uuid=self.uuid, address='11:22:33:44:55:66',
-            pxe_enabled=True, extra={})
+            is_pxe_enabled=True, extra={})
 
         status = self.client.get_status(self.uuid)
         self.check_status(status, finished=True, state=istate.States.finished)
@@ -67,8 +67,8 @@ class TestV1PythonAPI(functional.Base):
     def test_introspect_list_statuses(self):
         self.client.introspect(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
-                                                              'reboot')
+        self.cli.set_node_power_state.assert_called_once_with(self.uuid,
+                                                              'rebooting')
 
         statuses = self.client.list_statuses()
         my_status = statuses[self.my_status_index(statuses)]
@@ -79,10 +79,10 @@ class TestV1PythonAPI(functional.Base):
         self.assertEqual({'uuid': self.uuid}, res)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
-        self.assertCalledWithPatch(self.patch, self.cli.node.update)
-        self.cli.port.create.assert_called_once_with(
+        self.assertCalledWithPatch(self.patch, self.cli.patch_node)
+        self.cli.create_port.assert_called_once_with(
             node_uuid=self.uuid, address='11:22:33:44:55:66',
-            pxe_enabled=True, extra={})
+            is_pxe_enabled=True, extra={})
 
         statuses = self.client.list_statuses()
         my_status = statuses[self.my_status_index(statuses)]
@@ -117,7 +117,7 @@ class TestV1PythonAPI(functional.Base):
     def test_reprocess_stored_introspection_data(self):
         port_create_call = mock.call(node_uuid=self.uuid,
                                      address='11:22:33:44:55:66',
-                                     pxe_enabled=True, extra={})
+                                     is_pxe_enabled=True, extra={})
 
         # assert reprocessing doesn't work before introspection
         self.assertRaises(client.ClientError, self.client.reprocess,
@@ -125,8 +125,8 @@ class TestV1PythonAPI(functional.Base):
 
         self.client.introspect(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
-                                                              'reboot')
+        self.cli.set_node_power_state.assert_called_once_with(self.uuid,
+                                                              'rebooting')
         status = self.client.get_status(self.uuid)
         self.check_status(status, finished=False, state=istate.States.waiting)
 
@@ -136,7 +136,7 @@ class TestV1PythonAPI(functional.Base):
 
         status = self.client.get_status(self.uuid)
         self.check_status(status, finished=True, state=istate.States.finished)
-        self.cli.port.create.assert_has_calls([port_create_call],
+        self.cli.create_port.assert_has_calls([port_create_call],
                                               any_order=True)
 
         res = self.client.reprocess(self.uuid)
@@ -145,7 +145,7 @@ class TestV1PythonAPI(functional.Base):
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
         self.check_status(status, finished=True, state=istate.States.finished)
 
-        self.cli.port.create.assert_has_calls([port_create_call,
+        self.cli.create_port.assert_has_calls([port_create_call,
                                                port_create_call],
                                               any_order=True)
 
@@ -156,8 +156,8 @@ class TestV1PythonAPI(functional.Base):
 
         self.client.introspect(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
-                                                              'reboot')
+        self.cli.set_node_power_state.assert_called_once_with(self.uuid,
+                                                              'rebooting')
 
         status = self.client.get_status(self.uuid)
         self.check_status(status, finished=False, state=istate.States.waiting)
@@ -332,8 +332,8 @@ class TestCLI(BaseCLITest):
     def test_introspect_get_status(self):
         self.run_cli('start', self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
-        self.cli.node.set_power_state.assert_called_once_with(self.uuid,
-                                                              'reboot')
+        self.cli.set_node_power_state.assert_called_once_with(self.uuid,
+                                                              'rebooting')
 
         status = self.run_cli('status', self.uuid, parse_json=True)
         self.check_status(status, finished=False, state=istate.States.waiting)
@@ -342,10 +342,10 @@ class TestCLI(BaseCLITest):
         self.assertEqual({'uuid': self.uuid}, res)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
-        self.assertCalledWithPatch(self.patch, self.cli.node.update)
-        self.cli.port.create.assert_called_once_with(
+        self.assertCalledWithPatch(self.patch, self.cli.patch_node)
+        self.cli.create_port.assert_called_once_with(
             node_uuid=self.uuid, address='11:22:33:44:55:66',
-            pxe_enabled=True, extra={})
+            is_pxe_enabled=True, extra={})
 
         status = self.run_cli('status', self.uuid, parse_json=True)
         self.check_status(status, finished=True, state=istate.States.finished)

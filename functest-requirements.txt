@@ -1,4 +1,4 @@
 # NOTE(jroll) these are pinned to the same SHA, update when needed.
-# Last updated: Sep 26, 2019 (Train cycle).
-git+https://opendev.org/openstack/ironic-inspector@0c154991cebeab0abfd2499f95dc704ef046e09f#egg=ironic-inspector
--r https://opendev.org/openstack/ironic-inspector/raw/commit/0c154991cebeab0abfd2499f95dc704ef046e09f/test-requirements.txt
+# Last updated: Apr 2, 2020 (Ussuri cycle).
+git+https://opendev.org/openstack/ironic-inspector@75437072da66686509d4b7fa80589f5b4966a858#egg=ironic-inspector
+-r https://opendev.org/openstack/ironic-inspector/raw/commit/75437072da66686509d4b7fa80589f5b4966a858/test-requirements.txt
