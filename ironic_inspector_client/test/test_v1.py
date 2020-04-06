@@ -13,11 +13,10 @@
 
 import collections
 import unittest
+import uuid
 
 from keystoneauth1 import session
 import mock
-from oslo_utils import netutils
-from oslo_utils import uuidutils
 
 import ironic_inspector_client
 from ironic_inspector_client.common import http
@@ -34,7 +33,7 @@ FAKE_HEADERS = {
                    return_value=mock.Mock(headers=FAKE_HEADERS,
                                           status_code=200))
 class TestInit(unittest.TestCase):
-    my_ip = 'http://' + netutils.get_my_ipv4() + ':5050'
+    my_ip = 'http://127.0.0.1:5050'
 
     def get_client(self, **kwargs):
         kwargs.setdefault('inspector_url', self.my_ip)
@@ -68,8 +67,8 @@ class TestInit(unittest.TestCase):
 class BaseTest(unittest.TestCase):
     def setUp(self):
         super(BaseTest, self).setUp()
-        self.uuid = uuidutils.generate_uuid()
-        self.my_ip = 'http://' + netutils.get_my_ipv4() + ':5050'
+        self.uuid = str(uuid.uuid4())
+        self.my_ip = 'http://127.0.0.1:5050'
 
     @mock.patch.object(http.BaseClient, 'server_api_versions',
                        lambda self: ((1, 0), (1, 99)))
