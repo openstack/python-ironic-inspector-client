@@ -16,15 +16,16 @@
 from __future__ import print_function
 
 import json
+import os
 import sys
 
-from osc_lib.command import command
-from osc_lib import exceptions
-from osc_lib.i18n import _
-from osc_lib import utils
+from cliff import command
+from cliff import lister
+from cliff import show
 import yaml
 
 import ironic_inspector_client
+from ironic_inspector_client.common.i18n import _
 from ironic_inspector_client import resource as res
 
 
@@ -57,18 +58,18 @@ def make_client(instance):
 def build_option_parser(parser):
     # TODO(dtantsur): deprecate these options in favor of more generic OS_*
     parser.add_argument('--inspector-api-version',
-                        default=utils.env('INSPECTOR_VERSION',
-                                          default=DEFAULT_API_VERSION),
+                        default=(os.environ.get('INSPECTOR_VERSION')
+                                 or DEFAULT_API_VERSION),
                         help='inspector API version, only 1 is supported now '
                         '(env: INSPECTOR_VERSION).')
     parser.add_argument('--inspector-url',
-                        default=utils.env('INSPECTOR_URL', default=None),
+                        default=os.environ.get('INSPECTOR_URL'),
                         help='inspector URL, defaults to localhost '
                         '(env: INSPECTOR_URL).')
     return parser
 
 
-class StartCommand(command.Lister):
+class StartCommand(lister.Lister):
     """Start the introspection."""
 
     COLUMNS = ('UUID', 'Error')
@@ -91,7 +92,7 @@ class StartCommand(command.Lister):
 
     def take_action(self, parsed_args):
         if parsed_args.check_errors and not parsed_args.wait:
-            raise exceptions.CommandError(
+            raise RuntimeError(
                 _("--check-errors can only be used with --wait"))
 
         client = self.app.client_manager.baremetal_introspection
@@ -130,7 +131,7 @@ class ReprocessCommand(command.Command):
         client.reprocess(parsed_args.node)
 
 
-class StatusCommand(command.ShowOne):
+class StatusCommand(show.ShowOne):
     """Get introspection status."""
     hidden_status_items = {'links'}
 
@@ -157,10 +158,12 @@ class StatusCommand(command.ShowOne):
         return zip(*sorted(self.status_attributes(status)))
 
 
-class StatusListCommand(command.Lister):
+class StatusListCommand(lister.Lister):
     """List introspection statuses"""
 
     COLUMNS = ('UUID', 'Started at', 'Finished at', 'Error')
+    MAPPING = dict(zip(COLUMNS,
+                       ['uuid', 'started_at', 'finished_at', 'error']))
 
     @classmethod
     def status_row(cls, client_item):
@@ -173,7 +176,7 @@ class StatusListCommand(command.Lister):
         :return: a list of client_item attributes as the row
         """
         status = dict(StatusCommand.status_attributes(client_item))
-        return utils.get_dict_properties(status, cls.COLUMNS)
+        return tuple(status.get(cls.MAPPING[item]) for item in cls.COLUMNS)
 
     def get_parser(self, prog_name):
         parser = super(StatusListCommand, self).get_parser(prog_name)
@@ -204,7 +207,7 @@ class AbortCommand(command.Command):
         client.abort(parsed_args.node)
 
 
-class RuleImportCommand(command.Lister):
+class RuleImportCommand(lister.Lister):
     """Import one or several introspection rules from a JSON/YAML file."""
 
     COLUMNS = ("UUID", "Description")
@@ -229,7 +232,7 @@ class RuleImportCommand(command.Lister):
         return self.COLUMNS, result
 
 
-class RuleListCommand(command.Lister):
+class RuleListCommand(lister.Lister):
     """List all introspection rules."""
 
     COLUMNS = ("UUID", "Description")
@@ -242,7 +245,7 @@ class RuleListCommand(command.Lister):
         return self.COLUMNS, rules
 
 
-class RuleShowCommand(command.ShowOne):
+class RuleShowCommand(show.ShowOne):
     """Show an introspection rule."""
 
     def get_parser(self, prog_name):
@@ -300,7 +303,7 @@ class DataSaveCommand(command.Command):
             json.dump(data, sys.stdout)
 
 
-class InterfaceListCommand(command.Lister):
+class InterfaceListCommand(lister.Lister):
     """List interface data including attached switch port information."""
 
     def get_parser(self, prog_name):
@@ -340,7 +343,7 @@ class InterfaceListCommand(command.Lister):
         return interface_res.labels, rows
 
 
-class InterfaceShowCommand(command.ShowOne):
+class InterfaceShowCommand(show.ShowOne):
     """Show interface data including attached switch port information."""
 
     COLUMNS = ("Field", "Value")

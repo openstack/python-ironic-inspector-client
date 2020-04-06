@@ -17,7 +17,6 @@ import sys
 import tempfile
 
 import mock
-from osc_lib import exceptions
 from osc_lib.tests import utils
 
 from ironic_inspector_client import shell
@@ -149,7 +148,7 @@ class TestIntrospect(BaseTest):
         cmd = shell.StartCommand(self.app, None)
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         msg = "--check-errors can only be used with --wait"
-        self.assertRaisesRegex(exceptions.CommandError, msg, cmd.take_action,
+        self.assertRaisesRegex(RuntimeError, msg, cmd.take_action,
                                parsed_args)
 
     def test_abort(self):
