@@ -98,6 +98,6 @@
         ironic-inspector-dhcp: True
 
 - job:
-    name: python-ironic-inspector-client-tempest-python3
-    description: python-ironic-inspector-client-tempest-python3
+    name: python-ironic-inspector-client-tempest
+    description: python-ironic-inspector-client-tempest
     parent: python-ironic-inspector-client-base
