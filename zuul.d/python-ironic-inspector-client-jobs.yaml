@@ -25,29 +25,15 @@
       tempest_test_regex: ironic_tempest_plugin.tests.scenario.test_introspection_basic
       tempest_concurrency: 1
       devstack_localrc:
-        FORCE_CONFIG_DRIVE: True
         BUILD_TIMEOUT: 600
-        IRONIC_BAREMETAL_BASIC_OPS: True
-        IRONIC_BUILD_DEPLOY_RAMDISK: False
         IRONIC_CALLBACK_TIMEOUT: 600
-        IRONIC_DEPLOY_DRIVER: ipmi
-        IRONIC_INSPECTOR_BUILD_RAMDISK: False
-        IRONIC_RAMDISK_TYPE: tinyipa
-        IRONIC_TEMPEST_BUILD_TIMEOUT: 600
-        IRONIC_TEMPEST_WHOLE_DISK_IMAGE: False
-        IRONIC_VM_COUNT: 1
-        IRONIC_VM_EPHEMERAL_DISK: 0
-        IRONIC_VM_LOG_DIR: '{{ devstack_base_dir }}/ironic-bm-logs'
-        IRONIC_VM_SPECS_RAM: 384
         IRONIC_DEFAULT_DEPLOY_INTERFACE: direct
         IRONIC_DEFAULT_RESCUE_INTERFACE: ""
-
-        Q_AGENT: openvswitch
-        Q_ML2_TENANT_NETWORK_TYPE: vxlan
-
+        IRONIC_TEMPEST_BUILD_TIMEOUT: 600
+        IRONIC_VM_EPHEMERAL_DISK: 0
+        IRONIC_VM_LOG_DIR: '{{ devstack_base_dir }}/ironic-bm-logs'
         SWIFT_ENABLE_TEMPURLS: True
         SWIFT_TEMPURL_KEY: secretkey
-
       devstack_plugins:
         ironic: https://opendev.org/openstack/ironic
         ironic-inspector: https://opendev.org/openstack/ironic-inspector
@@ -59,12 +45,10 @@
         c-sch: False
         c-vol: False
         cinder: False
-
         s-account: True
         s-container: True
         s-object: True
         s-proxy: True
-
         dstat: True
         g-api: True
         g-reg: True
@@ -102,5 +86,8 @@
     description: python-ironic-inspector-client-tempest
     parent: python-ironic-inspector-client-base
     vars:
+      tempest_test_timeout: 3600
       devstack_localrc:
         IRONIC_DEFAULT_BOOT_OPTION: netboot
+        BUILD_TIMEOUT: 3600
+        IRONIC_TEMPEST_BUILD_TIMEOUT: 3600
