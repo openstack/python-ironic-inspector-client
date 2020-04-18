@@ -16,6 +16,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 import eventlet
 eventlet.monkey_patch()
@@ -24,7 +25,6 @@ from ironic_inspector import process
 from ironic_inspector.test import functional
 from keystoneauth1 import session as ks_session
 from keystoneauth1 import token_endpoint
-import mock
 from oslo_concurrency import processutils
 
 import ironic_inspector_client as client

@@ -13,10 +13,10 @@
 
 import collections
 import unittest
+from unittest import mock
 import uuid
 
 from keystoneauth1 import session
-import mock
 
 import ironic_inspector_client
 from ironic_inspector_client.common import http

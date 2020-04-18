@@ -15,8 +15,8 @@ import collections
 import io
 import sys
 import tempfile
+from unittest import mock
 
-import mock
 from osc_lib.tests import utils
 
 from ironic_inspector_client import shell

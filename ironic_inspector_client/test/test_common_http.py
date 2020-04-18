@@ -13,10 +13,10 @@
 
 import json
 import unittest
+from unittest import mock
 
 from keystoneauth1 import exceptions
 from keystoneauth1 import session
-import mock
 
 from ironic_inspector_client.common import http
 
