@@ -210,6 +210,7 @@ class TestV1PythonAPI(functional.Base):
         rule = {'conditions': [],
                 'actions': [{'action': 'fail', 'message': 'boom'}],
                 'description': 'Cool actions',
+                'scope': None,
                 'uuid': self.uuid}
         res = self.client.rules.from_json(rule)
         self.assertEqual(self.uuid, res['uuid'])
@@ -222,7 +223,8 @@ class TestV1PythonAPI(functional.Base):
         res = self.client.rules.get_all()
         self.assertEqual(rule['links'], res[0].pop('links'))
         self.assertEqual([{'uuid': self.uuid,
-                           'description': 'Cool actions'}],
+                           'description': 'Cool actions',
+                           'scope': None}],
                          res)
 
         self.client.rules.delete(self.uuid)
@@ -357,13 +359,15 @@ class TestCLI(BaseCLITest):
         rule = {'conditions': [],
                 'actions': [{'action': 'fail', 'message': 'boom'}],
                 'description': 'Cool actions',
+                'scope': None,
                 'uuid': self.uuid}
         with tempfile.NamedTemporaryFile(mode='w') as fp:
             json.dump(rule, fp)
             fp.flush()
             res = self.run_cli('rule', 'import', fp.name, parse_json=True)
 
-        self.assertEqual([{'UUID': self.uuid, 'Description': 'Cool actions'}],
+        self.assertEqual([{'UUID': self.uuid,
+                           'Description': 'Cool actions'}],
                          res)
 
         res = self.run_cli('rule', 'show', self.uuid, parse_json=True)
