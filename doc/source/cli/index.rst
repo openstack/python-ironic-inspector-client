@@ -1,12 +1,39 @@
 Command Line Reference
 ======================
 
+Integration for two command lines tools are provided: ironicclient_ and
+OpenStackClient_.
 
-CLI tool is based on OpenStackClient_ with prefix
-``openstack baremetal introspection``.
+Integration with ``baremetal`` CLI
+----------------------------------
+
+The ``baremetal`` command is provided by ironicclient_, so it has to be
+installed, e.g.:
+
+.. code-block:: shell
+
+    pip install 'python-ironicclient>=4.1.0'
+
+All commands are prefixed with ``baremetal introspection``. See `standalone
+ironic CLI documentation`_ for details on how to use it.
+
+.. _ironicclient: https://docs.openstack.org/python-ironicclient/
+.. _standalone ironic CLI documentation: https://docs.openstack.org/python-ironicclient/latest/cli/standalone.html
+
+Integration with ``openstack baremetal`` CLI
+--------------------------------------------
+
+The ``openstack`` command is provided by ironicclient_, so it has to be
+installed, e.g.:
+
+.. code-block:: shell
+
+    pip install python-openstackclient.
+
+All commands are prefixed with ``baremetal introspection``.
 
 Common arguments
-----------------
+~~~~~~~~~~~~~~~~
 
 All commands accept the following arguments:
 
