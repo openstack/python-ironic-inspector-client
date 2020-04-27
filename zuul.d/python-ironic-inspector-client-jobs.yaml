@@ -101,3 +101,6 @@
     name: python-ironic-inspector-client-tempest
     description: python-ironic-inspector-client-tempest
     parent: python-ironic-inspector-client-base
+    vars:
+      devstack_localrc:
+        IRONIC_DEFAULT_BOOT_OPTION: netboot
