@@ -31,7 +31,8 @@ FAKE_HEADERS = {
 
 @mock.patch.object(session.Session, 'get',
                    return_value=mock.Mock(headers=FAKE_HEADERS,
-                                          status_code=200))
+                                          status_code=200),
+                   autospec=True)
 class TestInit(unittest.TestCase):
     my_ip = 'http://127.0.0.1:5050'
 
@@ -41,7 +42,8 @@ class TestInit(unittest.TestCase):
 
     def test_ok(self, mock_get):
         self.get_client()
-        mock_get.assert_called_once_with(self.my_ip, authenticated=False,
+        mock_get.assert_called_once_with(mock.ANY,
+                                         self.my_ip, authenticated=False,
                                          raise_exc=False)
 
     def test_explicit_version(self, mock_get):
@@ -59,7 +61,8 @@ class TestInit(unittest.TestCase):
 
     def test_explicit_url(self, mock_get):
         self.get_client(inspector_url='http://host:port')
-        mock_get.assert_called_once_with('http://host:port',
+        mock_get.assert_called_once_with(mock.ANY,
+                                         'http://host:port',
                                          authenticated=False,
                                          raise_exc=False)
 
@@ -77,18 +80,18 @@ class BaseTest(unittest.TestCase):
         return ironic_inspector_client.ClientV1(**kwargs)
 
 
-@mock.patch.object(http.BaseClient, 'request')
+@mock.patch.object(http.BaseClient, 'request', autospec=True)
 class TestIntrospect(BaseTest):
     def test(self, mock_req):
         self.get_client().introspect(self.uuid)
         mock_req.assert_called_once_with(
-            'post', '/introspection/%s' % self.uuid,
+            mock.ANY, 'post', '/introspection/%s' % self.uuid,
             params={})
 
     def test_deprecated_uuid(self, mock_req):
         self.get_client().introspect(uuid=self.uuid)
         mock_req.assert_called_once_with(
-            'post', '/introspection/%s' % self.uuid,
+            mock.ANY, 'post', '/introspection/%s' % self.uuid,
             params={})
 
     def test_invalid_input(self, mock_req):
@@ -97,23 +100,23 @@ class TestIntrospect(BaseTest):
     def test_manage_boot(self, mock_req):
         self.get_client().introspect(self.uuid, manage_boot=False)
         mock_req.assert_called_once_with(
-            'post', '/introspection/%s' % self.uuid,
+            mock.ANY, 'post', '/introspection/%s' % self.uuid,
             params={'manage_boot': '0'})
 
 
-@mock.patch.object(http.BaseClient, 'request')
+@mock.patch.object(http.BaseClient, 'request', autospec=True)
 class TestReprocess(BaseTest):
     def test(self, mock_req):
         self.get_client().reprocess(self.uuid)
         mock_req.assert_called_once_with(
-            'post',
+            mock.ANY, 'post',
             '/introspection/%s/data/unprocessed' % self.uuid
         )
 
     def test_deprecated_uuid(self, mock_req):
         self.get_client().reprocess(uuid=self.uuid)
         mock_req.assert_called_once_with(
-            'post',
+            mock.ANY, 'post',
             '/introspection/%s/data/unprocessed' % self.uuid
         )
 
@@ -122,7 +125,7 @@ class TestReprocess(BaseTest):
         self.assertFalse(mock_req.called)
 
 
-@mock.patch.object(http.BaseClient, 'request')
+@mock.patch.object(http.BaseClient, 'request', autospec=True)
 class TestGetStatus(BaseTest):
     def test(self, mock_req):
         mock_req.return_value.json.return_value = 'json'
@@ -130,7 +133,7 @@ class TestGetStatus(BaseTest):
         self.get_client().get_status(self.uuid)
 
         mock_req.assert_called_once_with(
-            'get', '/introspection/%s' % self.uuid)
+            mock.ANY, 'get', '/introspection/%s' % self.uuid)
 
     def test_deprecated_uuid(self, mock_req):
         mock_req.return_value.json.return_value = 'json'
@@ -138,13 +141,13 @@ class TestGetStatus(BaseTest):
         self.get_client().get_status(uuid=self.uuid)
 
         mock_req.assert_called_once_with(
-            'get', '/introspection/%s' % self.uuid)
+            mock.ANY, 'get', '/introspection/%s' % self.uuid)
 
     def test_invalid_input(self, _):
         self.assertRaises(TypeError, self.get_client().get_status, 42)
 
 
-@mock.patch.object(http.BaseClient, 'request')
+@mock.patch.object(http.BaseClient, 'request', autospec=True)
 class TestListStatuses(BaseTest):
     def test_default(self, mock_req):
         mock_req.return_value.json.return_value = {
@@ -155,7 +158,7 @@ class TestListStatuses(BaseTest):
             'limit': None
         }
         self.get_client().list_statuses()
-        mock_req.assert_called_once_with('get', '/introspection',
+        mock_req.assert_called_once_with(mock.ANY, 'get', '/introspection',
                                          params=params)
 
     def test_nondefault(self, mock_req):
@@ -167,7 +170,7 @@ class TestListStatuses(BaseTest):
             'limit': 42
         }
         self.get_client().list_statuses(**params)
-        mock_req.assert_called_once_with('get', '/introspection',
+        mock_req.assert_called_once_with(mock.ANY, 'get', '/introspection',
                                          params=params)
 
     def test_invalid_marker(self, _):
@@ -249,7 +252,7 @@ class TestWaitForFinish(BaseTest):
                           self.get_client().wait_for_finish)
 
 
-@mock.patch.object(http.BaseClient, 'request')
+@mock.patch.object(http.BaseClient, 'request', autospec=True)
 class TestGetData(BaseTest):
     def test_json(self, mock_req):
         mock_req.return_value.json.return_value = 'json'
@@ -257,7 +260,7 @@ class TestGetData(BaseTest):
         self.assertEqual('json', self.get_client().get_data(self.uuid))
 
         mock_req.assert_called_once_with(
-            'get', '/introspection/%s/data' % self.uuid)
+            mock.ANY, 'get', '/introspection/%s/data' % self.uuid)
 
     def test_deprecated_uuid(self, mock_req):
         mock_req.return_value.json.return_value = 'json'
@@ -265,7 +268,7 @@ class TestGetData(BaseTest):
         self.assertEqual('json', self.get_client().get_data(uuid=self.uuid))
 
         mock_req.assert_called_once_with(
-            'get', '/introspection/%s/data' % self.uuid)
+            mock.ANY, 'get', '/introspection/%s/data' % self.uuid)
 
     def test_raw(self, mock_req):
         mock_req.return_value.content = b'json'
@@ -274,13 +277,13 @@ class TestGetData(BaseTest):
                                                              raw=True))
 
         mock_req.assert_called_once_with(
-            'get', '/introspection/%s/data' % self.uuid)
+            mock.ANY, 'get', '/introspection/%s/data' % self.uuid)
 
     def test_invalid_input(self, _):
         self.assertRaises(TypeError, self.get_client().get_data, 42)
 
 
-@mock.patch.object(http.BaseClient, 'request')
+@mock.patch.object(http.BaseClient, 'request', autospec=True)
 class TestRules(BaseTest):
     def get_rules(self, **kwargs):
         return self.get_client(**kwargs).rules
@@ -289,20 +292,22 @@ class TestRules(BaseTest):
         self.get_rules().create([{'cond': 'cond'}], [{'act': 'act'}])
 
         mock_req.assert_called_once_with(
-            'post', '/rules', json={'conditions': [{'cond': 'cond'}],
-                                    'actions': [{'act': 'act'}],
-                                    'uuid': None,
-                                    'description': None})
+            mock.ANY, 'post', '/rules',
+            json={'conditions': [{'cond': 'cond'}],
+                  'actions': [{'act': 'act'}],
+                  'uuid': None,
+                  'description': None})
 
     def test_create_all_fields(self, mock_req):
         self.get_rules().create([{'cond': 'cond'}], [{'act': 'act'}],
                                 uuid='u', description='d')
 
         mock_req.assert_called_once_with(
-            'post', '/rules', json={'conditions': [{'cond': 'cond'}],
-                                    'actions': [{'act': 'act'}],
-                                    'uuid': 'u',
-                                    'description': 'd'})
+            mock.ANY, 'post', '/rules',
+            json={'conditions': [{'cond': 'cond'}],
+                  'actions': [{'act': 'act'}],
+                  'uuid': 'u',
+                  'description': 'd'})
 
     def test_create_invalid_input(self, mock_req):
         self.assertRaises(TypeError, self.get_rules().create,
@@ -318,7 +323,7 @@ class TestRules(BaseTest):
         self.get_rules().from_json({'foo': 'bar'})
 
         mock_req.assert_called_once_with(
-            'post', '/rules', json={'foo': 'bar'})
+            mock.ANY, 'post', '/rules', json={'foo': 'bar'})
 
     def test_get_all(self, mock_req):
         mock_req.return_value.json.return_value = {'rules': ['rules']}
@@ -326,7 +331,7 @@ class TestRules(BaseTest):
         res = self.get_rules().get_all()
         self.assertEqual(['rules'], res)
 
-        mock_req.assert_called_once_with('get', '/rules')
+        mock_req.assert_called_once_with(mock.ANY, 'get', '/rules')
 
     def test_get(self, mock_req):
         mock_req.return_value.json.return_value = {'answer': 42}
@@ -334,7 +339,7 @@ class TestRules(BaseTest):
         res = self.get_rules().get('uuid1')
         self.assertEqual({'answer': 42}, res)
 
-        mock_req.assert_called_once_with('get', '/rules/uuid1')
+        mock_req.assert_called_once_with(mock.ANY, 'get', '/rules/uuid1')
 
     def test_get_invalid_input(self, mock_req):
         self.assertRaises(TypeError, self.get_rules().get, 42)
@@ -343,7 +348,7 @@ class TestRules(BaseTest):
     def test_delete(self, mock_req):
         self.get_rules().delete('uuid1')
 
-        mock_req.assert_called_once_with('delete', '/rules/uuid1')
+        mock_req.assert_called_once_with(mock.ANY, 'delete', '/rules/uuid1')
 
     def test_delete_invalid_input(self, mock_req):
         self.assertRaises(TypeError, self.get_rules().delete, 42)
@@ -352,21 +357,21 @@ class TestRules(BaseTest):
     def test_delete_all(self, mock_req):
         self.get_rules().delete_all()
 
-        mock_req.assert_called_once_with('delete', '/rules')
+        mock_req.assert_called_once_with(mock.ANY, 'delete', '/rules')
 
 
-@mock.patch.object(http.BaseClient, 'request')
+@mock.patch.object(http.BaseClient, 'request', autospec=True)
 class TestAbort(BaseTest):
     def test(self, mock_req):
         self.get_client().abort(self.uuid)
-        mock_req.assert_called_once_with('post',
+        mock_req.assert_called_once_with(mock.ANY, 'post',
                                          '/introspection/%s/abort' % self.uuid)
 
     def test_invalid_input(self, _):
         self.assertRaises(TypeError, self.get_client().abort, 42)
 
 
-@mock.patch.object(http.BaseClient, 'request')
+@mock.patch.object(http.BaseClient, 'request', autospec=True)
 class TestInterfaceApi(BaseTest):
     def setUp(self):
         super(TestInterfaceApi, self).setUp()
