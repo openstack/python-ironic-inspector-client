@@ -18,7 +18,7 @@ import tempfile
 import unittest
 
 import eventlet
-eventlet.monkey_patch()  # noqa
+eventlet.monkey_patch()
 from ironic_inspector import introspection_state as istate
 from ironic_inspector import process
 from ironic_inspector.test import functional

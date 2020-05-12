@@ -104,7 +104,7 @@ class TestIntrospect(BaseTest):
     def test_wait_with_check_errors_no_raise_exception(self):
         nodes = ['uuid1', 'uuid2', 'uuid3']
         arglist = ['--wait'] + ['--check-errors'] + nodes
-        verifylist = [('node', nodes), ('wait', True),  ('check_errors', True)]
+        verifylist = [('node', nodes), ('wait', True), ('check_errors', True)]
         self.client.wait_for_finish.return_value = {
             'uuid1': {'finished': True, 'error': None},
             'uuid2': {'finished': True, 'error': None},

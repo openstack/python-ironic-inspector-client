@@ -20,9 +20,9 @@ import ironic_inspector_client
 class TestExposedAPI(unittest.TestCase):
     def test_only_client_all_exposed(self):
         exposed = {x for x in dir(ironic_inspector_client)
-                   if not x.startswith('__') and
-                   not isinstance(getattr(ironic_inspector_client, x),
-                                  types.ModuleType)}
+                   if not x.startswith('__')
+                   and not isinstance(getattr(ironic_inspector_client, x),
+                                      types.ModuleType)}
         self.assertEqual({'ClientV1', 'ClientError', 'EndpointNotFound',
                           'VersionNotSupported',
                           'MAX_API_VERSION', 'DEFAULT_API_VERSION'},
