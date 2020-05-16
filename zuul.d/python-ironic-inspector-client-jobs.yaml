@@ -1,7 +1,7 @@
 - job:
     name: python-ironic-inspector-client-base
     description: Base job for devstack/tempest based python-ironic-inspector-client jobs.
-    parent: ironic-base
+    parent: ironic-inspector-base
     timeout: 10800
     required-projects:
       - openstack/ironic
@@ -25,15 +25,9 @@
       tempest_test_regex: ironic_tempest_plugin.tests.scenario.test_introspection_basic
       tempest_concurrency: 1
       devstack_localrc:
-        BUILD_TIMEOUT: 600
-        IRONIC_CALLBACK_TIMEOUT: 600
         IRONIC_DEFAULT_DEPLOY_INTERFACE: direct
         IRONIC_DEFAULT_RESCUE_INTERFACE: ""
-        IRONIC_TEMPEST_BUILD_TIMEOUT: 600
         IRONIC_VM_EPHEMERAL_DISK: 0
-        IRONIC_VM_LOG_DIR: '{{ devstack_base_dir }}/ironic-bm-logs'
-        SWIFT_ENABLE_TEMPURLS: True
-        SWIFT_TEMPURL_KEY: secretkey
       devstack_plugins:
         ironic: https://opendev.org/openstack/ironic
         ironic-inspector: https://opendev.org/openstack/ironic-inspector
@@ -86,8 +80,5 @@
     description: python-ironic-inspector-client-tempest
     parent: python-ironic-inspector-client-base
     vars:
-      tempest_test_timeout: 3600
       devstack_localrc:
         IRONIC_DEFAULT_BOOT_OPTION: netboot
-        BUILD_TIMEOUT: 3600
-        IRONIC_TEMPEST_BUILD_TIMEOUT: 3600
