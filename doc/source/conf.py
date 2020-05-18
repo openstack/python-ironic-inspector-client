@@ -11,8 +11,9 @@ extensions = ['sphinxcontrib.apidoc',
               'openstackdocstheme',
               ]
 
-repository_name = 'openstack/python-ironic-inspector-client'
-use_storyboard = True
+openstackdocs_repo_name = 'openstack/python-ironic-inspector-client'
+openstackdocs_pdf_link = True
+openstackdocs_use_storyboard = True
 
 wsme_protocols = ['restjson']
 
