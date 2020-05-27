@@ -1,6 +1,6 @@
 - job:
-    name: python-ironic-inspector-client-base
-    description: Base job for devstack/tempest based python-ironic-inspector-client jobs.
+    name: python-ironic-inspector-client-tempest
+    description: Devstack/tempest based python-ironic-inspector-client job.
     parent: ironic-inspector-base
     timeout: 10800
     required-projects:
@@ -25,6 +25,7 @@
       tempest_test_regex: ironic_tempest_plugin.tests.scenario.test_introspection_basic
       tempest_concurrency: 1
       devstack_localrc:
+        IRONIC_DEFAULT_BOOT_OPTION: netboot
         IRONIC_DEFAULT_DEPLOY_INTERFACE: direct
         IRONIC_DEFAULT_RESCUE_INTERFACE: ""
         IRONIC_VM_EPHEMERAL_DISK: 0
@@ -74,11 +75,3 @@
         ir-cond: True
         ironic-inspector: True
         ironic-inspector-dhcp: True
-
-- job:
-    name: python-ironic-inspector-client-tempest
-    description: python-ironic-inspector-client-tempest
-    parent: python-ironic-inspector-client-base
-    vars:
-      devstack_localrc:
-        IRONIC_DEFAULT_BOOT_OPTION: netboot
