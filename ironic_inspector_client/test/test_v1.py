@@ -262,6 +262,15 @@ class TestGetData(BaseTest):
         mock_req.assert_called_once_with(
             mock.ANY, 'get', '/introspection/%s/data' % self.uuid)
 
+    def test_unprocessed(self, mock_req):
+        mock_req.return_value.json.return_value = 'json'
+
+        self.assertEqual('json', self.get_client().get_data(self.uuid,
+                                                            processed=False))
+
+        mock_req.assert_called_once_with(
+            mock.ANY, 'get', '/introspection/%s/data/unprocessed' % self.uuid)
+
     def test_deprecated_uuid(self, mock_req):
         mock_req.return_value.json.return_value = 'json'
 

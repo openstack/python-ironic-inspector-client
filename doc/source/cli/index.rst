@@ -116,11 +116,13 @@ Retrieving introspection data
 
 ::
 
-    $ openstack baremetal introspection data save [--file file_name] NODE_ID
+    $ openstack baremetal introspection data save [--file file_name] [--unprocessed] NODE_ID
 
 * ``NODE_ID`` - Ironic node UUID or name;
 * ``file_name`` - file name to save data to. If file name is not provided,
   the data is dumped to stdout.
+* ``--unprocessed`` - if set, retrieves the unprocessed data received from the
+  ramdisk.
 
 .. note::
     This feature requires Swift support to be enabled in **Ironic Inspector**

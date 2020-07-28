@@ -262,7 +262,7 @@ class ClientV1(http.BaseClient):
         raise WaitTimeoutError(_("Timeout while waiting for introspection "
                                  "of nodes %s") % new_active_node_ids)
 
-    def get_data(self, node_id=None, raw=False, uuid=None):
+    def get_data(self, node_id=None, raw=False, uuid=None, processed=True):
         """Get introspection data from the last introspection of a node.
 
         If swift support is disabled, introspection data won't be stored,
@@ -271,6 +271,8 @@ class ClientV1(http.BaseClient):
         :param uuid: node UUID or name, deprecated
         :param node_id: node node_id or name
         :param raw: whether to return raw binary data or parsed JSON data
+        :param processed: whether to return the final processed data or the
+            raw unprocessed data received from the ramdisk.
         :returns: bytes or a dict depending on the 'raw' argument
         :raises: :py:class:`ironic_inspector_client.ClientError` on error
             reported from a server
@@ -281,7 +283,9 @@ class ClientV1(http.BaseClient):
         """
         node_id = self._check_parameters(node_id, uuid)
 
-        resp = self.request('get', '/introspection/%s/data' % node_id)
+        url = ('/introspection/%s/data' if processed
+               else '/introspection/%s/data/unprocessed')
+        resp = self.request('get', url % node_id)
         if raw:
             return resp.content
         else:

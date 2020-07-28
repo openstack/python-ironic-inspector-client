@@ -371,7 +371,23 @@ class TestDataSave(BaseTest):
         with mock.patch.object(sys, 'stdout', buf):
             cmd.take_action(parsed_args)
         self.assertEqual('{"answer": 42}', buf.getvalue())
-        self.client.get_data.assert_called_once_with('uuid1', raw=False)
+        self.client.get_data.assert_called_once_with('uuid1', raw=False,
+                                                     processed=True)
+
+    def test_unprocessed(self):
+        self.client.get_data.return_value = {'answer': 42}
+        buf = io.StringIO()
+
+        arglist = ['uuid1', '--unprocessed']
+        verifylist = [('node', 'uuid1'), ('unprocessed', True)]
+
+        cmd = shell.DataSaveCommand(self.app, None)
+        parsed_args = self.check_parser(cmd, arglist, verifylist)
+        with mock.patch.object(sys, 'stdout', buf):
+            cmd.take_action(parsed_args)
+        self.assertEqual('{"answer": 42}', buf.getvalue())
+        self.client.get_data.assert_called_once_with('uuid1', raw=False,
+                                                     processed=False)
 
     def test_file(self):
         self.client.get_data.return_value = b'{"answer": 42}'
@@ -387,7 +403,8 @@ class TestDataSave(BaseTest):
             content = fp.read()
 
         self.assertEqual(b'{"answer": 42}', content)
-        self.client.get_data.assert_called_once_with('uuid1', raw=True)
+        self.client.get_data.assert_called_once_with('uuid1', raw=True,
+                                                     processed=True)
 
 
 class TestInterfaceCmds(BaseTest):

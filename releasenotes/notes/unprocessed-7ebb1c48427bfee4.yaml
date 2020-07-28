@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds support for retrieving unprocessed introspection data via the new
+    ``processed`` boolean argument to ``get_data``, as well as the new
+    ``--unprocessed`` CLI flag.

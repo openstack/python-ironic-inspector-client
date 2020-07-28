@@ -287,13 +287,16 @@ class DataSaveCommand(command.Command):
         parser.add_argument("--file", metavar="<filename>",
                             help="downloaded introspection data filename "
                             "(default: stdout)")
+        parser.add_argument('--unprocessed', action='store_true',
+                            help="download the unprocessed data")
         parser.add_argument('node', help='baremetal node UUID or name')
         return parser
 
     def take_action(self, parsed_args):
         client = self.app.client_manager.baremetal_introspection
         data = client.get_data(parsed_args.node,
-                               raw=bool(parsed_args.file))
+                               raw=bool(parsed_args.file),
+                               processed=not parsed_args.unprocessed)
         if parsed_args.file:
             with open(parsed_args.file, 'wb') as fp:
                 fp.write(data)
