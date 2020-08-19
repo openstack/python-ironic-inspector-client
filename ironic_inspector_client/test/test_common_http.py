@@ -192,3 +192,28 @@ class TestRequest(unittest.TestCase):
 
         self.assertRaisesRegex(http.ClientError, 'boom',
                                self.get_client().request, 'get', 'url')
+
+    def test_accessing_ironic(self):
+        self.req.return_value.status_code = 400
+        self.req.return_value.content = json.dumps(
+            {"error_message": "{\"code\": 404, \"title\": \"Not Found\", "
+             "\"description\": \"\"}"}).encode('utf-8')
+
+        self.assertRaisesRegex(http.ClientError,
+                               'Ironic-style response.*Not Found',
+                               self.get_client().request, 'get', 'url')
+
+    def test_error_non_sense(self):
+        self.req.return_value.status_code = 400
+        self.req.return_value.content = json.dumps(
+            {'hello': 'world'}).encode('utf-8')
+
+        self.assertRaisesRegex(http.ClientError, 'hello',
+                               self.get_client().request, 'get', 'url')
+
+    def test_error_non_sense2(self):
+        self.req.return_value.status_code = 400
+        self.req.return_value.content = b'42'
+
+        self.assertRaisesRegex(http.ClientError, '42',
+                               self.get_client().request, 'get', 'url')

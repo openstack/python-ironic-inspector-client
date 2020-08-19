@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Provides a clear error message when trying to access an ironic URL with
+    ironic-inspector-client.

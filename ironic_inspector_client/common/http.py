@@ -47,12 +47,31 @@ class ClientError(requests.HTTPError):
         # inspector returns error message in body
         msg = response.content.decode(_ERROR_ENCODING)
         try:
-            msg = json.loads(msg)['error']['message']
+            msg = json.loads(msg)
         except ValueError:
             LOG.debug('Old style error response returned, assuming '
                       'ironic-discoverd')
-        except (KeyError, TypeError):
+        except TypeError:
             LOG.exception('Bad error response from Ironic Inspector')
+        else:
+            try:
+                msg = msg['error']['message']
+            except KeyError as exc:
+                LOG.error('Invalid error response from Ironic Inspector: '
+                          '%(msg)s (missing key %(key)s)',
+                          {'msg': msg, 'key': exc})
+                # It's surprisingly common to try accessing ironic URL with
+                # ironic-inspector-client, handle this case
+                try:
+                    msg = msg['error_message']
+                except KeyError:
+                    pass
+                else:
+                    msg = _('Received Ironic-style response %s. Are you '
+                            'trying to access Ironic URL instead of Ironic '
+                            'Inspector?') % msg
+            except TypeError:
+                LOG.exception('Bad error response from Ironic Inspector')
 
         LOG.debug('Inspector returned error "%(msg)s" (HTTP %(code)s)',
                   {'msg': msg, 'code': response.status_code})
