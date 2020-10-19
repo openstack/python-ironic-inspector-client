@@ -141,7 +141,7 @@ class TestV1PythonAPI(functional.Base):
 
         res = self.client.reprocess(self.uuid)
         self.assertEqual(202, res.status_code)
-        self.assertEqual('', res.text)
+        self.assertEqual('{}\n', res.text)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
         self.check_status(status, finished=True, state=istate.States.finished)
 
@@ -166,7 +166,7 @@ class TestV1PythonAPI(functional.Base):
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
 
         self.assertEqual(202, res.status_code)
-        self.assertEqual('', res.text)
+        self.assertEqual('{}\n', res.text)
 
         status = self.client.get_status(self.uuid)
         self.check_status(status, finished=True, state=istate.States.error,
