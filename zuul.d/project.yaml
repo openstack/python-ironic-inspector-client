@@ -9,9 +9,7 @@
       jobs:
         - openstack-tox-functional-py38
         - python-ironic-inspector-client-tempest
-        - openstack-tox-lower-constraints
     gate:
       jobs:
         - openstack-tox-functional-py38
         - python-ironic-inspector-client-tempest
-        - openstack-tox-lower-constraints
