@@ -311,8 +311,8 @@ class ClientV1(http.BaseClient):
         """Get interface data for the input node and interface
 
         To get LLDP data, collection must be enabled by the kernel parameter
-        ``ipa-collect-lldp=1``, and the inspector plugin ``basic_lldp`` must
-        be enabled.
+        ``ipa-collect-lldp=1``, and a relevant inspector plugin must be
+        enabled, e.g., ``lldp_basic``, ``local_link_connection``.
 
         :param node_ident: node UUID or name
         :param interface: interface name
