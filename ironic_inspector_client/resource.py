@@ -28,6 +28,7 @@ class InterfaceResource(object):
         'switch_capabilities_enabled': 'Switch Capabilities Enabled',
         'switch_capabilities_support': 'Switch Capabilities Supported',
         'switch_chassis_id': 'Switch Chassis ID',
+        'switch_mgmt_addresses': 'Switch Management Addresses',
         'switch_port_autonegotiation_enabled':
             'Switch Port Autonegotiation Enabled',
         'switch_port_autonegotiation_support':
@@ -53,6 +54,7 @@ class InterfaceResource(object):
         'switch_port_vlans': 'Switch Port VLANs',
         'switch_port_vlan_ids': 'Switch Port VLAN IDs',
         'switch_protocol_identities': 'Switch Protocol Identities',
+        'switch_system_description': 'Switch System Description',
         'switch_system_name': 'Switch System Name'
     }
     """A mapping of all known interface fields to their descriptions."""
