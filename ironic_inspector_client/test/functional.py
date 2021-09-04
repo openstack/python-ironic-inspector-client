@@ -445,7 +445,7 @@ class TestCLI(BaseCLITest):
                                            {u'id': 201, u'name': u'vlan201'},
                                            {u'id': 203, u'name': u'vlan203'}]}
 
-        self.assertDictContainsSubset(expected, res)
+        self.assertLessEqual(expected.items(), res.items())
 
 
 if __name__ == '__main__':
