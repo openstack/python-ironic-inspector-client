@@ -19,7 +19,7 @@ import unittest
 from unittest import mock
 
 import eventlet
-eventlet.monkey_patch()
+eventlet.monkey_patch()  # noqa
 from ironic_inspector import introspection_state as istate
 from ironic_inspector import process
 from ironic_inspector.test import functional

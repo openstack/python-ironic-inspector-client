@@ -1,31 +1,28 @@
-# -*- coding: utf-8 -*-
-#
-
 # -- General configuration ----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinxcontrib.apidoc',
-              'sphinx.ext.viewcode',
-              'sphinxcontrib.rsvgconverter',
-              'openstackdocstheme',
-              ]
-
-openstackdocs_repo_name = 'openstack/python-ironic-inspector-client'
-openstackdocs_pdf_link = True
-openstackdocs_use_storyboard = True
-
-wsme_protocols = ['restjson']
+extensions = [
+    'sphinxcontrib.apidoc',
+    'sphinx.ext.viewcode',
+    'openstackdocstheme',
+    'cliff.sphinxext'
+]
 
 # sphinxcontrib.apidoc options
 apidoc_module_dir = '../../ironic_inspector_client'
 apidoc_output_dir = 'reference/api'
 apidoc_excluded_paths = [
-    'test/*',
-    'test',
+    'tests',
     'common/i18n*',
-    'shell*']
+    'shell*'
+]
 apidoc_separate_modules = True
+
+# openstackdocstheme options
+openstackdocs_repo_name = 'openstack/python-ironic-inspector-client'
+openstackdocs_pdf_link = True
+openstackdocs_use_storyboard = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -50,7 +47,7 @@ add_function_parentheses = True
 add_module_names = True
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # -- Options for HTML output --------------------------------------------------
 

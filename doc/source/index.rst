@@ -2,7 +2,7 @@
 Welcome to Ironic Inspector Client
 ==================================
 
-.. include:: ../../README.rst
+This is a client library and tool for `Ironic Inspector`_.
 
 Contents
 ========
@@ -19,3 +19,6 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _Ironic Inspector: https://docs.openstack.org/ironic-inspector/latest/
+
