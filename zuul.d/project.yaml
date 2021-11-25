@@ -7,9 +7,9 @@
       - openstackclient-plugin-jobs
     check:
       jobs:
-        - openstack-tox-functional-py38
+        - openstack-tox-functional-py39
         - python-ironic-inspector-client-tempest
     gate:
       jobs:
-        - openstack-tox-functional-py38
+        - openstack-tox-functional-py39
         - python-ironic-inspector-client-tempest
