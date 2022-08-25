@@ -34,7 +34,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-copyright = u'OpenStack Foundation'
+copyright = 'OpenStack Foundation'
 
 # A list of ignored prefixes for module index sorting.
 modindex_common_prefix = ['ironic_inspector_client']
@@ -70,8 +70,8 @@ latex_documents = [
     (
         'index',
         'doc-python-ironic-inspector-client.tex',
-        u'Python Ironic Inspector Client Documentation',
-        u'OpenStack Foundation',
+        'Python Ironic Inspector Client Documentation',
+        'OpenStack Foundation',
         'manual'
     ),
 ]

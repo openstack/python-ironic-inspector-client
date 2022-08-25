@@ -59,7 +59,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-copyright = u'2015, Ironic Inspector Developers'
+copyright = '2015, Ironic Inspector Developers'
 
 # Release notes are version independent.
 # The full version, including alpha/beta/rc tags.
@@ -200,8 +200,8 @@ htmlhelp_basename = 'IronicInspectorClientReleaseNotesdoc'
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     ('index', 'IronicInspectorClientReleaseNotes.tex',
-     u'Ironic Inspector Client Release Notes Documentation',
-     u'Ironic Inspector Developers', 'manual'),
+     'Ironic Inspector Client Release Notes Documentation',
+     'Ironic Inspector Developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -231,8 +231,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'ironicinspectorclientreleasenotes',
-     u'Ironic Inspector Client Release Notes Documentation',
-     [u'Ironic Inspector Developers'], 1)
+     'Ironic Inspector Client Release Notes Documentation',
+     ['Ironic Inspector Developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -246,8 +246,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'IronicInspectorClientReleaseNotes',
-     u'Ironic Inspector Client Release Notes Documentation',
-     u'Ironic Inspector Developers', 'IronicInspectorClientReleaseNotes',
+     'Ironic Inspector Client Release Notes Documentation',
+     'Ironic Inspector Developers', 'IronicInspectorClientReleaseNotes',
      'One line description of project.',
      'Miscellaneous'),
 ]
