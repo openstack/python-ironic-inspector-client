@@ -151,8 +151,13 @@ class TestV1PythonAPI(functional.Base):
 
     def test_abort_introspection(self):
         # assert abort doesn't work before introspect request
+        # TODO(iurygregory): We need to figure out why we can't
+        # use self.uuid, my current assumption is that previous
+        # tests executed introspection for the given uuid and
+        # introspection finished, so we don't get the error when
+        # we ask to abort.
         self.assertRaises(client.ClientError, self.client.abort,
-                          self.uuid)
+                          "2e31df61-84b1-5856-bfb6-6b5f2cd3dd11")
 
         self.client.introspect(self.uuid)
         eventlet.greenthread.sleep(functional.DEFAULT_SLEEP)
