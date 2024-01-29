@@ -9,6 +9,8 @@
       jobs:
         - openstack-tox-functional-py310
         - python-ironic-inspector-client-tempest
+        - python-ironic-inspector-client-tox-codespell:
+            voting: false
     gate:
       jobs:
         - openstack-tox-functional-py310
