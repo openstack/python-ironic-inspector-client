@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    Just as ironic-inspector itself, this project is now in the maintenance
+    mode, and its usage is discouraged. Use ironicclient_ and openstacksdk_.
+
+    .. _ironicclient: https://docs.openstack.org/python-ironicclient/latest/
+    .. _openstacksdk: https://docs.openstack.org/openstacksdk/latest/
