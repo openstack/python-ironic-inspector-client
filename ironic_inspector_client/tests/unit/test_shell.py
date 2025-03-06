@@ -335,9 +335,9 @@ class TestRules(BaseTest):
         parsed_args = self.check_parser(cmd, arglist, verifylist)
         cols, values = cmd.take_action(parsed_args)
 
-        self.assertEqual(('actions', 'conditions', 'description', 'uuid'),
+        self.assertEqual(('uuid', 'description', 'conditions', 'actions'),
                          cols)
-        self.assertEqual(([{}], [{}], 'd', 'uuid1'), values)
+        self.assertEqual(('uuid1', 'd', [{}], [{}]), values)
         self.rules_api.get.assert_called_once_with('uuid1')
 
     def test_delete(self):
