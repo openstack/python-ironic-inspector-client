@@ -1,5 +1,0 @@
----
-features:
-  - |
-    Exposes ``switch_mgmt_addresses`` and ``switch_system_description`` in
-    interface details.

@@ -1,3 +1,0 @@
----
-features:
-  - Allow multiple UUID's in the 'introspection start' CLI command.

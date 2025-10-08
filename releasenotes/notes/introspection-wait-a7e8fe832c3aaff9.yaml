@@ -1,7 +1,0 @@
----
-upgrade:
-  - When setting IPMI credentials is requested, the introspection commands
-    prints a notice to stdout. This was not desired, and it is not printed
-    to stderr instead.
-features:
-  - Introspection command got --wait flag to wait for introspection finish.

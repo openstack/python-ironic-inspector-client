@@ -1,8 +1,0 @@
----
-features:
-  - |
-    Adds ``--check-errors`` flag to verify if any error occurred when
-    waiting for the introspection to finish for the selected nodes.
-    If any error occurs no output is displayed and the exit status for the
-    command is different from 0 (success).
-    The ``--check-errors`` option can only be used with ``--wait``.

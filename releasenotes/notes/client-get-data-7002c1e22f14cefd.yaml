@@ -1,3 +1,0 @@
----
-features:
-  - Add client.get_data() call for getting stored introspection data.
